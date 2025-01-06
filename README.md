@@ -1,4 +1,4 @@
-## About
+# About
 
 Qubetics is a scalable, high-throughput Proof-of-Stake EVM blockchain
 that is fully compatible and interoperable with Ethereum.
