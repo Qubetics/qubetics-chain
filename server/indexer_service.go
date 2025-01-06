@@ -35,7 +35,7 @@ func NewEVMIndexerService(
 	return is
 }
 
-// OnStart implements service.Service by subscribing for new blocks
+// OnStart implements service.Service by sub	scribing for new blocks
 // and indexing them by events.
 func (eis *EVMIndexerService) OnStart() error {
 	ctx := context.Background()
