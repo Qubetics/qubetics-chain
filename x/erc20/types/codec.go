@@ -26,6 +26,8 @@ const (
 	// Amino names
 	convertERC20Name = "qubetics/MsgConvertERC20"
 	updateParams     = "qubetics/erc20/MsgUpdateParams"
+	convertCoinName  = "qubetics/MsgConvertCoin"
+
 )
 
 // NOTE: This is required for the GetSignBytes function
@@ -57,4 +59,6 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgUpdateParams{}, updateParams, nil)
 	cdc.RegisterConcrete(&MsgConvertERC20{}, convertERC20Name, nil)
+	cdc.RegisterConcrete(&MsgConvertCoin{}, convertCoinName, nil)
+
 }
