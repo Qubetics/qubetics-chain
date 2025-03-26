@@ -47,7 +47,7 @@ func (k Keeper) IterateTokenPairs(ctx sdk.Context, cb func(tokenPair types.Token
 
 	for ; iterator.Valid(); iterator.Next() {
 		var tokenPair types.TokenPair
-		k.cdc.MustUnmarshal(iterator.Value(), &tokenPair)
+		k.cdc.Unmarshal(iterator.Value(), &tokenPair)
 
 		if cb(tokenPair) {
 			break
@@ -78,7 +78,7 @@ func (k Keeper) GetTokenPair(ctx sdk.Context, id []byte) (types.TokenPair, bool)
 		return types.TokenPair{}, false
 	}
 
-	k.cdc.MustUnmarshal(bz, &tokenPair)
+	k.cdc.Unmarshal(bz, &tokenPair)
 	return tokenPair, true
 }
 

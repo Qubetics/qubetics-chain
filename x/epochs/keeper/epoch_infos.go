@@ -17,7 +17,7 @@ func (k Keeper) GetEpochInfo(ctx sdk.Context, identifier string) (types.EpochInf
 		return epoch, false
 	}
 
-	k.cdc.MustUnmarshal(bz, &epoch)
+	k.cdc.Unmarshal(bz, &epoch)
 	return epoch, true
 }
 
@@ -45,7 +45,7 @@ func (k Keeper) IterateEpochInfo(ctx sdk.Context, fn func(index int64, epochInfo
 
 	for ; iterator.Valid(); iterator.Next() {
 		epoch := types.EpochInfo{}
-		k.cdc.MustUnmarshal(iterator.Value(), &epoch)
+		k.cdc.Unmarshal(iterator.Value(), &epoch)
 
 		stop := fn(i, epoch)
 

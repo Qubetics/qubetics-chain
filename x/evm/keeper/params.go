@@ -18,7 +18,7 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	if len(bz) == 0 {
 		return k.GetLegacyParams(ctx)
 	}
-	k.cdc.MustUnmarshal(bz, &params)
+	k.cdc.Unmarshal(bz, &params)
 	return
 }
 

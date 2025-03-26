@@ -16,10 +16,10 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	if len(bz) == 0 {
 		k.ss.GetParamSetIfExists(ctx, &params)
 	} else {
-		k.cdc.MustUnmarshal(bz, &params)
+		k.cdc.Unmarshal(bz, &params)
 	}
 
-	// zero the nil params for legacy blocks
+	// zero the nil params for legacy bMustUnmarshallocks
 	if params.MinGasPrice.IsNil() {
 		params.MinGasPrice = math.LegacyZeroDec()
 	}
