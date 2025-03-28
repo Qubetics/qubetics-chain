@@ -134,6 +134,11 @@ func (md MonoDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, ne
 		return ctx, err
 	}
 
+	// 11. gas wanted
+	if err := CheckGasWanted(ctx, md.feeMarketKeeper, tx, decUtils.Rules.IsLondon); err != nil {
+		return ctx, err
+	}
+
 	// Use the lowest priority of all the messages as the final one.
 	for i, msg := range tx.GetMsgs() {
 		ethMsg, txData, from, err := evmtypes.UnpackEthMsg(msg)
@@ -296,10 +301,10 @@ func (md MonoDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, ne
 			return ctx, err
 		}
 
-		// 11. gas wanted
-		if err := CheckGasWanted(ctx, md.feeMarketKeeper, tx, decUtils.Rules.IsLondon); err != nil {
-			return ctx, err
-		}
+		// // 11. gas wanted
+		// if err := CheckGasWanted(ctx, md.feeMarketKeeper, tx, decUtils.Rules.IsLondon); err != nil {
+		// 	return ctx, err
+		// }
 
 		// 12. emit events
 		txIdx := uint64(i) // nosec: G701
