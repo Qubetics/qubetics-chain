@@ -47,7 +47,10 @@ func (k Keeper) IterateTokenPairs(ctx sdk.Context, cb func(tokenPair types.Token
 
 	for ; iterator.Valid(); iterator.Next() {
 		var tokenPair types.TokenPair
-		k.cdc.Unmarshal(iterator.Value(), &tokenPair)
+		if err := k.cdc.Unmarshal(iterator.Value(), &tokenPair); err != nil {
+			// Optional: you can log the error here if you want
+			continue // Skip bad entries
+		}
 
 		if cb(tokenPair) {
 			break
@@ -72,13 +75,15 @@ func (k Keeper) GetTokenPair(ctx sdk.Context, id []byte) (types.TokenPair, bool)
 	}
 
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixTokenPair)
-	var tokenPair types.TokenPair
 	bz := store.Get(id)
 	if len(bz) == 0 {
 		return types.TokenPair{}, false
 	}
 
-	k.cdc.Unmarshal(bz, &tokenPair)
+	var tokenPair types.TokenPair
+	if err := k.cdc.Unmarshal(bz, &tokenPair); err != nil {
+		return types.TokenPair{}, false
+	}
 	return tokenPair, true
 }
 

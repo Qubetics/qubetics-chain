@@ -11,21 +11,25 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 )
 
-// GetParams returns the total set of evm parameters.
+// GetParams returns the total set of EVM parameters.
 func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyPrefixParams)
 	if len(bz) == 0 {
 		return k.GetLegacyParams(ctx)
 	}
-	k.cdc.Unmarshal(bz, &params)
-	return
+
+	if err := k.cdc.Unmarshal(bz, &params); err != nil {
+		// Optional: You can log the error here
+		return k.GetLegacyParams(ctx) // fallback to legacy params on error
+	}
+
+	return params
 }
 
-// SetParams sets the EVM params each in their individual key for better get performance
+// SetParams sets the EVM params in a single key for better get performance.
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) error {
-	// NOTE: We need to sort the precompiles in order to enable searching with binary search
-	// in params.IsActivePrecompile.
+	// NOTE: We need to sort the precompiles to enable binary search in IsActivePrecompile.
 	slices.Sort(params.ActiveStaticPrecompiles)
 
 	if err := params.Validate(); err != nil {
@@ -42,7 +46,7 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) error {
 	return nil
 }
 
-// GetLegacyParams returns param set for version before migrate
+// GetLegacyParams returns params from the legacy subspace parameter store.
 func (k Keeper) GetLegacyParams(ctx sdk.Context) types.Params {
 	var params types.Params
 	k.ss.GetParamSetIfExists(ctx, &params)
@@ -55,7 +59,6 @@ func (k Keeper) EnableStaticPrecompiles(ctx sdk.Context, addresses ...common.Add
 	params := k.GetParams(ctx)
 	activePrecompiles := params.ActiveStaticPrecompiles
 
-	// Append and sort the new precompiles
 	updatedPrecompiles, err := appendPrecompiles(activePrecompiles, addresses...)
 	if err != nil {
 		return err
@@ -65,8 +68,8 @@ func (k Keeper) EnableStaticPrecompiles(ctx sdk.Context, addresses ...common.Add
 	return k.SetParams(ctx, params)
 }
 
+// appendPrecompiles appends new addresses to the list, avoiding duplicates and keeping it sorted.
 func appendPrecompiles(existingPrecompiles []string, addresses ...common.Address) ([]string, error) {
-	// check for duplicates
 	hexAddresses := make([]string, len(addresses))
 	for i := range addresses {
 		addrHex := addresses[i].Hex()

@@ -10,31 +10,34 @@ import (
 
 // GetEpochInfo returns epoch info by identifier
 func (k Keeper) GetEpochInfo(ctx sdk.Context, identifier string) (types.EpochInfo, bool) {
-	epoch := types.EpochInfo{}
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixEpoch)
 	bz := store.Get([]byte(identifier))
 	if len(bz) == 0 {
-		return epoch, false
+		return types.EpochInfo{}, false
 	}
 
-	k.cdc.Unmarshal(bz, &epoch)
+	var epoch types.EpochInfo
+	if err := k.cdc.Unmarshal(bz, &epoch); err != nil {
+		// Log the error (optional) — or just safely return not found
+		return types.EpochInfo{}, false
+	}
 	return epoch, true
 }
 
-// SetEpochInfo set epoch info
+// SetEpochInfo sets epoch info
 func (k Keeper) SetEpochInfo(ctx sdk.Context, epoch types.EpochInfo) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixEpoch)
-	bz := k.cdc.MustMarshal(&epoch)
+	bz := k.cdc.MustMarshal(&epoch) // This is fine here
 	store.Set([]byte(epoch.Identifier), bz)
 }
 
-// DeleteEpochInfo delete epoch info
+// DeleteEpochInfo deletes epoch info
 func (k Keeper) DeleteEpochInfo(ctx sdk.Context, identifier string) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixEpoch)
 	store.Delete([]byte(identifier))
 }
 
-// IterateEpochInfo iterate through epochs
+// IterateEpochInfo iterates through epochs
 func (k Keeper) IterateEpochInfo(ctx sdk.Context, fn func(index int64, epochInfo types.EpochInfo) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixEpoch)
 
@@ -44,8 +47,11 @@ func (k Keeper) IterateEpochInfo(ctx sdk.Context, fn func(index int64, epochInfo
 	i := int64(0)
 
 	for ; iterator.Valid(); iterator.Next() {
-		epoch := types.EpochInfo{}
-		k.cdc.Unmarshal(iterator.Value(), &epoch)
+		var epoch types.EpochInfo
+		if err := k.cdc.Unmarshal(iterator.Value(), &epoch); err != nil {
+			// Optional: log error here
+			continue // Skip bad data
+		}
 
 		stop := fn(i, epoch)
 
