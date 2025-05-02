@@ -6,7 +6,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/qubetics/qubetics-blockchain/v2/types"
+	// "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 // GasWantedDecorator keeps track of the gasWanted amount on the current block in transient store
@@ -43,6 +43,15 @@ func (gwd GasWantedDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 	return next(ctx, tx, simulate)
 }
 
+// GetTxGasLimit is a hypothetical function that retrieves the transaction-specific gas limit.
+// You will need to implement this based on your application's logic.
+func GetTxGasLimit(tx sdk.Tx) uint64 {
+	// Example: Assume we are retrieving the gas limit from the transaction's properties or some config
+	// This could depend on the transaction type, smart contract, etc.
+	// For now, we're just returning a fixed gas limit for demonstration purposes.
+	return 1000000 // Example gas limit, this should be replaced with actual logic
+}
+
 func CheckGasWanted(ctx sdk.Context, feeMarketKeeper FeeMarketKeeper, tx sdk.Tx, isLondon bool) error {
 	if !isLondon {
 		return nil
@@ -55,14 +64,16 @@ func CheckGasWanted(ctx sdk.Context, feeMarketKeeper FeeMarketKeeper, tx sdk.Tx,
 
 	gasWanted := feeTx.GetGas()
 
-	// return error if the tx gas is greater than the block limit (max gas)
-	blockGasLimit := types.BlockGasLimit(ctx)
-	if gasWanted > blockGasLimit {
+	// Retrieve the transaction-specific gas limit (could be from a configuration, contract, etc.)
+	txGasLimit := GetTxGasLimit(tx)  // Hypothetical function to get the tx-specific gas limit
+
+	// Return error if the tx gas exceeds the tx gas limit
+	if gasWanted > txGasLimit {
 		return errorsmod.Wrapf(
 			errortypes.ErrOutOfGas,
-			"tx gas (%d) exceeds block gas limit (%d)",
+			"tx gas (%d) exceeds tx-specific gas limit (%d)",
 			gasWanted,
-			blockGasLimit,
+			txGasLimit,
 		)
 	}
 
