@@ -18,7 +18,7 @@ func (k Keeper) GetEpochInfo(ctx sdk.Context, identifier string) (types.EpochInf
 
 	var epoch types.EpochInfo
 	if err := k.cdc.Unmarshal(bz, &epoch); err != nil {
-		// Log the error (optional) — or just safely return not found
+		k.Logger(ctx).Error("failed to unmarshal epoch info", "error", err)
 		return types.EpochInfo{}, false
 	}
 	return epoch, true

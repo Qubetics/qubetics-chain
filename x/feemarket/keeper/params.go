@@ -15,7 +15,7 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	if len(bz) == 0 {
 		k.ss.GetParamSetIfExists(ctx, &params)
 	} else if err := k.cdc.Unmarshal(bz, &params); err != nil {
-		// Optional: log or handle unmarshalling error if needed
+		k.Logger(ctx).Error("failed to unmarshal feemarket params", "error", err)
 		k.ss.GetParamSetIfExists(ctx, &params)
 	}
 

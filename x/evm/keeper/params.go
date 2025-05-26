@@ -20,7 +20,7 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	}
 
 	if err := k.cdc.Unmarshal(bz, &params); err != nil {
-		// Optional: You can log the error here
+		k.Logger(ctx).Error("failed to unmarshal evm params", "error", err)
 		return k.GetLegacyParams(ctx) // fallback to legacy params on error
 	}
 

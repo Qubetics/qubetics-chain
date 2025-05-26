@@ -48,7 +48,7 @@ func (k Keeper) IterateTokenPairs(ctx sdk.Context, cb func(tokenPair types.Token
 	for ; iterator.Valid(); iterator.Next() {
 		var tokenPair types.TokenPair
 		if err := k.cdc.Unmarshal(iterator.Value(), &tokenPair); err != nil {
-			// Optional: you can log the error here if you want
+			k.Logger(ctx).Error("failed to unmarshal token pair during iteration", "error", err)
 			continue // Skip bad entries
 		}
 
@@ -82,6 +82,7 @@ func (k Keeper) GetTokenPair(ctx sdk.Context, id []byte) (types.TokenPair, bool)
 
 	var tokenPair types.TokenPair
 	if err := k.cdc.Unmarshal(bz, &tokenPair); err != nil {
+		k.Logger(ctx).Error("failed to unmarshal token pair", "error", err)
 		return types.TokenPair{}, false
 	}
 	return tokenPair, true
