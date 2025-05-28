@@ -27,7 +27,11 @@ func (k Keeper) GetEpochInfo(ctx sdk.Context, identifier string) (types.EpochInf
 // SetEpochInfo sets epoch info
 func (k Keeper) SetEpochInfo(ctx sdk.Context, epoch types.EpochInfo) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixEpoch)
-	bz := k.cdc.MustMarshal(&epoch) // This is fine here
+	bz, err := k.cdc.Marshal(&epoch)
+	if err != nil {
+		k.Logger(ctx).Error("failed to marshal epoch info", "error", err)
+		return
+	}
 	store.Set([]byte(epoch.Identifier), bz)
 }
 

@@ -92,7 +92,11 @@ func (k Keeper) GetTokenPair(ctx sdk.Context, id []byte) (types.TokenPair, bool)
 func (k Keeper) SetTokenPair(ctx sdk.Context, tokenPair types.TokenPair) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixTokenPair)
 	key := tokenPair.GetID()
-	bz := k.cdc.MustMarshal(&tokenPair)
+	bz, err := k.cdc.Marshal(&tokenPair)
+	if err != nil {
+		k.Logger(ctx).Error("failed to marshal token pair", "error", err)
+		return
+	}
 	store.Set(key, bz)
 }
 
