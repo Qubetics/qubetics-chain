@@ -1,0 +1,15 @@
+syntax = "proto3";
+package qubetics.node.v3;
+
+import "gogoproto/gogo.proto";
+import "qubetics/session/v3/session.proto";
+import "qubetics/types/v1/price.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/node/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Session {
+  qubetics.session.v3.BaseSession base_session = 1 [(gogoproto.embed) = true];
+  qubetics.types.v1.Price price = 2 [(gogoproto.nullable) = false];
+}

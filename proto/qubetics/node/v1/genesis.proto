@@ -1,0 +1,18 @@
+syntax = "proto3";
+package qubetics.node.v1;
+
+import "gogoproto/gogo.proto";
+import "qubetics/node/v1/node.proto";
+import "qubetics/node/v1/params.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/node/types/v1";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message GenesisState {
+  repeated Node nodes = 1 [
+    (gogoproto.jsontag) = "_,omitempty",
+    (gogoproto.nullable) = false
+  ];
+  Params params = 2 [(gogoproto.nullable) = false];
+}

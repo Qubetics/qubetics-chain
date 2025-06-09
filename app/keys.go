@@ -26,6 +26,11 @@ import (
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
+	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
+	oracletypes "github.com/qubetics/qubetics-blockchain/v2/x/oracle/types"
+	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
+
+
 )
 
 // StoreKeys returns the application store keys,
@@ -53,6 +58,12 @@ func StoreKeys() (
 		// qubetics keys
 		erc20types.StoreKey,
 		epochstypes.StoreKey, vestingtypes.StoreKey,
+
+	// Sentinel Hub keys
+	customminttypes.StoreKey,
+	oracletypes.StoreKey,
+	vpntypes.StoreKey,
+	
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)

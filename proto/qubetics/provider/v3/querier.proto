@@ -1,0 +1,22 @@
+syntax = "proto3";
+package qubetics.provider.v3;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "qubetics/provider/v3/params.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+service QueryService {
+  rpc QueryParams(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/qubetics/provider/v3/params";
+  }
+}

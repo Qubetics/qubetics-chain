@@ -1,0 +1,66 @@
+syntax = "proto3";
+package qubetics.plan.v2;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v2";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message MsgCreateRequest {
+  string from = 1;
+  google.protobuf.Duration duration = 2 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = false
+  ];
+  int64 gigabytes = 3;
+  repeated cosmos.base.v1beta1.Coin prices = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+message MsgLinkNodeRequest {
+  string from = 1;
+  uint64 id = 2 [(gogoproto.customname) = "ID"];
+  string node_address = 3;
+}
+
+message MsgUnlinkNodeRequest {
+  string from = 1;
+  uint64 id = 2 [(gogoproto.customname) = "ID"];
+  string node_address = 3;
+}
+
+message MsgUpdateStatusRequest {
+  string from = 1;
+  uint64 id = 2 [(gogoproto.customname) = "ID"];
+  qubetics.types.v1.Status status = 3;
+}
+
+message MsgSubscribeRequest {
+  string from = 1;
+  uint64 id = 2 [(gogoproto.customname) = "ID"];
+  string denom = 3;
+}
+
+message MsgCreateResponse {}
+
+message MsgLinkNodeResponse {}
+
+message MsgUnlinkNodeResponse {}
+
+message MsgUpdateStatusResponse {}
+
+message MsgSubscribeResponse {}
+
+service MsgService {
+  rpc MsgCreate(MsgCreateRequest) returns (MsgCreateResponse);
+  rpc MsgLinkNode(MsgLinkNodeRequest) returns (MsgLinkNodeResponse);
+  rpc MsgUnlinkNode(MsgUnlinkNodeRequest) returns (MsgUnlinkNodeResponse);
+  rpc MsgUpdateStatus(MsgUpdateStatusRequest) returns (MsgUpdateStatusResponse);
+  rpc MsgSubscribe(MsgSubscribeRequest) returns (MsgSubscribeResponse);
+}

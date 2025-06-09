@@ -1,0 +1,15 @@
+syntax = "proto3";
+package qubetics.session.v2;
+
+import "gogoproto/gogo.proto";
+import "qubetics/session/v2/params.proto";
+import "qubetics/session/v2/session.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v2";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message GenesisState {
+  repeated Session sessions = 1 [(gogoproto.nullable) = false];
+  Params params = 2 [(gogoproto.nullable) = false];
+}

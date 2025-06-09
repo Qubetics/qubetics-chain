@@ -1,0 +1,16 @@
+syntax = "proto3";
+package qubetics.provider.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v1";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message EventRegister {
+  string address = 1 [(gogoproto.moretags) = "yaml:\"address\""];
+}
+
+message EventUpdate {
+  string address = 1 [(gogoproto.moretags) = "yaml:\"address\""];
+}

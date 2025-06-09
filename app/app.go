@@ -163,7 +163,22 @@ import (
 	vestingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vesting/keeper"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
 
-		
+	//===============================vpn modules======================
+	custommint"github.com/qubetics/qubetics-blockchain/v2/x/mint"
+	custommintkeeper "github.com/qubetics/qubetics-blockchain/v2/x/mint/keeper"
+	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
+	oracle"github.com/qubetics/qubetics-blockchain/v2/x/oracle"
+	oraclekeeper "github.com/qubetics/qubetics-blockchain/v2/x/oracle/keeper"
+	oracletypes "github.com/qubetics/qubetics-blockchain/v2/x/oracle/types"
+	 vpn  "github.com/qubetics/qubetics-blockchain/v2/x/vpn"
+	vpnkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vpn/keeper"
+	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
+	deposittypes "github.com/qubetics/qubetics-blockchain/v2/x/deposit/types"
+	// Change this:
+
+	
+
+
 	// NOTE: override ICS20 keeper to support IBC transfers of ERC20 tokens
 	"github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
@@ -236,6 +251,11 @@ var (
 		epochs.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		ratelimit.AppModuleBasic{},
+
+		// dvpn module basics
+		custommint.AppModuleBasic{},
+		oracle.AppModuleBasic{},
+		vpn.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -251,6 +271,10 @@ var (
 		evmtypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 		erc20types.ModuleName:          {authtypes.Minter, authtypes.Burner},
 		ratelimittypes.ModuleName:      nil,
+		// dvpn module account permissions
+		customminttypes.ModuleName: nil,
+		oracletypes.ModuleName:     nil,
+		deposittypes.ModuleName:    nil,
 	}
 )
 
@@ -298,9 +322,13 @@ type Qubetics struct {
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	RateLimitKeeper       ratelimitkeeper.Keeper
 
+
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
+
+	// dvpn scoped keepers
+	ScopedOracleKeeper capabilitykeeper.ScopedKeeper
 
 	// Ethermint keepers
 	EvmKeeper       *evmkeeper.Keeper
@@ -310,6 +338,11 @@ type Qubetics struct {
 	Erc20Keeper   erc20keeper.Keeper
 	EpochsKeeper  epochskeeper.Keeper
 	VestingKeeper vestingkeeper.Keeper
+
+	//dvpn keepers
+	CustomMintKeeper custommintkeeper.Keeper
+	OracleKeeper     oraclekeeper.Keeper
+	VPNKeeper        vpnkeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -384,6 +417,9 @@ func NewQubetics(
 		memKeys:           memKeys,
 	}
 
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+
+
 	// init params keeper and subspaces
 	app.ParamsKeeper = initParamsKeeper(appCodec, cdc, keys[paramstypes.StoreKey], tkeys[paramstypes.TStoreKey])
 
@@ -397,9 +433,17 @@ func NewQubetics(
 	// add capability keeper and ScopeToModule for ibc module
 	app.CapabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
 
+		
+
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibcexported.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
+
+	//dvpn keepers
+		app.ScopedOracleKeeper = app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
+
+		
+			
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -415,14 +459,22 @@ func NewQubetics(
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec, keys[banktypes.StoreKey], app.AccountKeeper, app.BlockedAddrs(), authAddr,
 	)
+	
 	stakingKeeper := stakingkeeper.NewKeeper(
 		appCodec, keys[stakingtypes.StoreKey], app.AccountKeeper, app.BankKeeper, authAddr,
 	)
 	app.MintKeeper = mintkeeper.NewKeeper(appCodec, keys[minttypes.StoreKey], stakingKeeper, app.AccountKeeper, app.BankKeeper, authtypes.FeeCollectorName, authtypes.NewModuleAddress(govtypes.ModuleName).String())
+	app.CustomMintKeeper = custommintkeeper.NewKeeper(appCodec, keys[customminttypes.StoreKey], app.MintKeeper)
+
 	app.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec, keys[distrtypes.StoreKey], app.AccountKeeper, app.BankKeeper,
 		stakingKeeper, authtypes.FeeCollectorName, authAddr,
 	)
+	app.VPNKeeper = vpnkeeper.NewKeeper(
+		appCodec, keys[vpntypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.DistrKeeper, &app.OracleKeeper,
+		app.MsgServiceRouter(), govModuleAddr, authtypes.FeeCollectorName,
+	)
+
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec, app.LegacyAmino(), keys[slashingtypes.StoreKey], stakingKeeper, authAddr,
 	)
@@ -440,7 +492,7 @@ func NewQubetics(
 		tkeys[feemarkettypes.TransientKey],
 		app.GetSubspace(feemarkettypes.ModuleName),
 	)
-
+	
 	evmKeeper := evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
 		app.AccountKeeper, app.BankKeeper, stakingKeeper, app.FeeMarketKeeper,
@@ -455,6 +507,10 @@ func NewQubetics(
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec, keys[ibcexported.StoreKey], app.GetSubspace(ibcexported.ModuleName), stakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
+	app.OracleKeeper = oraclekeeper.NewKeeper(
+		appCodec, keys[oracletypes.StoreKey], app.ScopedOracleKeeper, app.IBCKeeper.ChannelKeeper, govModuleAddr,
+	)
+
 
 	// register the proposal types
 	govRouter := govv1beta1.NewRouter()
@@ -641,6 +697,12 @@ func NewQubetics(
 		// Qubetics app modules
 		epochs.NewAppModule(appCodec, app.EpochsKeeper),
 		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper.Keeper),
+
+		// Sentinel Hub modules
+		custommint.NewAppModule(appCodec, app.CustomMintKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper),
+		vpn.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.VPNKeeper),
+
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -656,6 +718,7 @@ func NewQubetics(
 		epochstypes.ModuleName,
 		feemarkettypes.ModuleName,
 		evmtypes.ModuleName,
+		customminttypes.ModuleName,
 		minttypes.ModuleName,
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
@@ -676,6 +739,10 @@ func NewQubetics(
 		erc20types.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+
+		// dvpn modules
+		oracletypes.ModuleName,
+		vpntypes.ModuleName,
 	)
 
 	// NOTE: fee market module must go last in order to retrieve the block gas used.
@@ -707,6 +774,12 @@ func NewQubetics(
 		erc20types.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+
+		// Sentinel Hub modules
+		customminttypes.ModuleName,
+		oracletypes.ModuleName,
+		vpntypes.ModuleName,
+
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -744,6 +817,11 @@ func NewQubetics(
 		epochstypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+
+		// Sentinel Hub modules
+		customminttypes.ModuleName,
+		oracletypes.ModuleName,
+		vpntypes.ModuleName,
 	)
 
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
@@ -1135,7 +1213,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(authtypes.ModuleName)
 	paramsKeeper.Subspace(banktypes.ModuleName)
 	paramsKeeper.Subspace(minttypes.ModuleName)
-	paramsKeeper.Subspace(stakingtypes.ModuleName)
+	
 	paramsKeeper.Subspace(distrtypes.ModuleName)
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
 	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable()) //nolint: staticcheck

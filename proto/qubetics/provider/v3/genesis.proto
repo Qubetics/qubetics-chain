@@ -1,0 +1,15 @@
+syntax = "proto3";
+package qubetics.provider.v3;
+
+import "gogoproto/gogo.proto";
+import "qubetics/provider/v2/provider.proto";
+import "qubetics/provider/v3/params.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message GenesisState {
+  repeated qubetics.provider.v2.Provider providers = 1 [(gogoproto.nullable) = false];
+  Params params = 2 [(gogoproto.nullable) = false];
+}
