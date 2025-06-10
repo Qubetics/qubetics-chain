@@ -47,7 +47,7 @@ func (p Precompile) Delegation(
 		return nil, err
 	}
 
-	queryServer := stakingkeeper.Querier{Keeper: p.stakingKeeper.Keeper}
+	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
 	res, err := queryServer.Delegation(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
@@ -77,7 +77,7 @@ func (p Precompile) UnbondingDelegation(
 		return nil, err
 	}
 
-	queryServer := stakingkeeper.Querier{Keeper: p.stakingKeeper.Keeper}
+	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
 	res, err := queryServer.UnbondingDelegation(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
@@ -106,7 +106,7 @@ func (p Precompile) Validator(
 		return nil, err
 	}
 
-	queryServer := stakingkeeper.Querier{Keeper: p.stakingKeeper.Keeper}
+	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
 	res, err := queryServer.Validator(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
@@ -135,7 +135,7 @@ func (p Precompile) Validators(
 		return nil, err
 	}
 
-	queryServer := stakingkeeper.Querier{Keeper: p.stakingKeeper.Keeper}
+	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
 	res, err := queryServer.Validators(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
@@ -181,7 +181,7 @@ func (p Precompile) Redelegations(
 		return nil, err
 	}
 
-	queryServer := stakingkeeper.Querier{Keeper: p.stakingKeeper.Keeper}
+	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
 	res, err := queryServer.Redelegations(ctx, req)
 	if err != nil {

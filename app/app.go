@@ -84,7 +84,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	sdkstaking "github.com/cosmos/cosmos-sdk/x/staking"
+	// sdkstaking "github.com/cosmos/cosmos-sdk/x/staking"
+	 "github.com/cosmos/cosmos-sdk/x/staking"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
@@ -156,8 +158,12 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/feemarket"
 	feemarketkeeper "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/keeper"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/staking"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+	// "github.com/qubetics/qubetics-blockchain/v2/x/staking"
+	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+// "github.com/cosmos/cosmos-sdk/x/staking"
+// 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+// 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/qubetics/qubetics-blockchain/v2/x/vesting"
 	vestingclient "github.com/qubetics/qubetics-blockchain/v2/x/vesting/client"
 	vestingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vesting/keeper"
@@ -208,7 +214,8 @@ var (
 		bank.AppModuleBasic{},
 		capability.AppModuleBasic{},
 		mint.AppModuleBasic{},
-		staking.AppModuleBasic{AppModuleBasic: &sdkstaking.AppModuleBasic{}},
+		staking.AppModuleBasic{},
+		// staking.AppModuleBasic{AppModuleBasic: &sdkstaking.AppModuleBasic{}},
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(
 			[]govclient.ProposalHandler{
@@ -640,7 +647,7 @@ func NewQubetics(
 			app.GetSubspace(erc20types.ModuleName)),
 		// Qubetics app modules
 		epochs.NewAppModule(appCodec, app.EpochsKeeper),
-		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper.Keeper),
+		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that

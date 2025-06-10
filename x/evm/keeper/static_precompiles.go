@@ -20,7 +20,9 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+
+	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	vestingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vesting/keeper"
 	"golang.org/x/exp/maps"
 )

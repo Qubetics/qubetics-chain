@@ -25,6 +25,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -43,7 +44,6 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
 )
 
@@ -522,7 +522,7 @@ func (s *PrecompileTestSuite) setupRedelegations(redelAmt *big.Int) error {
 
 	// create a validator with s.address and s.privKey
 	// then create a redelegation from validator[0] to this new validator
-	testutil.CreateValidator(s.ctx, s.T(), s.privKey.PubKey(), *s.app.StakingKeeper.Keeper, math.NewInt(100))
+	testutil.CreateValidator(s.ctx, s.T(), s.privKey.PubKey(), s.app.StakingKeeper, math.NewInt(100))
 	msg.ValidatorDstAddress = sdk.ValAddress(s.address.Bytes()).String()
 	_, err := msgSrv.BeginRedelegate(s.ctx, &msg)
 	return err

@@ -5,11 +5,6 @@
     "description": "A REST interface for state queries and transactions",
     "version": "1.0.0"
   },
-  "//": [
-    "checkov:skip=CKV_OPENAPI_13: The API is public, no need for authentication",
-    "checkov:skip=CKV_OPENAPI_6: The API is public, no need for authentication",
-    "checkov:skip=CKV_OPENAPI_4: The API is public, no need for authentication"
-  ],
   "securityDefinitions": {
     "default": {
       "type": "basic"
@@ -131,7 +126,7 @@
                         "title": "current_epoch_start_height of the epoch"
                       }
                     },
-                    "description": "EpochInfo defines the message interface containing the relevant informations about\nan epoch."
+                    "description": "EpochInfo defines the message interface containing the relevant informations\nabout an epoch."
                   },
                   "title": "epochs is a slice of all EpochInfos"
                 },
@@ -250,14 +245,14 @@
                   "properties": {
                     "enable_erc20": {
                       "type": "boolean",
-                      "description": "enable_erc20 is the parameter to enable the conversion of Cosmos coins <--> ERC20 tokens."
+                      "description": "enable_erc20 is the parameter to enable the conversion of Cosmos coins <-->\nERC20 tokens."
                     },
                     "native_precompiles": {
                       "type": "array",
                       "items": {
                         "type": "string"
                       },
-                      "title": "native_precompiles defines the slice of hex addresses of the\nactive precompiles that are used to interact with native staking coins as ERC20s"
+                      "title": "native_precompiles defines the slice of hex addresses of the\nactive precompiles that are used to interact with native staking coins as\nERC20s"
                     },
                     "dynamic_precompiles": {
                       "type": "array",
@@ -339,7 +334,7 @@
                         "title": "enabled defines the token mapping enable status"
                       },
                       "contract_owner": {
-                        "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1 ModuleAccount, 2 external address)",
+                        "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1\nModuleAccount, 2 external address)",
                         "type": "string",
                         "enum": [
                           "OWNER_UNSPECIFIED",
@@ -479,7 +474,7 @@
                       "title": "enabled defines the token mapping enable status"
                     },
                     "contract_owner": {
-                      "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1 ModuleAccount, 2 external address)",
+                      "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1\nModuleAccount, 2 external address)",
                       "type": "string",
                       "enum": [
                         "OWNER_UNSPECIFIED",
@@ -491,7 +486,7 @@
                     }
                   },
                   "description": "TokenPair defines an instance that records a pairing consisting of a native\nCosmos Coin and an ERC20 token address.",
-                  "title": "token_pairs returns the info about a registered token pair for the erc20 module"
+                  "title": "token_pairs returns the info about a registered token pair for the erc20\nmodule"
                 }
               },
               "description": "QueryTokenPairResponse is the response type for the Query/TokenPair RPC\nmethod."
@@ -545,424 +540,9 @@
         ]
       }
     },
-    "/qubetics/inflation/v1/circulating_supply": {
-      "get": {
-        "summary": "CirculatingSupply retrieves the total number of tokens that are in\ncirculation (i.e. excluding unvested tokens).",
-        "operationId": "CirculatingSupply",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "circulating_supply": {
-                  "title": "circulating_supply is the total amount of coins in circulation",
-                  "type": "object",
-                  "properties": {
-                    "denom": {
-                      "type": "string"
-                    },
-                    "amount": {
-                      "type": "string"
-                    }
-                  },
-                  "description": "DecCoin defines a token with a denomination and a decimal amount.\n\nNOTE: The amount field is an Dec which implements the custom method\nsignatures required by gogoproto."
-                }
-              },
-              "description": "QueryCirculatingSupplyResponse is the response type for the\nQuery/CirculatingSupply RPC method."
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "details": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type_url": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string",
-                        "format": "byte"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Query"
-        ]
-      }
-    },
-    "/qubetics/inflation/v1/epoch_mint_provision": {
-      "get": {
-        "summary": "EpochMintProvision retrieves current minting epoch provision value.",
-        "operationId": "EpochMintProvision",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "epoch_mint_provision": {
-                  "description": "epoch_mint_provision is the current minting per epoch provision value.",
-                  "type": "object",
-                  "properties": {
-                    "denom": {
-                      "type": "string"
-                    },
-                    "amount": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "description": "QueryEpochMintProvisionResponse is the response type for the\nQuery/EpochMintProvision RPC method."
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "details": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type_url": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string",
-                        "format": "byte"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Query"
-        ]
-      }
-    },
-    "/qubetics/inflation/v1/inflation_rate": {
-      "get": {
-        "summary": "InflationRate retrieves the inflation rate of the current period.",
-        "operationId": "InflationRate",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "inflation_rate": {
-                  "type": "string",
-                  "title": "inflation_rate by which the total supply increases within one period"
-                }
-              },
-              "description": "QueryInflationRateResponse is the response type for the Query/InflationRate\nRPC method."
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "details": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type_url": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string",
-                        "format": "byte"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Query"
-        ]
-      }
-    },
-    "/qubetics/inflation/v1/params": {
-      "get": {
-        "summary": "Params retrieves the total set of minting parameters.",
-        "operationId": "InflationParams",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "params": {
-                  "description": "params defines the parameters of the module.",
-                  "type": "object",
-                  "properties": {
-                    "mint_denom": {
-                      "type": "string",
-                      "title": "mint_denom specifies the type of coin to mint"
-                    },
-                    "exponential_calculation": {
-                      "title": "exponential_calculation takes in the variables to calculate exponential inflation",
-                      "type": "object",
-                      "properties": {
-                        "a": {
-                          "type": "string",
-                          "title": "a defines the initial value"
-                        },
-                        "r": {
-                          "type": "string",
-                          "title": "r defines the reduction factor"
-                        },
-                        "c": {
-                          "type": "string",
-                          "title": "c defines the parameter for long term inflation"
-                        },
-                        "bonding_target": {
-                          "type": "string",
-                          "title": "bonding_target"
-                        },
-                        "max_variance": {
-                          "type": "string",
-                          "title": "max_variance"
-                        }
-                      }
-                    },
-                    "inflation_distribution": {
-                      "title": "inflation_distribution of the minted denom",
-                      "type": "object",
-                      "properties": {
-                        "staking_rewards": {
-                          "type": "string",
-                          "title": "staking_rewards defines the proportion of the minted minted_denom that is\nto be allocated as staking rewards"
-                        },
-                        "usage_incentives": {
-                          "type": "string",
-                          "title": "Deprecated: usage_incentives defines the proportion of the minted minted_denom that is\nto be allocated to the incentives module address"
-                        },
-                        "community_pool": {
-                          "type": "string",
-                          "title": "community_pool defines the proportion of the minted minted_denom that is to\nbe allocated to the community pool"
-                        }
-                      }
-                    },
-                    "enable_inflation": {
-                      "type": "boolean",
-                      "title": "enable_inflation is the parameter that enables inflation and halts increasing the skipped_epochs"
-                    }
-                  }
-                }
-              },
-              "description": "QueryParamsResponse is the response type for the Query/Params RPC method."
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "details": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type_url": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string",
-                        "format": "byte"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Query"
-        ]
-      }
-    },
-    "/qubetics/inflation/v1/period": {
-      "get": {
-        "summary": "Period retrieves current period.",
-        "operationId": "Period",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "period": {
-                  "type": "string",
-                  "format": "uint64",
-                  "description": "period is the current minting per epoch provision value."
-                }
-              },
-              "description": "QueryPeriodResponse is the response type for the Query/Period RPC method."
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "details": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type_url": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string",
-                        "format": "byte"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Query"
-        ]
-      }
-    },
-    "/qubetics/inflation/v1/skipped_epochs": {
-      "get": {
-        "summary": "SkippedEpochs retrieves the total number of skipped epochs.",
-        "operationId": "SkippedEpochs",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "skipped_epochs": {
-                  "type": "string",
-                  "format": "uint64",
-                  "description": "skipped_epochs is the number of epochs that the inflation module has been disabled."
-                }
-              },
-              "description": "QuerySkippedEpochsResponse is the response type for the Query/SkippedEpochs\nRPC method."
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "details": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type_url": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string",
-                        "format": "byte"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Query"
-        ]
-      }
-    },
     "/qubetics/vesting/v2/balances/{address}": {
       "get": {
-        "summary": "Balances retrieves the unvested, vested and locked tokens for a vesting account",
+        "summary": "Balances retrieves the unvested, vested and locked tokens for a vesting\naccount",
         "operationId": "Balances",
         "responses": {
           "200": {
@@ -1219,7 +799,7 @@
     },
     "/qubetics/evm/v1/base_fee": {
       "get": {
-        "summary": "BaseFee queries the base fee of the parent block of the current block,\nit's similar to feemarket module's method, but also checks london hardfork status.",
+        "summary": "BaseFee queries the base fee of the parent block of the current block,\nit's similar to feemarket module's method, but also checks london hardfork\nstatus.",
         "operationId": "BaseFee",
         "responses": {
           "200": {
@@ -1591,7 +1171,7 @@
                 "ret": {
                   "type": "string",
                   "format": "byte",
-                  "title": "ret is the returned data from evm function (result or data supplied with revert\nopcode)"
+                  "title": "ret is the returned data from evm function (result or data supplied with\nrevert opcode)"
                 },
                 "vm_error": {
                   "type": "string",
@@ -1721,7 +1301,7 @@
                         },
                         "dao_fork_support": {
                           "type": "boolean",
-                          "title": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork"
+                          "title": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork"
                         },
                         "eip150_block": {
                           "type": "string",
@@ -1729,7 +1309,7 @@
                         },
                         "eip150_hash": {
                           "type": "string",
-                          "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed)"
+                          "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed)"
                         },
                         "eip155_block": {
                           "type": "string",
@@ -1741,11 +1321,11 @@
                         },
                         "byzantium_block": {
                           "type": "string",
-                          "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium)"
+                          "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)"
                         },
                         "constantinople_block": {
                           "type": "string",
-                          "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated)"
+                          "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)"
                         },
                         "petersburg_block": {
                           "type": "string",
@@ -1753,11 +1333,11 @@
                         },
                         "istanbul_block": {
                           "type": "string",
-                          "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul)"
+                          "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)"
                         },
                         "muir_glacier_block": {
                           "type": "string",
-                          "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated)"
+                          "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)"
                         },
                         "berlin_block": {
                           "type": "string",
@@ -1769,15 +1349,15 @@
                         },
                         "arrow_glacier_block": {
                           "type": "string",
-                          "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+                          "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
                         },
                         "gray_glacier_block": {
                           "type": "string",
-                          "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+                          "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
                         },
                         "merge_netsplit_block": {
                           "type": "string",
-                          "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter"
+                          "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter"
                         },
                         "shanghai_block": {
                           "type": "string",
@@ -1825,7 +1405,7 @@
                               "items": {
                                 "type": "string"
                               },
-                              "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+                              "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
                             }
                           }
                         },
@@ -1849,7 +1429,7 @@
                               "items": {
                                 "type": "string"
                               },
-                              "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+                              "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
                             }
                           }
                         }
@@ -1860,7 +1440,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "title": "active_static_precompiles defines the slice of hex addresses of the precompiled\ncontracts that are active"
+                      "title": "active_static_precompiles defines the slice of hex addresses of the\nprecompiled contracts that are active"
                     }
                   },
                   "title": "Params defines the EVM module parameters"
@@ -1989,7 +1569,7 @@
     },
     "/qubetics/evm/v1/trace_block": {
       "get": {
-        "summary": "TraceBlock implements the `debug_traceBlockByNumber` and `debug_traceBlockByHash` rpc api",
+        "summary": "TraceBlock implements the `debug_traceBlockByNumber` and\n`debug_traceBlockByHash` rpc api",
         "operationId": "TraceBlock",
         "responses": {
           "200": {
@@ -2053,7 +1633,7 @@
           },
           {
             "name": "trace_config.timeout",
-            "description": "timeout overrides the default timeout of 5 seconds for JavaScript-based tracing\ncalls.",
+            "description": "timeout overrides the default timeout of 5 seconds for JavaScript-based\ntracing calls.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2111,7 +1691,7 @@
           },
           {
             "name": "trace_config.overrides.dao_fork_support",
-            "description": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork.",
+            "description": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork.",
             "in": "query",
             "required": false,
             "type": "boolean"
@@ -2125,7 +1705,7 @@
           },
           {
             "name": "trace_config.overrides.eip150_hash",
-            "description": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed).",
+            "description": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2146,14 +1726,14 @@
           },
           {
             "name": "trace_config.overrides.byzantium_block",
-            "description": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium).",
+            "description": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.constantinople_block",
-            "description": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated).",
+            "description": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2167,14 +1747,14 @@
           },
           {
             "name": "trace_config.overrides.istanbul_block",
-            "description": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul).",
+            "description": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.muir_glacier_block",
-            "description": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated).",
+            "description": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2195,21 +1775,21 @@
           },
           {
             "name": "trace_config.overrides.arrow_glacier_block",
-            "description": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated).",
+            "description": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.gray_glacier_block",
-            "description": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated).",
+            "description": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.merge_netsplit_block",
-            "description": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter.",
+            "description": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2391,7 +1971,7 @@
           },
           {
             "name": "msg.from",
-            "description": "from is the ethereum signer address in hex format. This address value is checked\nagainst the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve.",
+            "description": "from is the ethereum signer address in hex format. This address value is\nchecked against the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2405,7 +1985,7 @@
           },
           {
             "name": "trace_config.timeout",
-            "description": "timeout overrides the default timeout of 5 seconds for JavaScript-based tracing\ncalls.",
+            "description": "timeout overrides the default timeout of 5 seconds for JavaScript-based\ntracing calls.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2463,7 +2043,7 @@
           },
           {
             "name": "trace_config.overrides.dao_fork_support",
-            "description": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork.",
+            "description": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork.",
             "in": "query",
             "required": false,
             "type": "boolean"
@@ -2477,7 +2057,7 @@
           },
           {
             "name": "trace_config.overrides.eip150_hash",
-            "description": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed).",
+            "description": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2498,14 +2078,14 @@
           },
           {
             "name": "trace_config.overrides.byzantium_block",
-            "description": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium).",
+            "description": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.constantinople_block",
-            "description": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated).",
+            "description": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2519,14 +2099,14 @@
           },
           {
             "name": "trace_config.overrides.istanbul_block",
-            "description": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul).",
+            "description": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.muir_glacier_block",
-            "description": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated).",
+            "description": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2547,21 +2127,21 @@
           },
           {
             "name": "trace_config.overrides.arrow_glacier_block",
-            "description": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated).",
+            "description": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.gray_glacier_block",
-            "description": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated).",
+            "description": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated).",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "trace_config.overrides.merge_netsplit_block",
-            "description": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter.",
+            "description": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -2879,7 +2459,7 @@
                     "enable_height": {
                       "type": "string",
                       "format": "int64",
-                      "description": "enable_height defines at which block height the base fee calculation is enabled."
+                      "description": "enable_height defines at which block height the base fee calculation is\nenabled."
                     },
                     "base_fee": {
                       "type": "string",
@@ -2887,7 +2467,7 @@
                     },
                     "min_gas_price": {
                       "type": "string",
-                      "title": "min_gas_price defines the minimum gas price value for cosmos and eth transactions"
+                      "title": "min_gas_price defines the minimum gas price value for cosmos and eth\ntransactions"
                     },
                     "min_gas_multiplier": {
                       "type": "string",
@@ -7308,7 +6888,7 @@
         "parameters": [
           {
             "name": "id",
-            "description": "Deprecated, use account_id instead\n\nid is the account number of the address to be queried. This field\nshould have been an uint64 (like all account numbers), and will be\nupdated to uint64 in a qubetics version of the auth query.",
+            "description": "Deprecated, use account_id instead\n\nid is the account number of the address to be queried. This field\nshould have been an uint64 (like all account numbers), and will be\nupdated to uint64 in a future version of the auth query.",
             "in": "path",
             "required": true,
             "type": "string",
@@ -14487,7 +14067,7 @@
                         "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
                       }
                     },
-                    "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+                    "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
                   },
                   "description": "validators defines the validators' info of a delegator."
                 },
@@ -14738,7 +14318,7 @@
                       "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
                     }
                   },
-                  "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+                  "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
                 }
               },
               "description": "QueryDelegatorValidatorResponse response type for the\nQuery/DelegatorValidator RPC method."
@@ -15041,7 +14621,7 @@
                             "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
                           }
                         },
-                        "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+                        "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
                       }
                     }
                   }
@@ -15400,7 +14980,7 @@
                         "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
                       }
                     },
-                    "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+                    "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
                   },
                   "description": "validators contains all the queried validators."
                 },
@@ -15651,7 +15231,7 @@
                       "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
                     }
                   },
-                  "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+                  "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
                 }
               },
               "title": "QueryValidatorResponse is response type for the Query/Validator RPC method"
@@ -20712,6 +20292,54 @@
       },
       "description": "PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }"
     },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        },
+        "value": {
+          "type": "string",
+          "format": "byte",
+          "description": "Must be a valid serialized protocol buffer of the above specified type."
+        }
+      },
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := &pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": <string>,\n      \"lastName\": <string>\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
+    "grpc.gateway.runtime.Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_url": {
+                "type": "string",
+                "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+              },
+              "value": {
+                "type": "string",
+                "format": "byte",
+                "description": "Must be a valid serialized protocol buffer of the above specified type."
+              }
+            },
+            "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := &pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": <string>,\n      \"lastName\": <string>\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+          }
+        }
+      }
+    },
     "qubetics.epochs.v1.EpochInfo": {
       "type": "object",
       "properties": {
@@ -20748,7 +20376,7 @@
           "title": "current_epoch_start_height of the epoch"
         }
       },
-      "description": "EpochInfo defines the message interface containing the relevant informations about\nan epoch."
+      "description": "EpochInfo defines the message interface containing the relevant informations\nabout an epoch."
     },
     "qubetics.epochs.v1.QueryCurrentEpochResponse": {
       "type": "object",
@@ -20802,7 +20430,7 @@
                 "title": "current_epoch_start_height of the epoch"
               }
             },
-            "description": "EpochInfo defines the message interface containing the relevant informations about\nan epoch."
+            "description": "EpochInfo defines the message interface containing the relevant informations\nabout an epoch."
           },
           "title": "epochs is a slice of all EpochInfos"
         },
@@ -20825,54 +20453,6 @@
       },
       "description": "QueryEpochsInfoResponse is the response type for the Query/EpochInfos RPC\nmethod."
     },
-    "google.protobuf.Any": {
-      "type": "object",
-      "properties": {
-        "type_url": {
-          "type": "string",
-          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
-        },
-        "value": {
-          "type": "string",
-          "format": "byte",
-          "description": "Must be a valid serialized protocol buffer of the above specified type."
-        }
-      },
-      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := &pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": <string>,\n      \"lastName\": <string>\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
-    },
-    "grpc.gateway.runtime.Error": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "string"
-        },
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
-        "details": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "type_url": {
-                "type": "string",
-                "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
-              },
-              "value": {
-                "type": "string",
-                "format": "byte",
-                "description": "Must be a valid serialized protocol buffer of the above specified type."
-              }
-            },
-            "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := &pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": <string>,\n      \"lastName\": <string>\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
-          }
-        }
-      }
-    },
     "qubetics.erc20.v1.Owner": {
       "type": "string",
       "enum": [
@@ -20888,14 +20468,14 @@
       "properties": {
         "enable_erc20": {
           "type": "boolean",
-          "description": "enable_erc20 is the parameter to enable the conversion of Cosmos coins <--> ERC20 tokens."
+          "description": "enable_erc20 is the parameter to enable the conversion of Cosmos coins <-->\nERC20 tokens."
         },
         "native_precompiles": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "title": "native_precompiles defines the slice of hex addresses of the\nactive precompiles that are used to interact with native staking coins as ERC20s"
+          "title": "native_precompiles defines the slice of hex addresses of the\nactive precompiles that are used to interact with native staking coins as\nERC20s"
         },
         "dynamic_precompiles": {
           "type": "array",
@@ -20916,14 +20496,14 @@
           "properties": {
             "enable_erc20": {
               "type": "boolean",
-              "description": "enable_erc20 is the parameter to enable the conversion of Cosmos coins <--> ERC20 tokens."
+              "description": "enable_erc20 is the parameter to enable the conversion of Cosmos coins <-->\nERC20 tokens."
             },
             "native_precompiles": {
               "type": "array",
               "items": {
                 "type": "string"
               },
-              "title": "native_precompiles defines the slice of hex addresses of the\nactive precompiles that are used to interact with native staking coins as ERC20s"
+              "title": "native_precompiles defines the slice of hex addresses of the\nactive precompiles that are used to interact with native staking coins as\nERC20s"
             },
             "dynamic_precompiles": {
               "type": "array",
@@ -20956,7 +20536,7 @@
               "title": "enabled defines the token mapping enable status"
             },
             "contract_owner": {
-              "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1 ModuleAccount, 2 external address)",
+              "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1\nModuleAccount, 2 external address)",
               "type": "string",
               "enum": [
                 "OWNER_UNSPECIFIED",
@@ -20968,7 +20548,7 @@
             }
           },
           "description": "TokenPair defines an instance that records a pairing consisting of a native\nCosmos Coin and an ERC20 token address.",
-          "title": "token_pairs returns the info about a registered token pair for the erc20 module"
+          "title": "token_pairs returns the info about a registered token pair for the erc20\nmodule"
         }
       },
       "description": "QueryTokenPairResponse is the response type for the Query/TokenPair RPC\nmethod."
@@ -20994,7 +20574,7 @@
                 "title": "enabled defines the token mapping enable status"
               },
               "contract_owner": {
-                "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1 ModuleAccount, 2 external address)",
+                "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1\nModuleAccount, 2 external address)",
                 "type": "string",
                 "enum": [
                   "OWNER_UNSPECIFIED",
@@ -21044,7 +20624,7 @@
           "title": "enabled defines the token mapping enable status"
         },
         "contract_owner": {
-          "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1 ModuleAccount, 2 external address)",
+          "title": "contract_owner is an ENUM specifying the type of ERC20 owner (0 invalid, 1\nModuleAccount, 2 external address)",
           "type": "string",
           "enum": [
             "OWNER_UNSPECIFIED",
@@ -21056,253 +20636,6 @@
         }
       },
       "description": "TokenPair defines an instance that records a pairing consisting of a native\nCosmos Coin and an ERC20 token address."
-    },
-    "cosmos.base.v1beta1.DecCoin": {
-      "type": "object",
-      "properties": {
-        "denom": {
-          "type": "string"
-        },
-        "amount": {
-          "type": "string"
-        }
-      },
-      "description": "DecCoin defines a token with a denomination and a decimal amount.\n\nNOTE: The amount field is an Dec which implements the custom method\nsignatures required by gogoproto."
-    },
-    "qubetics.inflation.v1.ExponentialCalculation": {
-      "type": "object",
-      "properties": {
-        "a": {
-          "type": "string",
-          "title": "a defines the initial value"
-        },
-        "r": {
-          "type": "string",
-          "title": "r defines the reduction factor"
-        },
-        "c": {
-          "type": "string",
-          "title": "c defines the parameter for long term inflation"
-        },
-        "bonding_target": {
-          "type": "string",
-          "title": "bonding_target"
-        },
-        "max_variance": {
-          "type": "string",
-          "title": "max_variance"
-        }
-      },
-      "title": "ExponentialCalculation holds factors to calculate exponential inflation on\neach period. Calculation reference:\nperiodProvision = exponentialDecay       *  bondingIncentive\nf(x)            = (a * (1 - r) ^ x + c)  *  (1 + max_variance - bondedRatio *\n(max_variance / bonding_target))"
-    },
-    "qubetics.inflation.v1.InflationDistribution": {
-      "type": "object",
-      "properties": {
-        "staking_rewards": {
-          "type": "string",
-          "title": "staking_rewards defines the proportion of the minted minted_denom that is\nto be allocated as staking rewards"
-        },
-        "usage_incentives": {
-          "type": "string",
-          "title": "Deprecated: usage_incentives defines the proportion of the minted minted_denom that is\nto be allocated to the incentives module address"
-        },
-        "community_pool": {
-          "type": "string",
-          "title": "community_pool defines the proportion of the minted minted_denom that is to\nbe allocated to the community pool"
-        }
-      },
-      "title": "InflationDistribution defines the distribution in which inflation is\nallocated through minting on each epoch (staking, incentives, community). It\nexcludes the team vesting distribution, as this is minted once at genesis.\nThe initial InflationDistribution can be calculated from the Qubetics Token\nModel like this:\nmintDistribution1 = distribution1 / (1 - teamVestingDistribution)\n0.5333333         = 40%           / (1 - 25%)"
-    },
-    "qubetics.inflation.v1.Params": {
-      "type": "object",
-      "properties": {
-        "mint_denom": {
-          "type": "string",
-          "title": "mint_denom specifies the type of coin to mint"
-        },
-        "exponential_calculation": {
-          "title": "exponential_calculation takes in the variables to calculate exponential inflation",
-          "type": "object",
-          "properties": {
-            "a": {
-              "type": "string",
-              "title": "a defines the initial value"
-            },
-            "r": {
-              "type": "string",
-              "title": "r defines the reduction factor"
-            },
-            "c": {
-              "type": "string",
-              "title": "c defines the parameter for long term inflation"
-            },
-            "bonding_target": {
-              "type": "string",
-              "title": "bonding_target"
-            },
-            "max_variance": {
-              "type": "string",
-              "title": "max_variance"
-            }
-          }
-        },
-        "inflation_distribution": {
-          "title": "inflation_distribution of the minted denom",
-          "type": "object",
-          "properties": {
-            "staking_rewards": {
-              "type": "string",
-              "title": "staking_rewards defines the proportion of the minted minted_denom that is\nto be allocated as staking rewards"
-            },
-            "usage_incentives": {
-              "type": "string",
-              "title": "Deprecated: usage_incentives defines the proportion of the minted minted_denom that is\nto be allocated to the incentives module address"
-            },
-            "community_pool": {
-              "type": "string",
-              "title": "community_pool defines the proportion of the minted minted_denom that is to\nbe allocated to the community pool"
-            }
-          }
-        },
-        "enable_inflation": {
-          "type": "boolean",
-          "title": "enable_inflation is the parameter that enables inflation and halts increasing the skipped_epochs"
-        }
-      },
-      "description": "Params holds parameters for the inflation module."
-    },
-    "qubetics.inflation.v1.QueryCirculatingSupplyResponse": {
-      "type": "object",
-      "properties": {
-        "circulating_supply": {
-          "title": "circulating_supply is the total amount of coins in circulation",
-          "type": "object",
-          "properties": {
-            "denom": {
-              "type": "string"
-            },
-            "amount": {
-              "type": "string"
-            }
-          },
-          "description": "DecCoin defines a token with a denomination and a decimal amount.\n\nNOTE: The amount field is an Dec which implements the custom method\nsignatures required by gogoproto."
-        }
-      },
-      "description": "QueryCirculatingSupplyResponse is the response type for the\nQuery/CirculatingSupply RPC method."
-    },
-    "qubetics.inflation.v1.QueryEpochMintProvisionResponse": {
-      "type": "object",
-      "properties": {
-        "epoch_mint_provision": {
-          "description": "epoch_mint_provision is the current minting per epoch provision value.",
-          "type": "object",
-          "properties": {
-            "denom": {
-              "type": "string"
-            },
-            "amount": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "description": "QueryEpochMintProvisionResponse is the response type for the\nQuery/EpochMintProvision RPC method."
-    },
-    "qubetics.inflation.v1.QueryInflationRateResponse": {
-      "type": "object",
-      "properties": {
-        "inflation_rate": {
-          "type": "string",
-          "title": "inflation_rate by which the total supply increases within one period"
-        }
-      },
-      "description": "QueryInflationRateResponse is the response type for the Query/InflationRate\nRPC method."
-    },
-    "qubetics.inflation.v1.QueryParamsResponse": {
-      "type": "object",
-      "properties": {
-        "params": {
-          "description": "params defines the parameters of the module.",
-          "type": "object",
-          "properties": {
-            "mint_denom": {
-              "type": "string",
-              "title": "mint_denom specifies the type of coin to mint"
-            },
-            "exponential_calculation": {
-              "title": "exponential_calculation takes in the variables to calculate exponential inflation",
-              "type": "object",
-              "properties": {
-                "a": {
-                  "type": "string",
-                  "title": "a defines the initial value"
-                },
-                "r": {
-                  "type": "string",
-                  "title": "r defines the reduction factor"
-                },
-                "c": {
-                  "type": "string",
-                  "title": "c defines the parameter for long term inflation"
-                },
-                "bonding_target": {
-                  "type": "string",
-                  "title": "bonding_target"
-                },
-                "max_variance": {
-                  "type": "string",
-                  "title": "max_variance"
-                }
-              }
-            },
-            "inflation_distribution": {
-              "title": "inflation_distribution of the minted denom",
-              "type": "object",
-              "properties": {
-                "staking_rewards": {
-                  "type": "string",
-                  "title": "staking_rewards defines the proportion of the minted minted_denom that is\nto be allocated as staking rewards"
-                },
-                "usage_incentives": {
-                  "type": "string",
-                  "title": "Deprecated: usage_incentives defines the proportion of the minted minted_denom that is\nto be allocated to the incentives module address"
-                },
-                "community_pool": {
-                  "type": "string",
-                  "title": "community_pool defines the proportion of the minted minted_denom that is to\nbe allocated to the community pool"
-                }
-              }
-            },
-            "enable_inflation": {
-              "type": "boolean",
-              "title": "enable_inflation is the parameter that enables inflation and halts increasing the skipped_epochs"
-            }
-          }
-        }
-      },
-      "description": "QueryParamsResponse is the response type for the Query/Params RPC method."
-    },
-    "qubetics.inflation.v1.QueryPeriodResponse": {
-      "type": "object",
-      "properties": {
-        "period": {
-          "type": "string",
-          "format": "uint64",
-          "description": "period is the current minting per epoch provision value."
-        }
-      },
-      "description": "QueryPeriodResponse is the response type for the Query/Period RPC method."
-    },
-    "qubetics.inflation.v1.QuerySkippedEpochsResponse": {
-      "type": "object",
-      "properties": {
-        "skipped_epochs": {
-          "type": "string",
-          "format": "uint64",
-          "description": "skipped_epochs is the number of epochs that the inflation module has been disabled."
-        }
-      },
-      "description": "QuerySkippedEpochsResponse is the response type for the Query/SkippedEpochs\nRPC method."
     },
     "cosmos.base.v1beta1.Coin": {
       "type": "object",
@@ -21393,7 +20726,7 @@
               "items": {
                 "type": "string"
               },
-              "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+              "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
             }
           }
         },
@@ -21417,7 +20750,7 @@
               "items": {
                 "type": "string"
               },
-              "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+              "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
             }
           }
         }
@@ -21443,7 +20776,7 @@
           "items": {
             "type": "string"
           },
-          "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+          "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
         }
       },
       "title": "AccessControlType defines the permission type for policies"
@@ -21472,7 +20805,7 @@
         },
         "dao_fork_support": {
           "type": "boolean",
-          "title": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork"
+          "title": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork"
         },
         "eip150_block": {
           "type": "string",
@@ -21480,7 +20813,7 @@
         },
         "eip150_hash": {
           "type": "string",
-          "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed)"
+          "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed)"
         },
         "eip155_block": {
           "type": "string",
@@ -21492,11 +20825,11 @@
         },
         "byzantium_block": {
           "type": "string",
-          "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium)"
+          "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)"
         },
         "constantinople_block": {
           "type": "string",
-          "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated)"
+          "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)"
         },
         "petersburg_block": {
           "type": "string",
@@ -21504,11 +20837,11 @@
         },
         "istanbul_block": {
           "type": "string",
-          "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul)"
+          "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)"
         },
         "muir_glacier_block": {
           "type": "string",
-          "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated)"
+          "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)"
         },
         "berlin_block": {
           "type": "string",
@@ -21520,15 +20853,15 @@
         },
         "arrow_glacier_block": {
           "type": "string",
-          "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+          "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
         },
         "gray_glacier_block": {
           "type": "string",
-          "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+          "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
         },
         "merge_netsplit_block": {
           "type": "string",
-          "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter"
+          "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter"
         },
         "shanghai_block": {
           "type": "string",
@@ -21631,7 +20964,7 @@
         },
         "from": {
           "type": "string",
-          "title": "from is the ethereum signer address in hex format. This address value is checked\nagainst the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve"
+          "title": "from is the ethereum signer address in hex format. This address value is\nchecked against the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve"
         }
       },
       "description": "MsgEthereumTx encapsulates an Ethereum transaction as an SDK message."
@@ -21699,7 +21032,7 @@
         "ret": {
           "type": "string",
           "format": "byte",
-          "title": "ret is the returned data from evm function (result or data supplied with revert\nopcode)"
+          "title": "ret is the returned data from evm function (result or data supplied with\nrevert opcode)"
         },
         "vm_error": {
           "type": "string",
@@ -21741,7 +21074,7 @@
             },
             "dao_fork_support": {
               "type": "boolean",
-              "title": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork"
+              "title": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork"
             },
             "eip150_block": {
               "type": "string",
@@ -21749,7 +21082,7 @@
             },
             "eip150_hash": {
               "type": "string",
-              "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed)"
+              "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed)"
             },
             "eip155_block": {
               "type": "string",
@@ -21761,11 +21094,11 @@
             },
             "byzantium_block": {
               "type": "string",
-              "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium)"
+              "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)"
             },
             "constantinople_block": {
               "type": "string",
-              "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated)"
+              "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)"
             },
             "petersburg_block": {
               "type": "string",
@@ -21773,11 +21106,11 @@
             },
             "istanbul_block": {
               "type": "string",
-              "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul)"
+              "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)"
             },
             "muir_glacier_block": {
               "type": "string",
-              "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated)"
+              "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)"
             },
             "berlin_block": {
               "type": "string",
@@ -21789,15 +21122,15 @@
             },
             "arrow_glacier_block": {
               "type": "string",
-              "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+              "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
             },
             "gray_glacier_block": {
               "type": "string",
-              "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+              "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
             },
             "merge_netsplit_block": {
               "type": "string",
-              "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter"
+              "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter"
             },
             "shanghai_block": {
               "type": "string",
@@ -21845,7 +21178,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+                  "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
                 }
               }
             },
@@ -21869,7 +21202,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+                  "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
                 }
               }
             }
@@ -21880,7 +21213,7 @@
           "items": {
             "type": "string"
           },
-          "title": "active_static_precompiles defines the slice of hex addresses of the precompiled\ncontracts that are active"
+          "title": "active_static_precompiles defines the slice of hex addresses of the\nprecompiled contracts that are active"
         }
       },
       "title": "Params defines the EVM module parameters"
@@ -21987,7 +21320,7 @@
                 },
                 "dao_fork_support": {
                   "type": "boolean",
-                  "title": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork"
+                  "title": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork"
                 },
                 "eip150_block": {
                   "type": "string",
@@ -21995,7 +21328,7 @@
                 },
                 "eip150_hash": {
                   "type": "string",
-                  "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed)"
+                  "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed)"
                 },
                 "eip155_block": {
                   "type": "string",
@@ -22007,11 +21340,11 @@
                 },
                 "byzantium_block": {
                   "type": "string",
-                  "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium)"
+                  "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)"
                 },
                 "constantinople_block": {
                   "type": "string",
-                  "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated)"
+                  "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)"
                 },
                 "petersburg_block": {
                   "type": "string",
@@ -22019,11 +21352,11 @@
                 },
                 "istanbul_block": {
                   "type": "string",
-                  "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul)"
+                  "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)"
                 },
                 "muir_glacier_block": {
                   "type": "string",
-                  "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated)"
+                  "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)"
                 },
                 "berlin_block": {
                   "type": "string",
@@ -22035,15 +21368,15 @@
                 },
                 "arrow_glacier_block": {
                   "type": "string",
-                  "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+                  "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
                 },
                 "gray_glacier_block": {
                   "type": "string",
-                  "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+                  "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
                 },
                 "merge_netsplit_block": {
                   "type": "string",
-                  "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter"
+                  "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter"
                 },
                 "shanghai_block": {
                   "type": "string",
@@ -22091,7 +21424,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+                      "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
                     }
                   }
                 },
@@ -22115,7 +21448,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "title": "access_control_list defines defines different things depending on the AccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from performing the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform the operation"
+                      "title": "access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation"
                     }
                   }
                 }
@@ -22126,7 +21459,7 @@
               "items": {
                 "type": "string"
               },
-              "title": "active_static_precompiles defines the slice of hex addresses of the precompiled\ncontracts that are active"
+              "title": "active_static_precompiles defines the slice of hex addresses of the\nprecompiled contracts that are active"
             }
           },
           "title": "Params defines the EVM module parameters"
@@ -22195,7 +21528,7 @@
         },
         "timeout": {
           "type": "string",
-          "title": "timeout overrides the default timeout of 5 seconds for JavaScript-based tracing\ncalls"
+          "title": "timeout overrides the default timeout of 5 seconds for JavaScript-based\ntracing calls"
         },
         "reexec": {
           "type": "string",
@@ -22233,7 +21566,7 @@
             },
             "dao_fork_support": {
               "type": "boolean",
-              "title": "dao_fork_support defines whether the nodes supports or opposes the DAO hard-fork"
+              "title": "dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork"
             },
             "eip150_block": {
               "type": "string",
@@ -22241,7 +21574,7 @@
             },
             "eip150_hash": {
               "type": "string",
-              "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas pricing changed)"
+              "title": "eip150_hash: EIP150 HF hash (needed for header only clients as only gas\npricing changed)"
             },
             "eip155_block": {
               "type": "string",
@@ -22253,11 +21586,11 @@
             },
             "byzantium_block": {
               "type": "string",
-              "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on byzantium)"
+              "title": "byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)"
             },
             "constantinople_block": {
               "type": "string",
-              "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already activated)"
+              "title": "constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)"
             },
             "petersburg_block": {
               "type": "string",
@@ -22265,11 +21598,11 @@
             },
             "istanbul_block": {
               "type": "string",
-              "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on istanbul)"
+              "title": "istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)"
             },
             "muir_glacier_block": {
               "type": "string",
-              "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 = already activated)"
+              "title": "muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)"
             },
             "berlin_block": {
               "type": "string",
@@ -22281,15 +21614,15 @@
             },
             "arrow_glacier_block": {
               "type": "string",
-              "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+              "title": "arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
             },
             "gray_glacier_block": {
               "type": "string",
-              "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 = already activated)"
+              "title": "gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"
             },
             "merge_netsplit_block": {
               "type": "string",
-              "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network splitter"
+              "title": "merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter"
             },
             "shanghai_block": {
               "type": "string",
@@ -22337,7 +21670,7 @@
         "enable_height": {
           "type": "string",
           "format": "int64",
-          "description": "enable_height defines at which block height the base fee calculation is enabled."
+          "description": "enable_height defines at which block height the base fee calculation is\nenabled."
         },
         "base_fee": {
           "type": "string",
@@ -22345,7 +21678,7 @@
         },
         "min_gas_price": {
           "type": "string",
-          "title": "min_gas_price defines the minimum gas price value for cosmos and eth transactions"
+          "title": "min_gas_price defines the minimum gas price value for cosmos and eth\ntransactions"
         },
         "min_gas_multiplier": {
           "type": "string",
@@ -22399,7 +21732,7 @@
             "enable_height": {
               "type": "string",
               "format": "int64",
-              "description": "enable_height defines at which block height the base fee calculation is enabled."
+              "description": "enable_height defines at which block height the base fee calculation is\nenabled."
             },
             "base_fee": {
               "type": "string",
@@ -22407,7 +21740,7 @@
             },
             "min_gas_price": {
               "type": "string",
-              "title": "min_gas_price defines the minimum gas price value for cosmos and eth transactions"
+              "title": "min_gas_price defines the minimum gas price value for cosmos and eth\ntransactions"
             },
             "min_gas_multiplier": {
               "type": "string",
@@ -25560,6 +24893,18 @@
       },
       "description": "SendEnabled maps coin denom to a send_enabled status (whether a denom is\nsendable)."
     },
+    "cosmos.base.v1beta1.DecCoin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "DecCoin defines a token with a denomination and a decimal amount.\n\nNOTE: The amount field is an Dec which implements the custom method\nsignatures required by gogoproto."
+    },
     "cosmos.distribution.v1beta1.DelegationDelegatorReward": {
       "type": "object",
       "properties": {
@@ -28571,7 +27916,7 @@
                 "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
               }
             },
-            "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+            "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
           }
         }
       },
@@ -28934,7 +28279,7 @@
               "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
             }
           },
-          "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+          "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
         }
       },
       "description": "QueryDelegatorValidatorResponse response type for the\nQuery/DelegatorValidator RPC method."
@@ -29072,7 +28417,7 @@
                 "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
               }
             },
-            "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+            "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
           },
           "description": "validators defines the validators' info of a delegator."
         },
@@ -29327,7 +28672,7 @@
                     "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
                   }
                 },
-                "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+                "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
               }
             }
           }
@@ -29775,7 +29120,7 @@
               "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
             }
           },
-          "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+          "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
         }
       },
       "title": "QueryValidatorResponse is response type for the Query/Validator RPC method"
@@ -29990,7 +29335,7 @@
                 "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
               }
             },
-            "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+            "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
           },
           "description": "validators contains all the queried validators."
         },
@@ -30468,7 +29813,7 @@
           "title": "list of unbonding ids, each uniquely identifing an unbonding of this validator"
         }
       },
-      "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of qubetics\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+      "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
     },
     "tendermint.types.BlockID": {
       "type": "object",
@@ -30941,7 +30286,7 @@
         "SIGN_MODE_EIP_191"
       ],
       "default": "SIGN_MODE_UNSPECIFIED",
-      "description": "SignMode represents a signing mode with its own security guarantees.\n\nThis enum should be considered a registry of all known sign modes\nin the Cosmos ecosystem. Apps are not expected to support all known\nsign modes. Apps that would like to support custom  sign modes are\nencouraged to open a small PR against this file to add a new case\nto this SignMode enum describing their sign mode so that different\napps have a consistent version of this enum.\n\n - SIGN_MODE_UNSPECIFIED: SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be\nrejected.\n - SIGN_MODE_DIRECT: SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is\nverified with raw bytes from Tx.\n - SIGN_MODE_TEXTUAL: SIGN_MODE_TEXTUAL is a qubetics signing mode that will verify some\nhuman-readable textual representation on top of the binary representation\nfrom SIGN_MODE_DIRECT. It is currently not supported.\n - SIGN_MODE_DIRECT_AUX: SIGN_MODE_DIRECT_AUX specifies a signing mode which uses\nSignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not\nrequire signers signing over other signers' `signer_info`. It also allows\nfor adding Tips in transactions.\n\nSince: cosmos-sdk 0.46\n - SIGN_MODE_LEGACY_AMINO_JSON: SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses\nAmino JSON and will be removed in the qubetics.\n - SIGN_MODE_EIP_191: SIGN_MODE_EIP_191 specifies the sign mode for EIP 191 signing on the Cosmos\nSDK. Ref: https://eips.ethereum.org/EIPS/eip-191\n\nCurrently, SIGN_MODE_EIP_191 is registered as a SignMode enum variant,\nbut is not implemented on the SDK by default. To enable EIP-191, you need\nto pass a custom `TxConfig` that has an implementation of\n`SignModeHandler` for EIP-191. The SDK may decide to fully support\nEIP-191 in the qubetics.\n\nSince: cosmos-sdk 0.45.2"
+      "description": "SignMode represents a signing mode with its own security guarantees.\n\nThis enum should be considered a registry of all known sign modes\nin the Cosmos ecosystem. Apps are not expected to support all known\nsign modes. Apps that would like to support custom  sign modes are\nencouraged to open a small PR against this file to add a new case\nto this SignMode enum describing their sign mode so that different\napps have a consistent version of this enum.\n\n - SIGN_MODE_UNSPECIFIED: SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be\nrejected.\n - SIGN_MODE_DIRECT: SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is\nverified with raw bytes from Tx.\n - SIGN_MODE_TEXTUAL: SIGN_MODE_TEXTUAL is a future signing mode that will verify some\nhuman-readable textual representation on top of the binary representation\nfrom SIGN_MODE_DIRECT. It is currently not supported.\n - SIGN_MODE_DIRECT_AUX: SIGN_MODE_DIRECT_AUX specifies a signing mode which uses\nSignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not\nrequire signers signing over other signers' `signer_info`. It also allows\nfor adding Tips in transactions.\n\nSince: cosmos-sdk 0.46\n - SIGN_MODE_LEGACY_AMINO_JSON: SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses\nAmino JSON and will be removed in the future.\n - SIGN_MODE_EIP_191: SIGN_MODE_EIP_191 specifies the sign mode for EIP 191 signing on the Cosmos\nSDK. Ref: https://eips.ethereum.org/EIPS/eip-191\n\nCurrently, SIGN_MODE_EIP_191 is registered as a SignMode enum variant,\nbut is not implemented on the SDK by default. To enable EIP-191, you need\nto pass a custom `TxConfig` that has an implementation of\n`SignModeHandler` for EIP-191. The SDK may decide to fully support\nEIP-191 in the future.\n\nSince: cosmos-sdk 0.45.2"
     },
     "cosmos.tx.v1beta1.AuthInfo": {
       "type": "object",
@@ -32280,7 +31625,7 @@
                 "SIGN_MODE_EIP_191"
               ],
               "default": "SIGN_MODE_UNSPECIFIED",
-              "description": "SignMode represents a signing mode with its own security guarantees.\n\nThis enum should be considered a registry of all known sign modes\nin the Cosmos ecosystem. Apps are not expected to support all known\nsign modes. Apps that would like to support custom  sign modes are\nencouraged to open a small PR against this file to add a new case\nto this SignMode enum describing their sign mode so that different\napps have a consistent version of this enum.\n\n - SIGN_MODE_UNSPECIFIED: SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be\nrejected.\n - SIGN_MODE_DIRECT: SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is\nverified with raw bytes from Tx.\n - SIGN_MODE_TEXTUAL: SIGN_MODE_TEXTUAL is a qubetics signing mode that will verify some\nhuman-readable textual representation on top of the binary representation\nfrom SIGN_MODE_DIRECT. It is currently not supported.\n - SIGN_MODE_DIRECT_AUX: SIGN_MODE_DIRECT_AUX specifies a signing mode which uses\nSignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not\nrequire signers signing over other signers' `signer_info`. It also allows\nfor adding Tips in transactions.\n\nSince: cosmos-sdk 0.46\n - SIGN_MODE_LEGACY_AMINO_JSON: SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses\nAmino JSON and will be removed in the qubetics.\n - SIGN_MODE_EIP_191: SIGN_MODE_EIP_191 specifies the sign mode for EIP 191 signing on the Cosmos\nSDK. Ref: https://eips.ethereum.org/EIPS/eip-191\n\nCurrently, SIGN_MODE_EIP_191 is registered as a SignMode enum variant,\nbut is not implemented on the SDK by default. To enable EIP-191, you need\nto pass a custom `TxConfig` that has an implementation of\n`SignModeHandler` for EIP-191. The SDK may decide to fully support\nEIP-191 in the qubetics.\n\nSince: cosmos-sdk 0.45.2"
+              "description": "SignMode represents a signing mode with its own security guarantees.\n\nThis enum should be considered a registry of all known sign modes\nin the Cosmos ecosystem. Apps are not expected to support all known\nsign modes. Apps that would like to support custom  sign modes are\nencouraged to open a small PR against this file to add a new case\nto this SignMode enum describing their sign mode so that different\napps have a consistent version of this enum.\n\n - SIGN_MODE_UNSPECIFIED: SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be\nrejected.\n - SIGN_MODE_DIRECT: SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is\nverified with raw bytes from Tx.\n - SIGN_MODE_TEXTUAL: SIGN_MODE_TEXTUAL is a future signing mode that will verify some\nhuman-readable textual representation on top of the binary representation\nfrom SIGN_MODE_DIRECT. It is currently not supported.\n - SIGN_MODE_DIRECT_AUX: SIGN_MODE_DIRECT_AUX specifies a signing mode which uses\nSignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not\nrequire signers signing over other signers' `signer_info`. It also allows\nfor adding Tips in transactions.\n\nSince: cosmos-sdk 0.46\n - SIGN_MODE_LEGACY_AMINO_JSON: SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses\nAmino JSON and will be removed in the future.\n - SIGN_MODE_EIP_191: SIGN_MODE_EIP_191 specifies the sign mode for EIP 191 signing on the Cosmos\nSDK. Ref: https://eips.ethereum.org/EIPS/eip-191\n\nCurrently, SIGN_MODE_EIP_191 is registered as a SignMode enum variant,\nbut is not implemented on the SDK by default. To enable EIP-191, you need\nto pass a custom `TxConfig` that has an implementation of\n`SignModeHandler` for EIP-191. The SDK may decide to fully support\nEIP-191 in the future.\n\nSince: cosmos-sdk 0.45.2"
             }
           }
         },
@@ -32334,10 +31679,10 @@
             "SIGN_MODE_EIP_191"
           ],
           "default": "SIGN_MODE_UNSPECIFIED",
-          "description": "SignMode represents a signing mode with its own security guarantees.\n\nThis enum should be considered a registry of all known sign modes\nin the Cosmos ecosystem. Apps are not expected to support all known\nsign modes. Apps that would like to support custom  sign modes are\nencouraged to open a small PR against this file to add a new case\nto this SignMode enum describing their sign mode so that different\napps have a consistent version of this enum.\n\n - SIGN_MODE_UNSPECIFIED: SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be\nrejected.\n - SIGN_MODE_DIRECT: SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is\nverified with raw bytes from Tx.\n - SIGN_MODE_TEXTUAL: SIGN_MODE_TEXTUAL is a qubetics signing mode that will verify some\nhuman-readable textual representation on top of the binary representation\nfrom SIGN_MODE_DIRECT. It is currently not supported.\n - SIGN_MODE_DIRECT_AUX: SIGN_MODE_DIRECT_AUX specifies a signing mode which uses\nSignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not\nrequire signers signing over other signers' `signer_info`. It also allows\nfor adding Tips in transactions.\n\nSince: cosmos-sdk 0.46\n - SIGN_MODE_LEGACY_AMINO_JSON: SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses\nAmino JSON and will be removed in the qubetics.\n - SIGN_MODE_EIP_191: SIGN_MODE_EIP_191 specifies the sign mode for EIP 191 signing on the Cosmos\nSDK. Ref: https://eips.ethereum.org/EIPS/eip-191\n\nCurrently, SIGN_MODE_EIP_191 is registered as a SignMode enum variant,\nbut is not implemented on the SDK by default. To enable EIP-191, you need\nto pass a custom `TxConfig` that has an implementation of\n`SignModeHandler` for EIP-191. The SDK may decide to fully support\nEIP-191 in the qubetics.\n\nSince: cosmos-sdk 0.45.2"
+          "description": "SignMode represents a signing mode with its own security guarantees.\n\nThis enum should be considered a registry of all known sign modes\nin the Cosmos ecosystem. Apps are not expected to support all known\nsign modes. Apps that would like to support custom  sign modes are\nencouraged to open a small PR against this file to add a new case\nto this SignMode enum describing their sign mode so that different\napps have a consistent version of this enum.\n\n - SIGN_MODE_UNSPECIFIED: SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be\nrejected.\n - SIGN_MODE_DIRECT: SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is\nverified with raw bytes from Tx.\n - SIGN_MODE_TEXTUAL: SIGN_MODE_TEXTUAL is a future signing mode that will verify some\nhuman-readable textual representation on top of the binary representation\nfrom SIGN_MODE_DIRECT. It is currently not supported.\n - SIGN_MODE_DIRECT_AUX: SIGN_MODE_DIRECT_AUX specifies a signing mode which uses\nSignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not\nrequire signers signing over other signers' `signer_info`. It also allows\nfor adding Tips in transactions.\n\nSince: cosmos-sdk 0.46\n - SIGN_MODE_LEGACY_AMINO_JSON: SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses\nAmino JSON and will be removed in the future.\n - SIGN_MODE_EIP_191: SIGN_MODE_EIP_191 specifies the sign mode for EIP 191 signing on the Cosmos\nSDK. Ref: https://eips.ethereum.org/EIPS/eip-191\n\nCurrently, SIGN_MODE_EIP_191 is registered as a SignMode enum variant,\nbut is not implemented on the SDK by default. To enable EIP-191, you need\nto pass a custom `TxConfig` that has an implementation of\n`SignModeHandler` for EIP-191. The SDK may decide to fully support\nEIP-191 in the future.\n\nSince: cosmos-sdk 0.45.2"
         }
       },
-      "title": "Single is the mode info for a single signer. It is structured as a message\nto allow for additional fields such as locale for SIGN_MODE_TEXTUAL in the\nqubetics"
+      "title": "Single is the mode info for a single signer. It is structured as a message\nto allow for additional fields such as locale for SIGN_MODE_TEXTUAL in the\nfuture"
     },
     "cosmos.tx.v1beta1.OrderBy": {
       "type": "string",
