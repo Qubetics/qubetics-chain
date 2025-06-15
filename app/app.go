@@ -454,21 +454,6 @@ func NewQubetics(
 		tkeys[feemarkettypes.TransientKey],
 		app.GetSubspace(feemarkettypes.ModuleName),
 	)
-	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
-	app.ValidatorpoolKeeper = *validatorpoolmodulekeeper.NewKeeper(
-		appCodec,
-		keys[validatorpoolmoduletypes.StoreKey],
-		keys[validatorpoolmoduletypes.MemStoreKey],
-		app.GetSubspace(validatorpoolmoduletypes.ModuleName),
-		authority.String(),
-		app.BankKeeper,
-		app.AccountKeeper,
-		app.StakingKeeper,
-		app.MintKeeper,
-		app.DistrKeeper,
-	)
-	
-
 
 	evmKeeper := evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
@@ -505,7 +490,19 @@ func NewQubetics(
 	govKeeper.SetLegacyRouter(govRouter)
 
 	// Qubetics Keeper
-
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	app.ValidatorpoolKeeper = *validatorpoolmodulekeeper.NewKeeper(
+		appCodec,
+		keys[validatorpoolmoduletypes.StoreKey],
+		keys[validatorpoolmoduletypes.MemStoreKey],
+		app.GetSubspace(validatorpoolmoduletypes.ModuleName),
+		authority.String(),
+		app.BankKeeper,
+		app.AccountKeeper,
+		stakingKeeper,
+		app.MintKeeper,
+		app.DistrKeeper,
+	)
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
 	// NOTE: Distr, Slashing and Claim must be created before calling the Hooks method to avoid returning a Keeper without its table generated
