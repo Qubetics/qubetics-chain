@@ -1,0 +1,14 @@
+syntax = "proto3";
+package qubetics.validatorpool;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  
+  // AnnualRoi defines the annual return on investment in basis points (e.g. 3000 = 30%)
+  uint32 annual_roi = 1 [(gogoproto.moretags) = "yaml:\"annual_roi\""];
+}

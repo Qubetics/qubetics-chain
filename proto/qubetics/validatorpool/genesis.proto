@@ -1,0 +1,12 @@
+syntax = "proto3";
+package qubetics.validatorpool;
+
+import "gogoproto/gogo.proto";
+import "qubetics/validatorpool/params.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types";
+
+// GenesisState defines the validatorpool module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
