@@ -25,6 +25,14 @@
     },
     
     {
+      "url": "./tmp-swagger-gen/qubetics/validatorpool/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "ValidatorPoolParams"
+        }
+      }
+    },
+    {
       "url": "./tmp-swagger-gen/qubetics/vesting/v2/query.swagger.json"
     },
     {
@@ -132,6 +140,14 @@
           "Deposit": "GovV1Deposit",
           "Deposits": "GovV1Deposit",
           "TallyResult": "GovV1TallyResult"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/mint/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "MintParams"
         }
       }
     },
