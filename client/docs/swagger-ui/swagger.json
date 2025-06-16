@@ -540,7 +540,7 @@
         ]
       }
     },
-    "/validatorpool/validatorpool/locked_supply": {
+    "/qubetics/validatorpool/locked_supply": {
       "get": {
         "summary": "LockedSupply returns the current locked supply in the validator pool",
         "operationId": "LockedSupply",
@@ -597,7 +597,7 @@
         ]
       }
     },
-    "/validatorpool/validatorpool/params": {
+    "/qubetics/validatorpool/params": {
       "get": {
         "summary": "Parameters queries the parameters of the module.",
         "operationId": "ValidatorPoolParams",
