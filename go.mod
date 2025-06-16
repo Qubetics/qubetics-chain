@@ -254,7 +254,7 @@ replace (
 	// use cosmos fork of keyring
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 	// use Cosmos-SDK fork to enable Ledger functionality
-	github.com/cosmos/cosmos-sdk => github.com/Qubetics/cosmos-sdk v0.47.12-qubetics
+	github.com/cosmos/cosmos-sdk => github.com/Qubetics/cosmos-sdk v1.0.0-qubetics
 	// use Qubetics geth fork
 	github.com/ethereum/go-ethereum => github.com/Qubetics/go-ethereum v1.10.26
 	// Security Advisory https://github.com/advisories/GHSA-h395-qcrw-5vmq
