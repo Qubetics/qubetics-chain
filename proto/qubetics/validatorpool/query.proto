@@ -1,0 +1,40 @@
+syntax = "proto3";
+package qubetics.validatorpool;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "qubetics/validatorpool/params.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/qubetics/validatorpool/params";
+  }
+
+  // LockedSupply returns the current locked supply in the validator pool
+  rpc LockedSupply(QueryLockedSupplyRequest) returns (QueryLockedSupplyResponse) {
+    option (google.api.http).get = "/qubetics/validatorpool/locked_supply";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryLockedSupplyRequest is request type for the Query/LockedSupply RPC method.
+message QueryLockedSupplyRequest {}
+
+// QueryLockedSupplyResponse is response type for the Query/LockedSupply RPC method.
+message QueryLockedSupplyResponse {
+  // locked_supply is the current amount of locked supply in the validator pool
+  string locked_supply = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+}

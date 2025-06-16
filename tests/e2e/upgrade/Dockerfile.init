@@ -1,7 +1,7 @@
 # argument to provide specific version of qubetics node
 ARG INITIAL_VERSION
 # checkov:skip=CKV_DOCKER_3:No need to create a user, this is only used on tests
-FROM tharsishq/qubetics:$INITIAL_VERSION
+FROM qubetics/qubetics:$INITIAL_VERSION
 
 WORKDIR /go/src/github.com/qubetics/qubetics
 

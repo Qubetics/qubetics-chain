@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	stakeDenom    = "stake"
+	stakeDenom    = "tics"
 	feeDenom      = "fee"
 	lockupPeriods = sdkvesting.Periods{
 		sdkvesting.Period{

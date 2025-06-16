@@ -7,7 +7,7 @@ import (
 )
 
 // The init function of the config file allows to setup the global
-// configuration for the EVM, modifying the custom ones defined in evmOS.
+// configuration for the EVM, modifying the custom ones defined in qubetics.
 func init() {
 	err := evmconfig.NewEVMConfigurator().
 		WithExtendedEips(qubeticsActivators).

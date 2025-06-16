@@ -10,7 +10,7 @@ import (
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	// evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 )
 
 var _ sdk.PostDecorator = &BurnDecorator{}
@@ -38,11 +38,11 @@ func (bd BurnDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simulate, success
 	}
 
 	// skip logic if there is an Ethereum transaction
-	for _, msg := range tx.GetMsgs() {
-		if _, ok := msg.(*evmtypes.MsgEthereumTx); ok {
-			return next(ctx, tx, simulate, success)
-		}
-	}
+	// for _, msg := range tx.GetMsgs() {
+	// 	if _, ok := msg.(*evmtypes.MsgEthereumTx); ok {
+	// 		return next(ctx, tx, simulate, success)
+	// 	}
+	// }
 
 	fees := feeTx.GetFee()
 

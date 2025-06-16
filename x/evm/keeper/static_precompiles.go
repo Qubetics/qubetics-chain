@@ -20,7 +20,9 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+
+	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	vestingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vesting/keeper"
 	"golang.org/x/exp/maps"
 )
@@ -118,7 +120,7 @@ func (k *Keeper) GetStaticPrecompileInstance(params *types.Params, address commo
 		// If the precompile is within params but not found in the precompiles map it means we have memory
 		// corruption.
 		if !found {
-			panic(fmt.Errorf("precompiled contract not stored in memory: %s", address))
+			return nil, false, fmt.Errorf("precompiled contract not stored in memory: %s", address)
 		}
 		return precompile, true, nil
 	}

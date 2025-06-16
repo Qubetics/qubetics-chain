@@ -2,9 +2,10 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // envVars is a helper struct to define the used environment variables
@@ -46,8 +47,8 @@ func TestLoadUpgradeParams(t *testing.T) {
 			want: Params{
 				MountPath: "/tmp/qubetics",
 				Versions: []VersionConfig{
-					{"v0.1.0", "v0.1.0", tharsisRepo},
-					{"v0.2.0", "v0.2.0", tharsisRepo},
+					{"v0.1.0", "v0.1.0", qubeticsRepo},
+					{"v0.2.0", "v0.2.0", qubeticsRepo},
 				},
 				ChainID:     "qubetics_9123-1",
 				WorkDirRoot: wd,
@@ -62,9 +63,9 @@ func TestLoadUpgradeParams(t *testing.T) {
 			want: Params{
 				MountPath: defaultMountPath,
 				Versions: []VersionConfig{
-					{"v0.1.0", "v0.1.0", tharsisRepo},
-					{"v0.2.0", "v0.2.0", tharsisRepo},
-					{latestVersionName, LocalVersionTag, tharsisRepo},
+					{"v0.1.0", "v0.1.0", qubeticsRepo},
+					{"v0.2.0", "v0.2.0", qubeticsRepo},
+					{latestVersionName, LocalVersionTag, qubeticsRepo},
 				},
 				ChainID:     defaultChainID,
 				WorkDirRoot: wd,
@@ -80,8 +81,8 @@ func TestLoadUpgradeParams(t *testing.T) {
 			want: Params{
 				MountPath: defaultMountPath,
 				Versions: []VersionConfig{
-					{"v0.1.0", "v0.1.0", tharsisRepo},
-					{"v0.2.0", "v0.2.0", tharsisRepo},
+					{"v0.1.0", "v0.1.0", qubeticsRepo},
+					{"v0.2.0", "v0.2.0", qubeticsRepo},
 				},
 				ChainID:     defaultChainID,
 				WorkDirRoot: wd,
@@ -97,8 +98,8 @@ func TestLoadUpgradeParams(t *testing.T) {
 			want: Params{
 				MountPath: defaultMountPath,
 				Versions: []VersionConfig{
-					{"v0.1.0-rc1", "v0.1.0-rc1", tharsisRepo},
-					{"v0.2.0-rc2", "v0.2.0-rc2", tharsisRepo},
+					{"v0.1.0-rc1", "v0.1.0-rc1", qubeticsRepo},
+					{"v0.2.0-rc2", "v0.2.0-rc2", qubeticsRepo},
 				},
 				ChainID:     defaultChainID,
 				WorkDirRoot: wd,
@@ -111,8 +112,8 @@ func TestLoadUpgradeParams(t *testing.T) {
 			want: Params{
 				MountPath: defaultMountPath,
 				Versions: []VersionConfig{
-					{defaultInitialVersion, defaultInitialVersion, tharsisRepo},
-					{latestVersionName, LocalVersionTag, tharsisRepo},
+					{defaultInitialVersion, defaultInitialVersion, qubeticsRepo},
+					{latestVersionName, LocalVersionTag, qubeticsRepo},
 				},
 				ChainID:     defaultChainID,
 				WorkDirRoot: wd,

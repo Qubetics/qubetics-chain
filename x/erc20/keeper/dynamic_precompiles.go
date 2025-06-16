@@ -10,6 +10,12 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
 )
 
+// WhitelistedChains contains the list of chain IDs that are allowed to register ERC20 precompiles.
+var WhitelistedChains = []string{
+	"trusted-chain-1", // Example trusted chain ID
+	"trusted-chain-2", // Another trusted chain ID
+}
+
 // RegisterERC20Extension creates and adds an ERC20 precompile interface for an IBC Coin.
 //
 // It derives the ERC-20 address from the token denomination and registers the
@@ -17,6 +23,12 @@ import (
 //
 // CONTRACT: This must ONLY be called if there is no existing token pair for the given denom.
 func (k Keeper) RegisterERC20Extension(ctx sdk.Context, denom string) (*types.TokenPair, error) {
+	// Check if the source chain is whitelisted
+	sourceChainID := ctx.ChainID() // Get the chain ID of the current chain
+	if !isChainWhitelisted(sourceChainID) {
+		return nil, fmt.Errorf("chain %s is not whitelisted for ERC20 precompile creation", sourceChainID)
+	}
+
 	pair, err := k.CreateNewTokenPair(ctx, denom)
 	if err != nil {
 		return nil, err
@@ -27,6 +39,16 @@ func (k Keeper) RegisterERC20Extension(ctx sdk.Context, denom string) (*types.To
 		return nil, err
 	}
 	return &pair, err
+}
+
+// isChainWhitelisted checks if the chain is in the list of whitelisted chains.
+func isChainWhitelisted(chainID string) bool {
+	for _, whitelistedChain := range WhitelistedChains {
+		if chainID == whitelistedChain {
+			return true
+		}
+	}
+	return false
 }
 
 // EnableDynamicPrecompiles appends the addresses of the given Precompiles to the list
@@ -49,7 +71,7 @@ func (k Keeper) EnableDynamicPrecompiles(ctx sdk.Context, addresses ...common.Ad
 }
 
 // appendPrecompiles append addresses to the existingPrecompiles and sort the resulting slice.
-// The function returns an error is the two sets are overlapping.
+// The function returns an error if the two sets are overlapping.
 func appendPrecompiles(existingPrecompiles []string, addresses ...common.Address) ([]string, error) {
 	// check for duplicates
 	hexAddresses := make([]string, len(addresses))

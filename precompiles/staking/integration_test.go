@@ -2424,7 +2424,7 @@ var _ = Describe("Calling staking precompile via Solidity", func() {
 
 			It("shouldn't delegate to a validator that is not in the allow list of the approval", func() {
 				// create a new validator, which is not included in the active set of the last block
-				testutil.CreateValidator(s.ctx, s.T(), s.privKey.PubKey(), *s.app.StakingKeeper.Keeper, math.NewInt(100))
+				testutil.CreateValidator(s.ctx, s.T(), s.privKey.PubKey(), s.app.StakingKeeper, math.NewInt(100))
 				newValAddr := sdk.ValAddress(s.address.Bytes())
 
 				delegateArgs := defaultDelegateArgs.WithArgs(

@@ -79,11 +79,11 @@ func LoadUpgradeParams(upgradesFolder string) (Params, error) {
 		versions = append(versions, VersionConfig{
 			UpgradeName: versionTag,
 			ImageTag:    versionTag,
-			ImageName:   tharsisRepo,
+			ImageName:   qubeticsRepo,
 		})
 	}
 
-	// When a target version is specified, it is used and the tharsishq DockerHub repo used.
+	// When a target version is specified, it is used and the Qubetics DockerHub repo used.
 	// If no target version is specified, the last upgrade in the app/upgrades folder is used
 	// and a name for the local image is assigned.
 	targetV := os.Getenv("TARGET_VERSION")
@@ -111,7 +111,7 @@ func LoadUpgradeParams(upgradesFolder string) (Params, error) {
 	versions = append(versions, VersionConfig{
 		upgradeName,
 		versionTag,
-		tharsisRepo,
+		qubeticsRepo,
 	})
 
 	// If chain ID is not specified, the default value from the constants file will be used in upgrade-init.sh

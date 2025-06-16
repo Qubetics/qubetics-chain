@@ -1,6 +1,6 @@
 # Qubetics Custom EIPs
 
-This document explain how **evmOS** allows chain built on top of it to define custom EIPs to modify the behavior of EVM
+This document explain how **qubetics** allows chain built on top of it to define custom EIPs to modify the behavior of EVM
 opcodes.
 
 ## Custom EIPs
@@ -8,7 +8,7 @@ opcodes.
 Inside an EVM, every state transition or query is executed by evaluating opcodes. Custom EIPs are functions used to
 change the behavior of these opcodes to tailor the EVM functionalities to fit the app-chain requirements.
 
-Custom EIPs should be defined in an `eips` package inside the `./app/eips/` folder of chains using the **evmOS**
+Custom EIPs should be defined in an `eips` package inside the `./app/eips/` folder of chains using the **qubetics**
 framework. This organization of custom implementations is not a strict requirement, but is the suggested approach to
 have a clean organization of functionalities. In this file, only the custom modifier should be defined.
 
@@ -19,7 +19,6 @@ defined with the signature:
 func(jt *vm.JumpTable) {}
 ```
 
-where `vm` is the package `"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"`.
 
 Custom EIPs are used to modify the behavior of opcodes, which are described by the `operation` structure:
 
@@ -40,7 +39,7 @@ type operation struct {
 }
 ```
 
-With the **evmOS** framework, it is possible to modify any of the fields defined in the type via the `operation` setter
+With the **qubetics** framework, it is possible to modify any of the fields defined in the type via the `operation` setter
 methods:
 
 - `SetExecute`: update the execution logic for the opcode.
@@ -70,8 +69,8 @@ In the same folder should also be defined tests and contracts used to verify the
 
 The activation of custom EIPs should be done inside the `config.go` file defined in the `./app/` folder. This file has
 the role of the single source for modify the EVM implementation which is defined in the
-[`x/evm/`](https://github.com/qubetics/qubetics/tree/main/x/evm) folder
-of **evmOS**.
+[`x/evm/`] folder
+of **qubetics**.
 
 In this file, 3 main components should be defined:
 
@@ -97,7 +96,7 @@ It can be interpreted as a list of available functionalities that can be toggled
 structure is a map where the key is the EIP number in the octal representation, and the value is the custom EIP
 function that has to be evaluated.
 
-In **evmOS**, custom activators should be defined in a structure with the same data type, like in the example below:
+In **qubetics**, custom activators should be defined in a structure with the same data type, like in the example below:
 
 ```go
 // Activate custom EIPs: 0000, 0001, 0002, etc
@@ -115,8 +114,8 @@ example provided at the of the [Custom EIPs](#custom-eips) section.
 
 Custom EIPs defined in the `activators` map are not enabled by default. This type is only used to define the list of
 custom functionalities that can be activated. To specify which custom EIP activate, we should modify the
-**evmOS** `x/evm` module params. The parameter orchestrating enabled custom EIPs is the `DefaultExtraEIPs` and
-**evmOS** provide an easy and safe way to customize it.
+**qubetics** `x/evm` module params. The parameter orchestrating enabled custom EIPs is the `DefaultExtraEIPs` and
+**qubetics** provide an easy and safe way to customize it.
 
 To specify which activator enable in the chain, a new variable containing a slice of keys of the custom activators
 should be defined. An example is reported below:
@@ -148,7 +147,7 @@ Currently, only 2 customizations are possible:
 - `WithExtendedDefaultExtraEIPs`: extended the default active EIPs.
 
 It is important to notice that the configurator will only allow to append new entries to the default ones defined by
-**evmOS**. The reason behind this choice is to ensure the correct and safe execution of the virtual machine but still
+**qubetics**. The reason behind this choice is to ensure the correct and safe execution of the virtual machine but still
 allowing partners to customize their implementation.
 
 The `EVMConfigurator` type should be constructed using the builder pattern inside the `init()` function of the file so
