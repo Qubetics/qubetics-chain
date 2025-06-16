@@ -247,11 +247,11 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 
 
 	# Allocate genesis accounts (cosmos formatted addresses)
-	qubeticsd add-genesis-account "$(qubeticsd keys show "$VAL_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 100000000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	qubeticsd add-genesis-account "$(qubeticsd keys show "$USER1_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	qubeticsd add-genesis-account "$(qubeticsd keys show "$USER2_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	qubeticsd add-genesis-account "$(qubeticsd keys show "$USER3_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	qubeticsd add-genesis-account "$(qubeticsd keys show "$USER4_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	qubeticsd add-genesis-account "$(qubeticsd keys show "$VAL_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1067737016860000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER1_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER2_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER3_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER4_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
 
 	# Sign genesis transaction
 	qubeticsd gentx "$VAL_KEY" 1000000000000000000000tics --gas-prices ${BASEFEE}tics --keyring-backend "$KEYRING" --chain-id "$CHAINID" --home "$HOMEDIR"

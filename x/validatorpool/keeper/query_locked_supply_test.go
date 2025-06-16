@@ -17,7 +17,7 @@ func TestLockedSupplyQuery(t *testing.T) {
 	require.NotNil(t, moduleAcc)
 
 	// Set up initial balance for the module account
-	initialBalance := sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(1000)))
+	initialBalance := sdk.NewCoins(sdk.NewCoin("tics", sdk.NewInt(1000)))
 	mockBankKeeper.balances[moduleAcc.GetAddress().String()] = initialBalance
 
 	// Test case 1: Valid request

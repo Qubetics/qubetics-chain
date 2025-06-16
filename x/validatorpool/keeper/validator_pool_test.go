@@ -126,7 +126,7 @@ type MockStakingKeeper struct {
 
 func NewMockStakingKeeper() *MockStakingKeeper {
 	return &MockStakingKeeper{
-		bondDenom: "stake",
+		bondDenom: "tics",
 	}
 }
 
@@ -228,8 +228,8 @@ func setupTest(t *testing.T) (sdk.Context, *keeper.Keeper, *MockAccountKeeper, *
 	mockAccountKeeper.accounts["fee_collector"] = feeCollectorAcc
 	// Set up balances using address string as key
 	mockBankKeeper.ModuleAccountAddr = validatorPoolAcc.GetAddress().String()
-	mockBankKeeper.balances[validatorPoolAcc.GetAddress().String()] = sdk.NewCoins(sdk.NewCoin("stake", math.ZeroInt()))
-	mockBankKeeper.balances[feeCollectorAcc.GetAddress().String()] = sdk.NewCoins(sdk.NewCoin("stake", math.ZeroInt()))
+	mockBankKeeper.balances[validatorPoolAcc.GetAddress().String()] = sdk.NewCoins(sdk.NewCoin("tics", math.ZeroInt()))
+	mockBankKeeper.balances[feeCollectorAcc.GetAddress().String()] = sdk.NewCoins(sdk.NewCoin("tics", math.ZeroInt()))
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
@@ -245,7 +245,7 @@ func TestAddToPool(t *testing.T) {
 	amount := math.NewInt(1000)
 
 	// Set up initial balances
-	mockBankKeeper.balances[creator.String()] = sdk.NewCoins(sdk.NewCoin("stake", math.NewInt(2000)))
+	mockBankKeeper.balances[creator.String()] = sdk.NewCoins(sdk.NewCoin("tics", math.NewInt(2000)))
 
 	tests := []struct {
 		name          string
@@ -293,8 +293,8 @@ func TestAddToPool(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				// Verify balances after transfer
-				creatorBalance := mockBankKeeper.GetBalance(ctx, tt.creator, "stake")
-				poolBalance := mockBankKeeper.GetBalance(ctx, mockAccountKeeper.GetModuleAccount(ctx, types.ModuleName).GetAddress(), "stake")
+				creatorBalance := mockBankKeeper.GetBalance(ctx, tt.creator, "tics")
+				poolBalance := mockBankKeeper.GetBalance(ctx, mockAccountKeeper.GetModuleAccount(ctx, types.ModuleName).GetAddress(), "tics")
 				require.Equal(t, math.NewInt(2000).Sub(tt.amount), creatorBalance.Amount)
 				require.Equal(t, tt.amount, poolBalance.Amount)
 			}
@@ -308,9 +308,9 @@ func TestAllocateTokens(t *testing.T) {
 	// Set up initial pool balance
 	validatorPoolAcc := authtypes.NewEmptyModuleAccount(types.ModuleName)
 	feeCollectorAcc := authtypes.NewEmptyModuleAccount("fee_collector")
-	initialPoolBalance := sdk.NewCoin("stake", math.NewInt(1000000))
+	initialPoolBalance := sdk.NewCoin("tics", math.NewInt(1000000))
 	mockBankKeeper.balances[validatorPoolAcc.GetAddress().String()] = sdk.NewCoins(initialPoolBalance)
-	mockBankKeeper.balances[feeCollectorAcc.GetAddress().String()] = sdk.NewCoins(sdk.NewCoin("stake", math.ZeroInt()))
+	mockBankKeeper.balances[feeCollectorAcc.GetAddress().String()] = sdk.NewCoins(sdk.NewCoin("tics", math.ZeroInt()))
 
 	// Set up validators
 	val1 := stakingtypes.Validator{
@@ -335,14 +335,14 @@ func TestAllocateTokens(t *testing.T) {
 			setup: func() {
 				// Set up initial balances
 				mockBankKeeper.balances[types.ModuleName] = sdk.NewCoins(initialPoolBalance)
-				mockBankKeeper.balances["fee_collector"] = sdk.NewCoins(sdk.NewCoin("stake", math.ZeroInt()))
+				mockBankKeeper.balances["fee_collector"] = sdk.NewCoins(sdk.NewCoin("tics", math.ZeroInt()))
 			},
 			expectedError: false,
 		},
 		{
 			name: "empty pool balance",
 			setup: func() {
-				mockBankKeeper.balances[types.ModuleName] = sdk.NewCoins(sdk.NewCoin("stake", math.ZeroInt()))
+				mockBankKeeper.balances[types.ModuleName] = sdk.NewCoins(sdk.NewCoin("tics", math.ZeroInt()))
 			},
 			expectedError: false,
 		},

@@ -18,7 +18,7 @@ func TestMsgAddToPool_ValidateBasic(t *testing.T) {
 			name: "invalid creator address",
 			msg: MsgAddToPool{
 				Creator: "invalid_address",
-				Amount:  "1000000stake",
+				Amount:  "1000000tics",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		},
@@ -26,7 +26,7 @@ func TestMsgAddToPool_ValidateBasic(t *testing.T) {
 			name: "empty creator address",
 			msg: MsgAddToPool{
 				Creator: "",
-				Amount:  "1000000stake",
+				Amount:  "1000000tics",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		},
@@ -50,7 +50,7 @@ func TestMsgAddToPool_ValidateBasic(t *testing.T) {
 			name: "multiple coins not allowed",
 			msg: MsgAddToPool{
 				Creator: sample.AccAddress(),
-				Amount:  "1000000stake,2000000token",
+				Amount:  "1000000tics,2000000token",
 			},
 			err: sdkerrors.ErrInvalidRequest,
 		},
@@ -58,7 +58,7 @@ func TestMsgAddToPool_ValidateBasic(t *testing.T) {
 			name: "zero amount",
 			msg: MsgAddToPool{
 				Creator: sample.AccAddress(),
-				Amount:  "0stake",
+				Amount:  "0tics",
 			},
 			err: sdkerrors.ErrInvalidRequest,
 		},
@@ -66,7 +66,7 @@ func TestMsgAddToPool_ValidateBasic(t *testing.T) {
 			name: "negative amount",
 			msg: MsgAddToPool{
 				Creator: sample.AccAddress(),
-				Amount:  "-1000000stake",
+				Amount:  "-1000000tics",
 			},
 			err: sdkerrors.ErrInvalidRequest,
 		},
@@ -74,7 +74,7 @@ func TestMsgAddToPool_ValidateBasic(t *testing.T) {
 			name: "valid message",
 			msg: MsgAddToPool{
 				Creator: sample.AccAddress(),
-				Amount:  "1000000stake",
+				Amount:  "1000000tics",
 			},
 			err: nil,
 		},

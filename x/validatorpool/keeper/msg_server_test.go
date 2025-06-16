@@ -14,8 +14,8 @@ func setupMsgServer(t testing.TB) (types.MsgServer, context.Context) {
 	ctx, k, accountKeeper, bankKeeper, _, _ := setupTest(t.(*testing.T))
 
 	// Set up initial balance for the creator
-	creatorAddr := sdk.AccAddress([]byte("test-address-12345678901234567890"))
-	initialBalance := sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(10000000)))
+	creatorAddr := sdk.AccAddress([]byte("qubetics1cml96vmptgw99syqrrz8az79xer2pcgp8uve2v"))
+	initialBalance := sdk.NewCoins(sdk.NewCoin("tics", sdk.NewInt(10000000)))
 	bankKeeper.balances[creatorAddr.String()] = initialBalance
 
 	// Set up module account
@@ -31,7 +31,7 @@ func TestMsgServer_AddToPool(t *testing.T) {
 	require.NotNil(t, ctx)
 
 	// Create a valid test address
-	creatorAddr := sdk.AccAddress([]byte("test-address-12345678901234567890"))
+	creatorAddr := sdk.AccAddress([]byte("qubetics1cml96vmptgw99syqrrz8az79xer2pcgp8uve2v"))
 
 	tests := []struct {
 		name    string
@@ -42,7 +42,7 @@ func TestMsgServer_AddToPool(t *testing.T) {
 			name: "successful add to pool",
 			msg: &types.MsgAddToPool{
 				Creator: creatorAddr.String(),
-				Amount:  "1000000stake",
+				Amount:  "1000000tics",
 			},
 			wantErr: false,
 		},
@@ -50,7 +50,7 @@ func TestMsgServer_AddToPool(t *testing.T) {
 			name: "invalid creator address",
 			msg: &types.MsgAddToPool{
 				Creator: "invalid-address",
-				Amount:  "1000000stake",
+				Amount:  "1000000tics",
 			},
 			wantErr: true,
 		},
@@ -66,7 +66,7 @@ func TestMsgServer_AddToPool(t *testing.T) {
 			name: "multiple coins not allowed",
 			msg: &types.MsgAddToPool{
 				Creator: creatorAddr.String(),
-				Amount:  "1000000stake,2000000token",
+				Amount:  "1000000tics,2000000token",
 			},
 			wantErr: true,
 		},

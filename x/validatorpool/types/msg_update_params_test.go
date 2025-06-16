@@ -66,7 +66,7 @@ func TestMsgUpdateParams(t *testing.T) {
 }
 
 func TestNewMsgUpdateParams(t *testing.T) {
-	authority := "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"
+	authority := "qubetics1cml96vmptgw99syqrrz8az79xer2pcgp8uve2v"
 	params := Params{
 		// Add your params fields here
 	}
