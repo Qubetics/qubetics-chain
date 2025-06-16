@@ -81,20 +81,6 @@ qubeticsd init-genesis
 qubeticsd start
 ```
 
-## Documentation
-
-For more detailed documentation, please visit:
-- [Official Documentation](https://docs.shidoscan.com/)
-- [API Reference](https://swagger.shidoscan.com/swagger/#)
-
-## Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting pull requests.
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
 ## Security
 
 Please report security vulnerabilities to our security team at security@qubetics.io.
