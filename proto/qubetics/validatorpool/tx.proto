@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package qubetics.validatorpool;
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "qubetics/validatorpool/params.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+  rpc AddToPool(MsgAddToPool) returns (MsgAddToPoolResponse);
+  rpc UpdateParams (MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  
+}
+
+message MsgAddToPool {
+  string creator = 1;
+  string amount = 2;
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // params defines the x/validatorpool parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+message MsgAddToPoolResponse {}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+

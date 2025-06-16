@@ -13,7 +13,9 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+
+	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 var _ vm.PrecompiledContract = &Precompile{}

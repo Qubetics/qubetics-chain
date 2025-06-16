@@ -84,7 +84,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	sdkstaking "github.com/cosmos/cosmos-sdk/x/staking"
+
+	// sdkstaking "github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
@@ -156,14 +159,21 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/feemarket"
 	feemarketkeeper "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/keeper"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/staking"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+
+	// "github.com/qubetics/qubetics-blockchain/v2/x/staking"
+	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+	// "github.com/cosmos/cosmos-sdk/x/staking"
+	// 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	// 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	validatorpoolmodule "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool"
+	validatorpoolmodulekeeper "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/keeper"
+	validatorpoolmoduletypes "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vesting"
 	vestingclient "github.com/qubetics/qubetics-blockchain/v2/x/vesting/client"
 	vestingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vesting/keeper"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
 
-		
 	// NOTE: override ICS20 keeper to support IBC transfers of ERC20 tokens
 	"github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
@@ -208,7 +218,8 @@ var (
 		bank.AppModuleBasic{},
 		capability.AppModuleBasic{},
 		mint.AppModuleBasic{},
-		staking.AppModuleBasic{AppModuleBasic: &sdkstaking.AppModuleBasic{}},
+		staking.AppModuleBasic{},
+		// staking.AppModuleBasic{AppModuleBasic: &sdkstaking.AppModuleBasic{}},
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(
 			[]govclient.ProposalHandler{
@@ -236,21 +247,23 @@ var (
 		epochs.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		ratelimit.AppModuleBasic{},
+		validatorpoolmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
 	maccPerms = map[string][]string{
-		authtypes.FeeCollectorName:     {authtypes.Burner},
-		minttypes.ModuleName:           {authtypes.Minter},
-		distrtypes.ModuleName:          nil,
-		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		govtypes.ModuleName:            {authtypes.Burner},
-		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		icatypes.ModuleName:            nil,
-		evmtypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
-		erc20types.ModuleName:          {authtypes.Minter, authtypes.Burner},
-		ratelimittypes.ModuleName:      nil,
+		authtypes.FeeCollectorName:          {authtypes.Burner},
+		minttypes.ModuleName:                {authtypes.Minter},
+		distrtypes.ModuleName:               nil,
+		stakingtypes.BondedPoolName:         {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName:      {authtypes.Burner, authtypes.Staking},
+		govtypes.ModuleName:                 {authtypes.Burner},
+		ibctransfertypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
+		icatypes.ModuleName:                 nil,
+		evmtypes.ModuleName:                 {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
+		erc20types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+		ratelimittypes.ModuleName:           nil,
+		validatorpoolmoduletypes.ModuleName: {authtypes.Minter, authtypes.Burner, authtypes.Staking},
 	}
 )
 
@@ -301,6 +314,7 @@ type Qubetics struct {
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
+	ValidatorpoolKeeper  validatorpoolmodulekeeper.Keeper
 
 	// Ethermint keepers
 	EvmKeeper       *evmkeeper.Keeper
@@ -476,7 +490,19 @@ func NewQubetics(
 	govKeeper.SetLegacyRouter(govRouter)
 
 	// Qubetics Keeper
-
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	app.ValidatorpoolKeeper = *validatorpoolmodulekeeper.NewKeeper(
+		appCodec,
+		keys[validatorpoolmoduletypes.StoreKey],
+		keys[validatorpoolmoduletypes.MemStoreKey],
+		app.GetSubspace(validatorpoolmoduletypes.ModuleName),
+		authority.String(),
+		app.BankKeeper,
+		app.AccountKeeper,
+		stakingKeeper,
+		app.MintKeeper,
+		app.DistrKeeper,
+	)
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
 	// NOTE: Distr, Slashing and Claim must be created before calling the Hooks method to avoid returning a Keeper without its table generated
@@ -484,6 +510,7 @@ func NewQubetics(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
+			app.ValidatorpoolKeeper.Hooks(),
 		),
 	)
 
@@ -640,7 +667,8 @@ func NewQubetics(
 			app.GetSubspace(erc20types.ModuleName)),
 		// Qubetics app modules
 		epochs.NewAppModule(appCodec, app.EpochsKeeper),
-		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper.Keeper),
+		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
+		validatorpoolmodule.NewAppModule(appCodec, app.ValidatorpoolKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -676,6 +704,7 @@ func NewQubetics(
 		erc20types.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+		validatorpoolmoduletypes.ModuleName,
 	)
 
 	// NOTE: fee market module must go last in order to retrieve the block gas used.
@@ -707,6 +736,7 @@ func NewQubetics(
 		erc20types.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+		validatorpoolmoduletypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -744,6 +774,7 @@ func NewQubetics(
 		epochstypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+		validatorpoolmoduletypes.ModuleName,
 	)
 
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
@@ -1149,6 +1180,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(feemarkettypes.ModuleName).WithKeyTable(feemarkettypes.ParamKeyTable())
 	// qubetics subspaces
 	paramsKeeper.Subspace(erc20types.ModuleName)
+	paramsKeeper.Subspace(validatorpoolmoduletypes.ModuleName)
 	return paramsKeeper
 }
 

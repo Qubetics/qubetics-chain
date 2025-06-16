@@ -61,32 +61,36 @@ func (k *Keeper) EthereumTx(goCtx context.Context, msg *types.MsgEthereumTx) (*t
 				labels,
 			)
 
-			// Observe which users define a gas limit >> gas used. Note, that
-			// gas_limit and gas_used are always > 0
-			gasLimit := math.LegacyNewDec(int64(tx.Gas()))
-			gasRatio, err := gasLimit.QuoInt64(int64(response.GasUsed)).Float64()
+			// Corrected gas ratio: gas_used / gas_limit
+			gasUsed := math.LegacyNewDec(int64(response.GasUsed))
+			gasRatio, err := gasUsed.QuoInt64(int64(tx.Gas())).Float64()
 			if err == nil {
 				telemetry.SetGaugeWithLabels(
-					[]string{"tx", "msg", "ethereum_tx", "gas_limit", "per", "gas_used"},
+					[]string{"tx", "msg", "ethereum_tx", "gas_used", "per", "gas_limit"},
 					float32(gasRatio),
 					labels,
 				)
+
+				// Optionally, you can add a warning metric if the gas ratio is below a threshold.
+				if gasRatio < 0.1 {
+					telemetry.IncrCounterWithLabels(
+						[]string{"tx", "msg", "ethereum_tx", "warning", "low_gas_ratio"},
+						1,
+						labels,
+					)
+				}
 			}
 		}
 	}()
 
 	attrs := []sdk.Attribute{
 		sdk.NewAttribute(sdk.AttributeKeyAmount, tx.Value().String()),
-		// add event for ethereum transaction hash format
 		sdk.NewAttribute(types.AttributeKeyEthereumTxHash, response.Hash),
-		// add event for index of valid ethereum tx
 		sdk.NewAttribute(types.AttributeKeyTxIndex, strconv.FormatUint(txIndex, 10)),
-		// add event for eth tx gas used, we can't get it from cosmos tx result when it contains multiple eth tx msgs.
 		sdk.NewAttribute(types.AttributeKeyTxGasUsed, strconv.FormatUint(response.GasUsed, 10)),
 	}
 
 	if len(ctx.TxBytes()) > 0 {
-		// add event for tendermint transaction hash format
 		hash := tmbytes.HexBytes(tmtypes.Tx(ctx.TxBytes()).Hash())
 		attrs = append(attrs, sdk.NewAttribute(types.AttributeKeyTxHash, hash.String()))
 	}
@@ -108,7 +112,6 @@ func (k *Keeper) EthereumTx(goCtx context.Context, msg *types.MsgEthereumTx) (*t
 		txLogAttrs[i] = sdk.NewAttribute(types.AttributeKeyTxLog, string(value))
 	}
 
-	// emit events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeEthereumTx,

@@ -76,6 +76,6 @@ func (n *IntegrationNetwork) GetAuthzClient() authz.QueryClient {
 
 func (n *IntegrationNetwork) GetStakingClient() stakingtypes.QueryClient {
 	queryHelper := getQueryHelper(n.GetContext())
-	stakingtypes.RegisterQueryServer(queryHelper, stakingkeeper.Querier{Keeper: n.app.StakingKeeper.Keeper})
+	stakingtypes.RegisterQueryServer(queryHelper, stakingkeeper.Querier{Keeper: &n.app.StakingKeeper})
 	return stakingtypes.NewQueryClient(queryHelper)
 }

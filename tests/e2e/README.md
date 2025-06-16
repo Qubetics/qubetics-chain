@@ -8,12 +8,11 @@ as it allows for initializing multiple Qubetics chains with different versions.
 - [End-to-End Testing Suite](#end-to-end-testing-suite)
     - [Quick Start](#quick-start)
     - [Upgrade Process](#upgrade-process)
-    - [Test Suite Structure](#test-suite-structure)
-        - [`e2e` Package](#e2e-package)
-        - [`upgrade` Package](#upgrade-package)
-        - [Version retrieve](#version-retrieve)
-        - [Testing Results](#testing-results)
-    - [Running multiple upgrades](#running-multiple-upgrades)
+  - [Test Suite Structure](#test-suite-structure)
+    - [`e2e` Package](#e2e-package)
+    - [`upgrade` Package](#upgrade-package)
+    - [Testing Results](#testing-results)
+  - [Running multiple upgrades](#running-multiple-upgrades)
 
 ### Quick Start
 
@@ -121,21 +120,6 @@ through nodes `gov` module.
 
 * `node.go`: defines `Node` structure
 responsible for setting node container parameters before run.
-
-### Version retrieve
-
-If `INITIAL_VERSION` is provided as an argument,
-node container(s) with the corresponding version(s)
-will be pulled from [DockerHub](https://hub.docker.com/r/tharsishq/qubetics/tags).
-If it is not specified,
-the test suite retrieves the second-to-last upgrade version
-from the local codebase (in the `qubetics/app/upgrades` folder)
-according to [Semantic Versioning](https://semver.org/).
-
-If `TARGET_VERSION` is specified,
-the corresponding container will also be pulled from DockerHub.
-When not specified, the test suite will retrieve the latest upgrade version
-from `qubetics/app/upgrades`.
 
 ### Testing Results
 

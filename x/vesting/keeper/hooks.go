@@ -44,7 +44,7 @@ func (k Keeper) AfterProposalDeposit(ctx sdk.Context, proposalID uint64, _ sdk.A
 	if !found {
 		k.Logger(ctx).Error("proposal not found",
 			"proposalID", proposalID,
-			"hook", "AfterProposalSubmission",
+			"hook", "AfterProposalDeposit", // Corrected hook name
 		)
 		return
 	}
@@ -53,7 +53,7 @@ func (k Keeper) AfterProposalDeposit(ctx sdk.Context, proposalID uint64, _ sdk.A
 	if err != nil {
 		k.Logger(ctx).Error("failed to get clawback proposal",
 			"proposalID", proposalID,
-			"hook", "AfterProposalSubmission",
+			"hook", "AfterProposalDeposit", // Corrected hook name
 			"error", err,
 		)
 		return

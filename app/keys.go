@@ -26,6 +26,7 @@ import (
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
+	validatorpoolmoduletypes "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types"
 )
 
 // StoreKeys returns the application store keys,
@@ -53,6 +54,7 @@ func StoreKeys() (
 		// qubetics keys
 		erc20types.StoreKey,
 		epochstypes.StoreKey, vestingtypes.StoreKey,
+		validatorpoolmoduletypes.StoreKey,
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)

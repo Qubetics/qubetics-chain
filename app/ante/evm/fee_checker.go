@@ -80,9 +80,9 @@ func FeeChecker(
 	feeCap := fee.Quo(sdkmath.NewIntFromUint64(gas))
 	baseFeeInt := sdkmath.NewIntFromBigInt(baseFee)
 
-	if feeCap.LT(baseFeeInt) {
-		return nil, 0, errorsmod.Wrapf(errortypes.ErrInsufficientFee, "gas prices too low, got: %s%s required: %s%s. Please retry using a higher gas price or a higher fee", feeCap, denom, baseFeeInt, denom)
-	}
+	// if feeCap.LT(baseFeeInt) {
+	// 	return nil, 0, errorsmod.Wrapf(errortypes.ErrInsufficientFee, "gas prices too low, got: %s%s required: %s%s. Please retry using a higher gas price or a higher fee", feeCap, denom, baseFeeInt, denom)
+	// }
 
 	// calculate the effective gas price using the EIP-1559 logic.
 	effectivePrice := sdkmath.NewIntFromBigInt(types.EffectiveGasPrice(baseFeeInt.BigInt(), feeCap.BigInt(), maxPriorityPrice.BigInt()))

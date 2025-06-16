@@ -1,6 +1,3 @@
-// Copyright Tharsis Labs Ltd.(Qubetics)
-// SPDX-License-Identifier:LGPL-3.0-only
-
 package keeper
 
 import (

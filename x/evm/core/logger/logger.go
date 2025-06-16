@@ -107,13 +107,18 @@ type StructLogger struct {
 
 // NewStructLogger returns a new logger
 func NewStructLogger(cfg *Config) *StructLogger {
-	logger := &StructLogger{
-		storage: make(map[common.Address]Storage),
-	}
-	if cfg != nil {
-		logger.cfg = *cfg
-	}
-	return logger
+    // Create the StructLogger instance
+    logger := &StructLogger{
+        storage: make(map[common.Address]Storage),
+    }
+    
+    // Ensure cfg is not nil, providing a default if necessary
+    if cfg == nil {
+        cfg = &Config{} // Use default configuration
+    }
+    logger.cfg = *cfg
+    
+    return logger
 }
 
 // Reset clears the data held by the logger.

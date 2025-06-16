@@ -31,7 +31,16 @@ func CanTransfer(
 		)
 	}
 
-	// NOTE: pass in an empty coinbase address and nil tracer as we don't need them for the check below
+	//  QBA-12: Reject transactions with a negative value to prevent underflows or malformed behavior
+	if msg.Value().Sign() < 0 {
+		return errorsmod.Wrapf(
+			errortypes.ErrInvalidRequest,
+			"transaction value must be non-negative: %s",
+			msg.Value().String(),
+		)
+	}
+
+	// Setup EVM configuration
 	cfg := &statedb.EVMConfig{
 		ChainConfig: ethCfg,
 		Params:      params,
@@ -39,11 +48,11 @@ func CanTransfer(
 		BaseFee:     baseFee,
 	}
 
+	// Create a new stateDB instance for the transaction
 	stateDB := statedb.New(ctx, evmKeeper, statedb.NewEmptyTxConfig(common.BytesToHash(ctx.HeaderHash().Bytes())))
 	evm := evmKeeper.NewEVM(ctx, msg, cfg, evmtypes.NewNoOpTracer(), stateDB)
 
-	// check that caller has enough balance to cover asset transfer for **topmost** call
-	// NOTE: here the gas consumed is from the context with the infinite gas meter
+	// Check that the caller has enough balance to cover asset transfer for the topmost call
 	if msg.Value().Sign() > 0 && !evm.Context.CanTransfer(stateDB, msg.From(), msg.Value()) {
 		return errorsmod.Wrapf(
 			errortypes.ErrInsufficientFunds,

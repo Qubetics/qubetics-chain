@@ -10,8 +10,8 @@ const (
 	// NOTE: For upgrade tests we're using the PebbleDB build
 	LocalVersionTag = "latest-pebble"
 
-	// tharsisRepo is the docker hub repository that contains the Qubetics images pulled during tests
-	tharsisRepo = "tharsishq/qubetics"
+	// qubeticsRepo is the docker hub repository that contains the Qubetics images pulled during tests
+	qubeticsRepo = "qubetics/qubetics"
 
 	// upgradesPath is the relative path from this folder to the app/upgrades folder
 	upgradesPath = "../../../app/upgrades"

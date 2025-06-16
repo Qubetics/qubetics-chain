@@ -12,7 +12,9 @@ import (
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
-	stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+
+	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 // PrecompileAddress of the ICS-20 EVM extension in hex format.

@@ -18,7 +18,7 @@ ifdef GITHUB_TOKEN
 		DOCKER_ARGS += --secret id=GITHUB_TOKEN
 	endif
 endif
-NAMESPACE := tharsishq
+NAMESPACE := qubetics
 PROJECT := qubetics
 DOCKER_IMAGE := $(NAMESPACE)/$(PROJECT)
 COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)

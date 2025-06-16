@@ -249,7 +249,7 @@ var _ = Describe("Clawback Vesting Accounts", Ordered, func() {
 			Expect(spendablePost).To(Equal(spendablePre.Sub(accountGasCoverage...)))
 
 			// check delegation was created successfully
-			stkQuerier := stakingkeeper.Querier{Keeper: s.app.StakingKeeper.Keeper}
+			stkQuerier := stakingkeeper.Querier{Keeper: &s.app.StakingKeeper}
 			delRes, err := stkQuerier.DelegatorDelegations(s.ctx, &stakingtypes.QueryDelegatorDelegationsRequest{DelegatorAddr: testAccount.clawbackAccount.Address})
 			Expect(err).To(BeNil())
 			Expect(delRes.DelegationResponses).To(HaveLen(1))
@@ -1275,7 +1275,7 @@ var _ = Describe("Clawback Vesting Accounts - claw back tokens", func() {
 
 			// check delegation was not clawed back
 			queryHelper := baseapp.NewQueryServerTestHelper(s.ctx, s.app.InterfaceRegistry())
-			querier := stakingkeeper.Querier{Keeper: s.app.StakingKeeper.Keeper}
+			querier := stakingkeeper.Querier{Keeper: &s.app.StakingKeeper}
 			stakingtypes.RegisterQueryServer(queryHelper, querier)
 			qc := stakingtypes.NewQueryClient(queryHelper)
 			delRes, err := qc.Delegation(s.ctx, &stakingtypes.QueryDelegationRequest{DelegatorAddr: vestingAddr.String(), ValidatorAddr: s.validator.OperatorAddress})
@@ -1334,7 +1334,7 @@ var _ = Describe("Clawback Vesting Accounts - claw back tokens", func() {
 			Expect(balanceDest.Add(vesting[0]).Amount.Uint64()).To(Equal(bD.Amount.Uint64()))
 
 			// check delegated tokens were not clawed back
-			stkQuerier := stakingkeeper.Querier{Keeper: s.app.StakingKeeper.Keeper}
+			stkQuerier := stakingkeeper.Querier{Keeper: &s.app.StakingKeeper}
 			delRes, err := stkQuerier.DelegatorDelegations(s.ctx, &stakingtypes.QueryDelegatorDelegationsRequest{DelegatorAddr: vestingAddr.String()})
 			Expect(err).To(BeNil())
 			Expect(delRes.DelegationResponses).To(HaveLen(1))
@@ -1395,7 +1395,7 @@ var _ = Describe("Clawback Vesting Accounts - claw back tokens", func() {
 			Expect(balanceDest).To(Equal(bD))
 			Expect(balanceCommPool.Amount).To(Equal(bCP.Amount))
 			// check delegated tokens were not clawed back
-			stkQuerier := stakingkeeper.Querier{Keeper: s.app.StakingKeeper.Keeper}
+			stkQuerier := stakingkeeper.Querier{Keeper: &s.app.StakingKeeper}
 			delRes, err := stkQuerier.DelegatorDelegations(s.ctx, &stakingtypes.QueryDelegatorDelegationsRequest{DelegatorAddr: vestingAddr.String()})
 			Expect(err).To(BeNil())
 			Expect(delRes.DelegationResponses).To(HaveLen(1))
