@@ -21,8 +21,10 @@ import (
 	v3nodetypes "github.com/qubetics/qubetics-blockchain/v2/x/node/types/v3"
 	v1plantypes "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v1"
 	v2plantypes "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v2"
+	v3plantypes "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v3"
 	v1providertypes "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v1"
 	v2providertypes "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v2"
+	v3providertypes "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3"
 	v1sessiontypes "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v1"
 	v2sessiontypes "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v2"
 	v3sessiontypes "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v3"
@@ -78,6 +80,8 @@ func (amb AppModuleBasic) RegisterGRPCGatewayRoutes(ctx client.Context, mux *run
 	_ = v3nodetypes.RegisterQueryServiceHandlerClient(context.Background(), mux, v3nodetypes.NewQueryServiceClient(ctx))
 	_ = v3sessiontypes.RegisterQueryServiceHandlerClient(context.Background(), mux, v3sessiontypes.NewQueryServiceClient(ctx))
 	_ = v3subscriptiontypes.RegisterQueryServiceHandlerClient(context.Background(), mux, v3subscriptiontypes.NewQueryServiceClient(ctx))
+	_ = v3plantypes.RegisterQueryServiceHandlerClient(context.Background(), mux, v3plantypes.NewQueryServiceClient(ctx))
+	_ = v3providertypes.RegisterQueryServiceHandlerClient(context.Background(), mux, v3providertypes.NewQueryServiceClient(ctx))
 }
 
 func (amb AppModuleBasic) GetTxCmd() *cobra.Command { return cli.GetTxCmd() }
