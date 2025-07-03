@@ -204,10 +204,10 @@ func (k *Keeper) HandleMsgStartLease(ctx sdk.Context, msg *v1.MsgStartLeaseReque
 		return nil, types.NewErrorPriceNotFound(msg.Denom)
 	}
 
-	price, err = price.UpdateQuoteValue(ctx, k.QuotePriceFunc)
-	if err != nil {
-		return nil, err
-	}
+	// price, err = price.UpdateQuoteValue(ctx, k.QuotePriceFunc)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	leaseExists := false
 	k.IterateLeasesForNodeByProvider(ctx, nodeAddr, provAddr, func(_ int, _ v1.Lease) bool {

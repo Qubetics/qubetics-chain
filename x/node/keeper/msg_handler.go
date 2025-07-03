@@ -188,10 +188,10 @@ func (k *Keeper) HandleMsgStartSession(ctx sdk.Context, msg *v3.MsgStartSessionR
 		}
 	}
 
-	price, err = price.UpdateQuoteValue(ctx, k.QuotePriceFunc)
-	if err != nil {
-		return nil, err
-	}
+	// price, err = price.UpdateQuoteValue(ctx, k.QuotePriceFunc)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	accAddr, err := sdk.AccAddressFromBech32(msg.From)
 	if err != nil {
