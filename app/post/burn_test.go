@@ -159,6 +159,7 @@ func (s *PostTestSuite) TestPostHandle() {
 			burnDecorator := post.NewBurnDecorator(
 				authtypes.FeeCollectorName,
 				s.unitNetwork.App.BankKeeper,
+				s.unitNetwork.App.DistrKeeper,
 			)
 
 			// In the execution of the PostHandle method, simulate, success, and next have been

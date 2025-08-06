@@ -5,12 +5,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	distrKeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 )
 
 // HandlerOptions are the options required for constructing a PostHandler.
 type HandlerOptions struct {
 	FeeCollectorName string
 	BankKeeper       bankkeeper.Keeper
+	DistrKeeper      distrKeeper.Keeper
 }
 
 func (h HandlerOptions) Validate() error {
@@ -28,7 +30,7 @@ func (h HandlerOptions) Validate() error {
 // NewPostHandler returns a new PostHandler decorators chain.
 func NewPostHandler(ho HandlerOptions) sdk.PostHandler {
 	postDecorators := []sdk.PostDecorator{
-		NewBurnDecorator(ho.FeeCollectorName, ho.BankKeeper),
+		NewBurnDecorator(ho.FeeCollectorName, ho.BankKeeper, ho.DistrKeeper),
 	}
 
 	return sdk.ChainPostDecorators(postDecorators...)
