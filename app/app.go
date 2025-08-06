@@ -907,6 +907,7 @@ func (app *Qubetics) setPostHandler() {
 	options := post.HandlerOptions{
 		FeeCollectorName: authtypes.FeeCollectorName,
 		BankKeeper:       app.BankKeeper,
+		DistrKeeper:      app.DistrKeeper,
 	}
 
 	if err := options.Validate(); err != nil {
