@@ -135,6 +135,7 @@ import (
 	ethante "github.com/qubetics/qubetics-blockchain/v2/app/ante/evm"
 	"github.com/qubetics/qubetics-blockchain/v2/app/post"
 	v1 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v1"
+	v2 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v2"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
 	bankprecompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/bank"
@@ -1276,8 +1277,10 @@ func (app *Qubetics) setupUpgradeHandlers() {
 	var storeUpgrades *storetypes.StoreUpgrades
 
 	switch upgradeInfo.Name {
-	case v1.UpgradeName:
-
+	case v2.UpgradeName:
+		storeUpgrades = &storetypes.StoreUpgrades{
+			Added: []string{customminttypes.StoreKey,oracletypes.StoreKey,vpntypes.StoreKey},
+		}
 	default:
 		// no-op
 	}

@@ -59,7 +59,7 @@ func StoreKeys() (
 		erc20types.StoreKey,
 		epochstypes.StoreKey, vestingtypes.StoreKey,
 
-		// Sentinel Hub keys
+		// qubetics keys
 		customminttypes.StoreKey,
 		oracletypes.StoreKey,
 		vpntypes.StoreKey,

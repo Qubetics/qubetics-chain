@@ -71,7 +71,7 @@ func validateActiveDuration(v interface{}) error {
 	}
 
 	if value < 0 {
-		return fmt.Errorf("active_duration cannot be negative")
+		  return fmt.Errorf("active_duration cannot be negative")
 	}
 	if value == 0 {
 		return fmt.Errorf("active_duration cannot be zero")
