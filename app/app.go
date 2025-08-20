@@ -180,9 +180,7 @@ import (
 	custommint "github.com/qubetics/qubetics-blockchain/v2/x/mint"
 	custommintkeeper "github.com/qubetics/qubetics-blockchain/v2/x/mint/keeper"
 	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
-	oracle "github.com/qubetics/qubetics-blockchain/v2/x/oracle"
-	oraclekeeper "github.com/qubetics/qubetics-blockchain/v2/x/oracle/keeper"
-	oracletypes "github.com/qubetics/qubetics-blockchain/v2/x/oracle/types"
+	
 	vpn "github.com/qubetics/qubetics-blockchain/v2/x/vpn"
 	vpnkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vpn/keeper"
 	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
@@ -265,7 +263,6 @@ var (
 
 		// dvpn module basics
 		custommint.AppModuleBasic{},
-		oracle.AppModuleBasic{},
 		vpn.AppModuleBasic{},
 		validatorpoolmodule.AppModuleBasic{},
 	)
@@ -285,7 +282,6 @@ var (
 		ratelimittypes.ModuleName:      nil,
 		// dvpn module account permissions
 		customminttypes.ModuleName:          nil,
-		oracletypes.ModuleName:              nil,
 		deposittypes.ModuleName:             nil,
 		validatorpoolmoduletypes.ModuleName: {authtypes.Minter, authtypes.Burner, authtypes.Staking},
 	}
@@ -354,7 +350,6 @@ type Qubetics struct {
 
 	//dvpn keepers
 	CustomMintKeeper custommintkeeper.Keeper
-	OracleKeeper     oraclekeeper.Keeper
 	VPNKeeper        vpnkeeper.Keeper
 
 	// the module manager
@@ -449,8 +444,6 @@ func NewQubetics(
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
-	//dvpn keepers
-	app.ScopedOracleKeeper = app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -478,7 +471,7 @@ func NewQubetics(
 		stakingKeeper, authtypes.FeeCollectorName, authAddr,
 	)
 	app.VPNKeeper = vpnkeeper.NewKeeper(
-		appCodec, keys[vpntypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.DistrKeeper, &app.OracleKeeper,
+		appCodec, keys[vpntypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.DistrKeeper, 
 		app.MsgServiceRouter(), govModuleAddr, authtypes.FeeCollectorName,
 	)
 
@@ -514,10 +507,7 @@ func NewQubetics(
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec, keys[ibcexported.StoreKey], app.GetSubspace(ibcexported.ModuleName), stakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
-	app.OracleKeeper = oraclekeeper.NewKeeper(
-		appCodec, keys[oracletypes.StoreKey], app.ScopedOracleKeeper, app.IBCKeeper.ChannelKeeper, govModuleAddr,
-	)
-
+	
 	// register the proposal types
 	govRouter := govv1beta1.NewRouter()
 	govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
@@ -719,7 +709,6 @@ func NewQubetics(
 
 		// Sentinel Hub modules
 		custommint.NewAppModule(appCodec, app.CustomMintKeeper),
-		oracle.NewAppModule(appCodec, app.OracleKeeper),
 		vpn.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.VPNKeeper),
 		validatorpoolmodule.NewAppModule(appCodec, app.ValidatorpoolKeeper, app.AccountKeeper, app.BankKeeper),
 	)
@@ -760,7 +749,6 @@ func NewQubetics(
 		ratelimittypes.ModuleName,
 
 		// dvpn modules
-		oracletypes.ModuleName,
 		vpntypes.ModuleName,
 		validatorpoolmoduletypes.ModuleName,
 	)
@@ -797,7 +785,6 @@ func NewQubetics(
 
 		// Sentinel Hub modules
 		customminttypes.ModuleName,
-		oracletypes.ModuleName,
 		vpntypes.ModuleName,
 
 		validatorpoolmoduletypes.ModuleName,
@@ -841,7 +828,6 @@ func NewQubetics(
 
 		// Sentinel Hub modules
 		customminttypes.ModuleName,
-		oracletypes.ModuleName,
 		vpntypes.ModuleName,
 		validatorpoolmoduletypes.ModuleName,
 	)
@@ -1279,7 +1265,7 @@ func (app *Qubetics) setupUpgradeHandlers() {
 	switch upgradeInfo.Name {
 	case v2.UpgradeName:
 		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{customminttypes.StoreKey,oracletypes.StoreKey,vpntypes.StoreKey},
+			Added: []string{customminttypes.StoreKey,vpntypes.StoreKey},
 		}
 	default:
 		// no-op

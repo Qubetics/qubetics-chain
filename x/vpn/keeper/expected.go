@@ -21,6 +21,3 @@ type DistributionKeeper interface {
 	FundCommunityPool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error
 }
 
-type OracleKeeper interface {
-	GetQuotePrice(ctx sdk.Context, price sdk.DecCoin) (sdk.Coin, error)
-}

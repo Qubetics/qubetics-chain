@@ -108,11 +108,6 @@ func (k *Keeper) HandleMsgRenewLease(ctx sdk.Context, msg *v1.MsgRenewLeaseReque
 		return nil, types.NewErrorPriceNotFound(msg.Denom)
 	}
 
-	price, err = price.UpdateQuoteValue(ctx, k.QuotePriceFunc)
-	if err != nil {
-		return nil, err
-	}
-
 	if err := lease.ValidateRenewalPolicies(price); err != nil {
 		return nil, sdkerrors.Wrap(types.ErrInvalidRenewalPolicy, err.Error())
 	}

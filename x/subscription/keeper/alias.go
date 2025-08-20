@@ -35,9 +35,7 @@ func (k *Keeper) HasNodeForPlan(ctx sdk.Context, id uint64, addr base.NodeAddres
 	return k.node.HasNodeForPlan(ctx, id, addr)
 }
 
-func (k *Keeper) QuotePriceFunc(ctx sdk.Context, price sdk.DecCoin) (sdk.Coin, error) {
-	return k.oracle.GetQuotePrice(ctx, price)
-}
+
 
 func (k *Keeper) GetPlan(ctx sdk.Context, id uint64) (plantypes.Plan, bool) {
 	return k.plan.GetPlan(ctx, id)

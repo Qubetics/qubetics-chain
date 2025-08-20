@@ -26,7 +26,6 @@ import (
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
 	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
-	oracletypes "github.com/qubetics/qubetics-blockchain/v2/x/oracle/types"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
 	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
 
@@ -61,7 +60,6 @@ func StoreKeys() (
 
 		// qubetics keys
 		customminttypes.StoreKey,
-		oracletypes.StoreKey,
 		vpntypes.StoreKey,
 
 		validatorpoolmoduletypes.StoreKey,

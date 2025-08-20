@@ -22,7 +22,6 @@ type Keeper struct {
 
 	bank    BankKeeper
 	node    NodeKeeper
-	oracle  OracleKeeper
 	plan    PlanKeeper
 	session SessionKeeper
 }
@@ -45,9 +44,6 @@ func (k *Keeper) WithNodeKeeper(keeper NodeKeeper) {
 	k.node = keeper
 }
 
-func (k *Keeper) WithOracleKeeper(keeper OracleKeeper) {
-	k.oracle = keeper
-}
 
 func (k *Keeper) WithPlanKeeper(keeper PlanKeeper) {
 	k.plan = keeper

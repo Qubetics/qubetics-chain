@@ -34,9 +34,6 @@ type LeaseKeeper interface {
 	NodeInactivePreHook(ctx sdk.Context, addr base.NodeAddress) error
 }
 
-type OracleKeeper interface {
-	GetQuotePrice(ctx sdk.Context, price sdk.DecCoin) (sdk.Coin, error)
-}
 
 type SessionKeeper interface {
 	DeleteSession(ctx sdk.Context, id uint64)

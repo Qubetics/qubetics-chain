@@ -28,9 +28,6 @@ type NodeKeeper interface {
 	GetNode(ctx sdk.Context, addr base.NodeAddress) (nodetypes.Node, bool)
 }
 
-type OracleKeeper interface {
-	GetQuotePrice(ctx sdk.Context, price sdk.DecCoin) (sdk.Coin, error)
-}
 
 type PlanKeeper interface {
 	LeaseInactivePreHook(ctx sdk.Context, id uint64) error

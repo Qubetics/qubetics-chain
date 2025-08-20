@@ -380,8 +380,6 @@ github.com/cosmos/gogoproto v1.7.0 h1:79USr0oyXAbxg3rspGh/m4SWNyoz/GLaAh0QlCe2fr
 github.com/cosmos/gogoproto v1.7.0/go.mod h1:yWChEv5IUEYURQasfyBW5ffkMHR/90hiHgbNgrtp4j0=
 github.com/cosmos/iavl v0.21.0-alpha.1.0.20230904092046-df3db2d96583 h1:3Matt7/LjZiZkIBPalYazOZcw2B05Ch14dU5TJyqJEc=
 github.com/cosmos/iavl v0.21.0-alpha.1.0.20230904092046-df3db2d96583/go.mod h1:WO7FyvaZJoH65+HFOsDir7xU9FWk2w9cHXNW1XHcl7A=
-github.com/cosmos/ibc-apps/modules/async-icq/v7 v7.1.1 h1:02RCbih5lQ8aGdDMSvxhTnk5JDLEDitn17ytEE1Qhko=
-github.com/cosmos/ibc-apps/modules/async-icq/v7 v7.1.1/go.mod h1:LvVkEXTORVgd87W2Yu7ZY3acKKeTMq/txdTworn8EZI=
 github.com/cosmos/ibc-apps/modules/rate-limiting/v7 v7.0.0 h1:+j6/+Oge8wlRSTbqgh2EfSq4Bz6/ql4sB/2ZMpMXwPU=
 github.com/cosmos/ibc-apps/modules/rate-limiting/v7 v7.0.0/go.mod h1:FkPfcczYKy4QXGHbeuqAjTDwzs5nsdryy7+YmQ37wGI=
 github.com/cosmos/ibc-go/v7 v7.6.0 h1:S1G5hcIVe9go+jQV6F9+I9yy+hylbJeLiVHUmktQNrM=

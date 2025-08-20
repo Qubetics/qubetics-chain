@@ -23,7 +23,6 @@ type Keeper struct {
 	deposit      DepositKeeper
 	distribution DistributionKeeper
 	lease        LeaseKeeper
-	oracle       OracleKeeper
 	session      SessionKeeper
 }
 
@@ -49,9 +48,7 @@ func (k *Keeper) WithLeaseKeeper(keeper LeaseKeeper) {
 	k.lease = keeper
 }
 
-func (k *Keeper) WithOracleKeeper(keeper OracleKeeper) {
-	k.oracle = keeper
-}
+
 
 func (k *Keeper) WithSessionKeeper(keeper SessionKeeper) {
 	k.session = keeper
