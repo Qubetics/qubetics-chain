@@ -255,7 +255,7 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER4_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
 
 	# Sign genesis transaction
-	qubeticsd gentx "$VAL_KEY" 10000000000000000000000000tics --gas-prices ${BASEFEE}tics --keyring-backend "$KEYRING" --chain-id "$CHAINID" --home "$HOMEDIR"
+	qubeticsd gentx "$VAL_KEY" 26000000000000000000000tics --gas-prices ${BASEFEE}tics --keyring-backend "$KEYRING" --chain-id "$CHAINID" --home "$HOMEDIR"
 	## In case you want to create multiple validators at genesis
 	## 1. Back to `qubeticsd keys add` step, init more keys
 	## 2. Back to `qubeticsd add-genesis-account` step, add balance for those

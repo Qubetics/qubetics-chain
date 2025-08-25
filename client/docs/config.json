@@ -199,17 +199,6 @@
     },
     
     {
-      "url": "./tmp-swagger-gen/qubetics/oracle/v1/querier.swagger.json",
-      "operationIds": {
-        "rename": {
-          "QueryOracles": "OracleQueryOracles",
-          "QueryOracle": "OracleQueryOracle",
-          "QueryParams": "OracleQueryParams"
-        }
-      }
-    },
-    
-    {
       "url": "./tmp-swagger-gen/qubetics/plan/v3/querier.swagger.json",
       "operationIds": {
         "rename": {
