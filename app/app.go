@@ -135,6 +135,7 @@ import (
 	ethante "github.com/qubetics/qubetics-blockchain/v2/app/ante/evm"
 	"github.com/qubetics/qubetics-blockchain/v2/app/post"
 	v1 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v1"
+	v2 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v2"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
 	bankprecompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/bank"
@@ -173,6 +174,18 @@ import (
 	vestingclient "github.com/qubetics/qubetics-blockchain/v2/x/vesting/client"
 	vestingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vesting/keeper"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
+
+	//===============================vpn modules======================
+	deposittypes "github.com/qubetics/qubetics-blockchain/v2/x/deposit/types"
+	custommint "github.com/qubetics/qubetics-blockchain/v2/x/mint"
+	custommintkeeper "github.com/qubetics/qubetics-blockchain/v2/x/mint/keeper"
+	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
+	
+	vpn "github.com/qubetics/qubetics-blockchain/v2/x/vpn"
+	vpnkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vpn/keeper"
+	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
+
+	// Change this:
 
 	// NOTE: override ICS20 keeper to support IBC transfers of ERC20 tokens
 	"github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer"
@@ -247,22 +260,29 @@ var (
 		epochs.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		ratelimit.AppModuleBasic{},
+
+		// dvpn module basics
+		custommint.AppModuleBasic{},
+		vpn.AppModuleBasic{},
 		validatorpoolmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
 	maccPerms = map[string][]string{
-		authtypes.FeeCollectorName:          {authtypes.Burner},
-		minttypes.ModuleName:                {authtypes.Minter},
-		distrtypes.ModuleName:               nil,
-		stakingtypes.BondedPoolName:         {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName:      {authtypes.Burner, authtypes.Staking},
-		govtypes.ModuleName:                 {authtypes.Burner},
-		ibctransfertypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
-		icatypes.ModuleName:                 nil,
-		evmtypes.ModuleName:                 {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
-		erc20types.ModuleName:               {authtypes.Minter, authtypes.Burner},
-		ratelimittypes.ModuleName:           nil,
+		authtypes.FeeCollectorName:     {authtypes.Burner},
+		minttypes.ModuleName:           {authtypes.Minter},
+		distrtypes.ModuleName:          nil,
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		govtypes.ModuleName:            {authtypes.Burner},
+		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		icatypes.ModuleName:            nil,
+		evmtypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
+		erc20types.ModuleName:          {authtypes.Minter, authtypes.Burner},
+		ratelimittypes.ModuleName:      nil,
+		// dvpn module account permissions
+		customminttypes.ModuleName:          nil,
+		deposittypes.ModuleName:             nil,
 		validatorpoolmoduletypes.ModuleName: {authtypes.Minter, authtypes.Burner, authtypes.Staking},
 	}
 )
@@ -316,6 +336,9 @@ type Qubetics struct {
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ValidatorpoolKeeper  validatorpoolmodulekeeper.Keeper
 
+	// dvpn scoped keepers
+	ScopedOracleKeeper capabilitykeeper.ScopedKeeper
+
 	// Ethermint keepers
 	EvmKeeper       *evmkeeper.Keeper
 	FeeMarketKeeper feemarketkeeper.Keeper
@@ -324,6 +347,10 @@ type Qubetics struct {
 	Erc20Keeper   erc20keeper.Keeper
 	EpochsKeeper  epochskeeper.Keeper
 	VestingKeeper vestingkeeper.Keeper
+
+	//dvpn keepers
+	CustomMintKeeper custommintkeeper.Keeper
+	VPNKeeper        vpnkeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -398,6 +425,8 @@ func NewQubetics(
 		memKeys:           memKeys,
 	}
 
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+
 	// init params keeper and subspaces
 	app.ParamsKeeper = initParamsKeeper(appCodec, cdc, keys[paramstypes.StoreKey], tkeys[paramstypes.TStoreKey])
 
@@ -415,6 +444,7 @@ func NewQubetics(
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
+
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
 	app.CapabilityKeeper.Seal()
@@ -429,14 +459,22 @@ func NewQubetics(
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec, keys[banktypes.StoreKey], app.AccountKeeper, app.BlockedAddrs(), authAddr,
 	)
+
 	stakingKeeper := stakingkeeper.NewKeeper(
 		appCodec, keys[stakingtypes.StoreKey], app.AccountKeeper, app.BankKeeper, authAddr,
 	)
 	app.MintKeeper = mintkeeper.NewKeeper(appCodec, keys[minttypes.StoreKey], stakingKeeper, app.AccountKeeper, app.BankKeeper, authtypes.FeeCollectorName, authtypes.NewModuleAddress(govtypes.ModuleName).String())
+	app.CustomMintKeeper = custommintkeeper.NewKeeper(appCodec, keys[customminttypes.StoreKey], app.MintKeeper)
+
 	app.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec, keys[distrtypes.StoreKey], app.AccountKeeper, app.BankKeeper,
 		stakingKeeper, authtypes.FeeCollectorName, authAddr,
 	)
+	app.VPNKeeper = vpnkeeper.NewKeeper(
+		appCodec, keys[vpntypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.DistrKeeper, 
+		app.MsgServiceRouter(), govModuleAddr, authtypes.FeeCollectorName,
+	)
+
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec, app.LegacyAmino(), keys[slashingtypes.StoreKey], stakingKeeper, authAddr,
 	)
@@ -469,7 +507,7 @@ func NewQubetics(
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec, keys[ibcexported.StoreKey], app.GetSubspace(ibcexported.ModuleName), stakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
-
+	
 	// register the proposal types
 	govRouter := govv1beta1.NewRouter()
 	govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
@@ -668,6 +706,10 @@ func NewQubetics(
 		// Qubetics app modules
 		epochs.NewAppModule(appCodec, app.EpochsKeeper),
 		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
+
+		// Sentinel Hub modules
+		custommint.NewAppModule(appCodec, app.CustomMintKeeper),
+		vpn.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.VPNKeeper),
 		validatorpoolmodule.NewAppModule(appCodec, app.ValidatorpoolKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
@@ -684,6 +726,7 @@ func NewQubetics(
 		epochstypes.ModuleName,
 		feemarkettypes.ModuleName,
 		evmtypes.ModuleName,
+		customminttypes.ModuleName,
 		minttypes.ModuleName,
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
@@ -704,6 +747,9 @@ func NewQubetics(
 		erc20types.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+
+		// dvpn modules
+		vpntypes.ModuleName,
 		validatorpoolmoduletypes.ModuleName,
 	)
 
@@ -736,6 +782,11 @@ func NewQubetics(
 		erc20types.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+
+		// Sentinel Hub modules
+		customminttypes.ModuleName,
+		vpntypes.ModuleName,
+
 		validatorpoolmoduletypes.ModuleName,
 	)
 
@@ -774,6 +825,10 @@ func NewQubetics(
 		epochstypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		ratelimittypes.ModuleName,
+
+		// Sentinel Hub modules
+		customminttypes.ModuleName,
+		vpntypes.ModuleName,
 		validatorpoolmoduletypes.ModuleName,
 	)
 
@@ -1167,7 +1222,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(authtypes.ModuleName)
 	paramsKeeper.Subspace(banktypes.ModuleName)
 	paramsKeeper.Subspace(minttypes.ModuleName)
-	paramsKeeper.Subspace(stakingtypes.ModuleName)
+
 	paramsKeeper.Subspace(distrtypes.ModuleName)
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
 	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable()) //nolint: staticcheck
@@ -1209,8 +1264,10 @@ func (app *Qubetics) setupUpgradeHandlers() {
 	var storeUpgrades *storetypes.StoreUpgrades
 
 	switch upgradeInfo.Name {
-	case v1.UpgradeName:
-
+	case v2.UpgradeName:
+		storeUpgrades = &storetypes.StoreUpgrades{
+			Added: []string{customminttypes.StoreKey,vpntypes.StoreKey},
+		}
 	default:
 		// no-op
 	}

@@ -1,0 +1,35 @@
+syntax = "proto3";
+package qubetics.plan.v3;
+
+import "gogoproto/gogo.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message EventCreate {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  string prov_address = 2;
+  int64 gigabytes = 3;
+  int64 hours = 4;
+  string prices = 5;
+}
+
+message EventLinkNode {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  string prov_address = 2;
+  string node_address = 3;
+}
+
+message EventUnlinkNode {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  string prov_address = 2;
+  string node_address = 3;
+}
+
+message EventUpdate {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  string prov_address = 2;
+  qubetics.types.v1.Status status = 3;
+}

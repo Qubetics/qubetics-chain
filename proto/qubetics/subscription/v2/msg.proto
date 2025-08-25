@@ -1,0 +1,32 @@
+syntax = "proto3";
+package qubetics.subscription.v2;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types/v2";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message MsgAllocateRequest {
+  string from = 1;
+  uint64 id = 2 [(gogoproto.customname) = "ID"];
+  string address = 3;
+  string bytes = 4 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message MsgCancelRequest {
+  string from = 1;
+  uint64 id = 2 [(gogoproto.customname) = "ID"];
+}
+
+message MsgAllocateResponse {}
+
+message MsgCancelResponse {}
+
+service MsgService {
+  rpc MsgAllocate(MsgAllocateRequest) returns (MsgAllocateResponse);
+  rpc MsgCancel(MsgCancelRequest) returns (MsgCancelResponse);
+}

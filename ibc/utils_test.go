@@ -38,7 +38,7 @@ func TestGetTransferSenderRecipient(t *testing.T) {
 			name: "invalid sender",
 			data: transfertypes.FungibleTokenPacketData{
 				Sender:   "cosmos1",
-				Receiver: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+				Receiver: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 				Amount:   "123456",
 			},
 			expSender:    "",
@@ -60,33 +60,33 @@ func TestGetTransferSenderRecipient(t *testing.T) {
 			name: "valid - cosmos sender, qubetics recipient",
 			data: transfertypes.FungibleTokenPacketData{
 				Sender:   "cosmos1qql8ag4cluz6r4dz28p3w00dnc9w8ueulg2gmc",
-				Receiver: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+				Receiver: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 				Amount:   "123456",
 			},
-			expSender:    "qubetics1qql8ag4cluz6r4dz28p3w00dnc9w8ueu8jcj58",
-			expRecipient: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+			expSender:    "qubetics1pvpljz6tzyyg42c33vhtnvynsnfl6q38w6pyue",
+			expRecipient: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 			expError:     false,
 		},
 		{
 			name: "valid - qubetics sender, cosmos recipient",
 			data: transfertypes.FungibleTokenPacketData{
-				Sender:   "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+				Sender:   "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 				Receiver: "cosmos1qql8ag4cluz6r4dz28p3w00dnc9w8ueulg2gmc",
 				Amount:   "123456",
 			},
-			expSender:    "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
-			expRecipient: "qubetics1qql8ag4cluz6r4dz28p3w00dnc9w8ueu8jcj58",
+			expSender:    "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
+			expRecipient: "qubetics1pvpljz6tzyyg42c33vhtnvynsnfl6q38w6pyue",
 			expError:     false,
 		},
 		{
 			name: "valid - osmosis sender, qubetics recipient",
 			data: transfertypes.FungibleTokenPacketData{
 				Sender:   "osmo1qql8ag4cluz6r4dz28p3w00dnc9w8ueuhnecd2",
-				Receiver: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+				Receiver: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 				Amount:   "123456",
 			},
-			expSender:    "qubetics1qql8ag4cluz6r4dz28p3w00dnc9w8ueu8jcj58",
-			expRecipient: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+			expSender:    "qubetics1pvpljz6tzyyg42c33vhtnvynsnfl6q38w6pyue",
+			expRecipient: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 			expError:     false,
 		},
 	}
@@ -128,7 +128,7 @@ func TestGetTransferAmount(t *testing.T) {
 				Data: transfertypes.ModuleCdc.MustMarshalJSON(
 					&transfertypes.FungibleTokenPacketData{
 						Sender:   "cosmos1qql8ag4cluz6r4dz28p3w00dnc9w8ueulg2gmc",
-						Receiver: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+						Receiver: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 						Amount:   "",
 					},
 				),
@@ -142,7 +142,7 @@ func TestGetTransferAmount(t *testing.T) {
 				Data: transfertypes.ModuleCdc.MustMarshalJSON(
 					&transfertypes.FungibleTokenPacketData{
 						Sender:   "cosmos1qql8ag4cluz6r4dz28p3w00dnc9w8ueulg2gmc",
-						Receiver: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+						Receiver: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 						Amount:   "test",
 					},
 				),
@@ -156,7 +156,7 @@ func TestGetTransferAmount(t *testing.T) {
 				Data: transfertypes.ModuleCdc.MustMarshalJSON(
 					&transfertypes.FungibleTokenPacketData{
 						Sender:   "cosmos1qql8ag4cluz6r4dz28p3w00dnc9w8ueulg2gmc",
-						Receiver: "qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs",
+						Receiver: "qubetics16awr0rsqy72rgaydjv0fvuvzfdynshf62kkd8h",
 						Amount:   "10000",
 					},
 				),

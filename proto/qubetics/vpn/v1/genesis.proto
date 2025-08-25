@@ -1,0 +1,25 @@
+syntax = "proto3";
+package qubetics.vpn.v1;
+
+import "gogoproto/gogo.proto";
+import "qubetics/deposit/v1/genesis.proto";
+import "qubetics/lease/v1/genesis.proto";
+import "qubetics/node/v3/genesis.proto";
+import "qubetics/plan/v3/genesis.proto";
+import "qubetics/provider/v3/genesis.proto";
+import "qubetics/session/v3/genesis.proto";
+import "qubetics/subscription/v3/genesis.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types/v1";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message GenesisState {
+  qubetics.deposit.v1.GenesisState deposit = 1;
+  qubetics.lease.v1.GenesisState lease = 2;
+  qubetics.node.v3.GenesisState node = 3;
+  qubetics.plan.v3.GenesisState plan = 4;
+  qubetics.provider.v3.GenesisState provider = 5;
+  qubetics.session.v3.GenesisState session = 6;
+  qubetics.subscription.v3.GenesisState subscription = 7;
+}

@@ -1,0 +1,33 @@
+syntax = "proto3";
+package qubetics.subscription.v3;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "qubetics/types/v1/price.proto";
+import "qubetics/types/v1/renewal.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Subscription {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  string acc_address = 2;
+  uint64 plan_id = 3 [(gogoproto.customname) = "PlanID"];
+  qubetics.types.v1.Price price = 4 [(gogoproto.nullable) = false];
+  qubetics.types.v1.RenewalPricePolicy renewal_price_policy = 5;
+  qubetics.types.v1.Status status = 6;
+  google.protobuf.Timestamp inactive_at = 7 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  google.protobuf.Timestamp start_at = 8 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  google.protobuf.Timestamp status_at = 9 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+}

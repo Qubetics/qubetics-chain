@@ -1,0 +1,24 @@
+syntax = "proto3";
+package qubetics.plan.v3;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "qubetics/types/v1/price.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Plan {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  string prov_address = 2;
+  int64 gigabytes = 3;
+  int64 hours = 4;
+  repeated qubetics.types.v1.Price prices = 5 [(gogoproto.nullable) = false];
+  qubetics.types.v1.Status status = 6;
+  google.protobuf.Timestamp status_at = 7 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+}
