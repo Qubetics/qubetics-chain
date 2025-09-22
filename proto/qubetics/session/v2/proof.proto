@@ -1,0 +1,19 @@
+syntax = "proto3";
+package qubetics.session.v2;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "qubetics/types/v1/bandwidth.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v2";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Proof {
+  uint64 id = 1 [(gogoproto.customname) = "ID"];
+  qubetics.types.v1.Bandwidth bandwidth = 2 [(gogoproto.nullable) = false];
+  google.protobuf.Duration duration = 3 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = false
+  ];
+}

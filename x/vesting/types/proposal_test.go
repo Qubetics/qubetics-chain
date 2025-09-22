@@ -21,6 +21,9 @@ func (suite *ProposalTestSuite) TestKeysTypes() {
 }
 
 func (suite *ProposalTestSuite) TestClawbackProposal() {
+	// Valid address generated with valid checksum
+	validAddr := "qubetics1l3vfmfnlhmg0mylvf2kv9t9eap40fyqyvz235u"
+
 	testCases := []struct {
 		msg                string
 		title              string
@@ -29,42 +32,39 @@ func (suite *ProposalTestSuite) TestClawbackProposal() {
 		destinationAddress string
 		expectPass         bool
 	}{
-		// Valid tests
 		{
 			msg:         "Clawback proposal - valid address",
 			title:       "test",
 			description: "test desc",
-			address:     "qubetics1fx944mzagwdhx0wz7k9tfztc8g3lkfk6ectc0g",
+			address:     validAddr,
 			expectPass:  true,
 		},
-		// Invalid - Missing params
 		{
-			msg:         "Clawback proposal - invalid missing title ",
+			msg:         "Clawback proposal - invalid missing title",
 			title:       "",
 			description: "test desc",
-			address:     "qubetics1fx944mzagwdhx0wz7k9tfztc8g3lkfk6ectc0g",
+			address:     validAddr,
 			expectPass:  false,
 		},
 		{
-			msg:         "Clawback proposal - invalid missing description ",
+			msg:         "Clawback proposal - invalid missing description",
 			title:       "test",
 			description: "",
-			address:     "qubetics1fx944mzagwdhx0wz7k9tfztc8g3lkfk6ectc0g",
+			address:     validAddr,
 			expectPass:  false,
 		},
-		// Invalid address
 		{
-			msg:         "Clawback proposal - invalid address (no hex)",
+			msg:         "Clawback proposal - invalid address (bad format)",
 			title:       "test",
 			description: "test desc",
-			address:     "qubetics19y7d5jz7q0v86zw5m0300mhprpvu0ccc4x6ggg",
+			address:     "qubetics1invalidaddressxxxxxxxxxxxxxxxxxxxxxxxxxx",
 			expectPass:  false,
 		},
 		{
 			msg:                "Clawback proposal - invalid destination addr",
 			title:              "test",
 			description:        "test desc",
-			address:            "qubetics1fx944mzagwdhx0wz7k9tfztc8g3lkfk6ectc0g",
+			address:            validAddr,
 			destinationAddress: "125182ujaisch8hsgs",
 			expectPass:         false,
 		},
@@ -75,9 +75,9 @@ func (suite *ProposalTestSuite) TestClawbackProposal() {
 		err := tx.ValidateBasic()
 
 		if tc.expectPass {
-			suite.Require().NoError(err, "valid test %d failed: %s, %v", i, tc.msg)
+			suite.Require().NoError(err, "valid test %d failed: %s", i, tc.msg)
 		} else {
-			suite.Require().Error(err, "invalid test %d passed: %s, %v", i, tc.msg)
+			suite.Require().Error(err, "invalid test %d passed: %s", i, tc.msg)
 		}
 	}
 }

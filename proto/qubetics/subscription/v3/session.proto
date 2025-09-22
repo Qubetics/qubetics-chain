@@ -1,0 +1,14 @@
+syntax = "proto3";
+package qubetics.subscription.v3;
+
+import "gogoproto/gogo.proto";
+import "qubetics/session/v3/session.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Session {
+  qubetics.session.v3.BaseSession base_session = 1 [(gogoproto.embed) = true];
+  uint64 subscription_id = 2 [(gogoproto.customname) = "SubscriptionID"];
+}

@@ -25,7 +25,10 @@ import (
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
 	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
+	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
+
 	validatorpoolmoduletypes "github.com/qubetics/qubetics-blockchain/v2/x/validatorpool/types"
 )
 
@@ -54,6 +57,11 @@ func StoreKeys() (
 		// qubetics keys
 		erc20types.StoreKey,
 		epochstypes.StoreKey, vestingtypes.StoreKey,
+
+		// qubetics keys
+		customminttypes.StoreKey,
+		vpntypes.StoreKey,
+
 		validatorpoolmoduletypes.StoreKey,
 	}
 
