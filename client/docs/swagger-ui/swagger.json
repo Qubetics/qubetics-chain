@@ -18156,7 +18156,7 @@
     },
     "/qubetics/provider/v2/params": {
       "get": {
-        "operationId": "ProviderQueryParams",
+        "operationId": "QueryParams",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -18470,6 +18470,74 @@
             "type": "string"
           }
         ],
+        "tags": [
+          "QueryService"
+        ]
+      }
+    },
+    "/qubetics/provider/v3/params": {
+      "get": {
+        "operationId": "ProviderQueryParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "deposit": {
+                      "type": "object",
+                      "properties": {
+                        "denom": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "string"
+                        }
+                      },
+                      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type_url": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string",
+                        "format": "byte"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "tags": [
           "QueryService"
         ]
@@ -35657,6 +35725,45 @@
             }
           },
           "description": "PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }"
+        }
+      }
+    },
+    "qubetics.provider.v3.Params": {
+      "type": "object",
+      "properties": {
+        "deposit": {
+          "type": "object",
+          "properties": {
+            "denom": {
+              "type": "string"
+            },
+            "amount": {
+              "type": "string"
+            }
+          },
+          "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+        }
+      }
+    },
+    "qubetics.provider.v3.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "type": "object",
+          "properties": {
+            "deposit": {
+              "type": "object",
+              "properties": {
+                "denom": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "string"
+                }
+              },
+              "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+            }
+          }
         }
       }
     },

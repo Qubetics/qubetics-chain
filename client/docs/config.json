@@ -217,7 +217,14 @@
       "operationIds": {
         "rename": {
           "QueryProviders": "ProviderQueryProviders",
-          "QueryProvider": "ProviderQueryProvider",
+          "QueryProvider": "ProviderQueryProvider"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/qubetics/provider/v3/querier.swagger.json",
+      "operationIds": {
+        "rename": {
           "QueryParams": "ProviderQueryParams"
         }
       }

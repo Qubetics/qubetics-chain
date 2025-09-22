@@ -180,7 +180,7 @@ import (
 	custommint "github.com/qubetics/qubetics-blockchain/v2/x/mint"
 	custommintkeeper "github.com/qubetics/qubetics-blockchain/v2/x/mint/keeper"
 	customminttypes "github.com/qubetics/qubetics-blockchain/v2/x/mint/types"
-	
+
 	vpn "github.com/qubetics/qubetics-blockchain/v2/x/vpn"
 	vpnkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vpn/keeper"
 	vpntypes "github.com/qubetics/qubetics-blockchain/v2/x/vpn/types"
@@ -1266,7 +1266,7 @@ func (app *Qubetics) setupUpgradeHandlers() {
 	switch upgradeInfo.Name {
 	case v2.UpgradeName:
 		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{customminttypes.StoreKey,vpntypes.StoreKey},
+			Added: []string{customminttypes.StoreKey,vpntypes.StoreKey,validatorpoolmoduletypes.StoreKey},
 		}
 	default:
 		// no-op
