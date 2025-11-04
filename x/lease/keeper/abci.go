@@ -10,8 +10,39 @@ import (
 	v1 "github.com/qubetics/qubetics-blockchain/v2/x/lease/types/v1"
 )
 
+// Default per-category caps to bound work per block.
+const (
+	DefaultMaxLeaseRenewalsPerBlock  = 1000
+	DefaultMaxLeasePayoutsPerBlock   = 1000
+	DefaultMaxInactiveLeasesPerBlock = 1000
+)
+
+// MaxLeaseRenewalsPerBlock returns the maximum renewals to attempt per block.
+func (k *Keeper) MaxLeaseRenewalsPerBlock(ctx sdk.Context) int {
+	return DefaultMaxLeaseRenewalsPerBlock
+}
+
+// MaxLeasePayoutsPerBlock returns the maximum payouts to attempt per block.
+func (k *Keeper) MaxLeasePayoutsPerBlock(ctx sdk.Context) int { return DefaultMaxLeasePayoutsPerBlock }
+
+// MaxInactiveLeasesPerBlock returns the maximum inactive lease endings to attempt per block.
+func (k *Keeper) MaxInactiveLeasesPerBlock(ctx sdk.Context) int {
+	return DefaultMaxInactiveLeasesPerBlock
+}
+
+// shouldHaltForGas returns true if the block gas meter indicates we've exceeded the limit.
+func (k *Keeper) shouldHaltForGas(ctx sdk.Context) bool {
+	if ctx.BlockGasMeter() == nil {
+		return false
+	}
+	return ctx.BlockGasMeter().IsPastLimit()
+}
+
 // handleInactiveLeases processes all leases that have become inactive at the current block time.
 func (k *Keeper) handleInactiveLeases(ctx sdk.Context) {
+	limit := k.MaxInactiveLeasesPerBlock(ctx)
+	processed := 0
+
 	// Iterate through leases that have become inactive at the current block time
 	k.IterateLeasesForInactiveAt(ctx, ctx.BlockTime(), func(_ int, item v1.Lease) bool {
 		k.Logger(ctx).Info("Handling inactive lease", "id", item.ID)
@@ -36,12 +67,25 @@ func (k *Keeper) handleInactiveLeases(ctx sdk.Context) {
 
 		// Emit any events generated during the lease termination process
 		ctx.EventManager().EmitEvents(resp.GetEvents())
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Inactive lease processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Inactive lease processing halted due to block gas limit")
+			return true
+		}
 		return false
 	})
 }
 
 // handleLeasePayouts processes payouts for leases that are due at the current block time.
 func (k *Keeper) handleLeasePayouts(ctx sdk.Context) {
+	limit := k.MaxLeasePayoutsPerBlock(ctx)
+	processed := 0
+
 	// Get the staking share to calculate the reward portion
 	share := k.StakingShare(ctx)
 
@@ -106,12 +150,24 @@ func (k *Keeper) handleLeasePayouts(ctx sdk.Context) {
 			},
 		)
 
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Lease payout processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Lease payout processing halted due to block gas limit")
+			return true
+		}
 		return false
 	})
 }
 
 // handleLeaseRenewals processes lease renewals that are due at the current block time.
 func (k *Keeper) handleLeaseRenewals(ctx sdk.Context) {
+	limit := k.MaxLeaseRenewalsPerBlock(ctx)
+	processed := 0
+
 	// Iterate through leases that are due for renewal at the current block time
 	k.IterateLeasesForRenewalAt(ctx, ctx.BlockTime(), func(_ int, item v1.Lease) bool {
 		k.Logger(ctx).Info("Handling lease renewal", "id", item.ID)
@@ -145,6 +201,16 @@ func (k *Keeper) handleLeaseRenewals(ctx sdk.Context) {
 
 		// Emit any events generated during the lease renewal process
 		cc.EventManager().EmitEvents(resp.GetEvents())
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Lease renewal processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Lease renewal processing halted due to block gas limit")
+			return true
+		}
 		return false
 	})
 }

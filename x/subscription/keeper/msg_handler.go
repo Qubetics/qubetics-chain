@@ -205,33 +205,33 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 		k.SetSubscriptionForAccount(ctx, toAddr, subscription.ID)
 	}
 
-	grantedBytes := fromAlloc.GrantedBytes.Add(toAlloc.GrantedBytes)
-	utilisedBytes := fromAlloc.UtilisedBytes.Add(toAlloc.UtilisedBytes)
-	availableBytes := grantedBytes.Sub(utilisedBytes)
-
-	if msg.Bytes.GT(availableBytes) {
+	// Sender must have enough unutilised granted bytes to transfer
+	senderAvailable := fromAlloc.GrantedBytes.Sub(fromAlloc.UtilisedBytes)
+	if msg.Bytes.GT(senderAvailable) {
 		return nil, types.NewErrorInsufficientBytes(subscription.ID, msg.Bytes)
 	}
 
-	fromAlloc.GrantedBytes = availableBytes.Sub(msg.Bytes)
+	// Transfer strictly from sender to receiver
+	fromAlloc.GrantedBytes = fromAlloc.GrantedBytes.Sub(msg.Bytes)
 	if fromAlloc.GrantedBytes.LT(fromAlloc.UtilisedBytes) {
 		return nil, types.NewErrorInvalidAllocation(subscription.ID, fromAddr)
 	}
 
+	toAlloc.GrantedBytes = toAlloc.GrantedBytes.Add(msg.Bytes)
+	if toAlloc.GrantedBytes.LT(toAlloc.UtilisedBytes) {
+		return nil, types.NewErrorInvalidAllocation(subscription.ID, toAddr)
+	}
+
+	// Persist both allocations and emit events
 	k.SetAllocation(ctx, fromAlloc)
 	ctx.EventManager().EmitTypedEvent(
 		&v3.EventAllocate{
 			ID:            fromAlloc.ID,
 			AccAddress:    fromAlloc.Address,
 			GrantedBytes:  fromAlloc.GrantedBytes.String(),
-			UtilisedBytes: fromAlloc.GrantedBytes.String(),
+			UtilisedBytes: fromAlloc.UtilisedBytes.String(),
 		},
 	)
-
-	toAlloc.GrantedBytes = msg.Bytes
-	if toAlloc.GrantedBytes.LT(toAlloc.UtilisedBytes) {
-		return nil, types.NewErrorInvalidAllocation(subscription.ID, toAddr)
-	}
 
 	k.SetAllocation(ctx, toAlloc)
 	ctx.EventManager().EmitTypedEvent(
@@ -239,7 +239,7 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 			ID:            toAlloc.ID,
 			AccAddress:    toAlloc.Address,
 			GrantedBytes:  toAlloc.GrantedBytes.String(),
-			UtilisedBytes: toAlloc.GrantedBytes.String(),
+			UtilisedBytes: toAlloc.UtilisedBytes.String(),
 		},
 	)
 
