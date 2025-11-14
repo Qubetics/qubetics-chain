@@ -110,9 +110,22 @@ func (k Keeper) OnRecvPacket(
 	case !found && strings.HasPrefix(coin.Denom, "ibc/") && ibc.IsBaseDenomFromSourceChain(data.Denom):
 		tokenPair, err := k.RegisterERC20Extension(ctx, coin.Denom)
 		if err != nil {
-			return channeltypes.NewErrorAcknowledgement(err)
+			// return channeltypes.NewErrorAcknowledgement(err)
+			// LOG the error but DON'T fail the IBC transfer
+			ctx.Logger().Info(
+				"Failed to auto-register ERC20 token pair, IBC transfer succeeded but manual registration required",
+				"denom", coin.Denom,
+				"error", err.Error(),
+			)
+			// Return success ACK - tokens arrived, just not auto-converted
+			return ack
 		}
-
+		ctx.Logger().Info(
+			"auto-register ERC20 token pair successful",
+			"SourceChannel", packet.SourceChannel,
+			"Erc20Address", tokenPair.Erc20Address,
+			"denomination", tokenPair.Denom,
+		)
 		ctx.EventManager().EmitEvents(
 			sdk.Events{
 				sdk.NewEvent(

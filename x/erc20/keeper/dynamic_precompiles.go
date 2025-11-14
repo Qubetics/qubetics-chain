@@ -14,6 +14,7 @@ import (
 var WhitelistedChains = []string{
 	"trusted-chain-1", // Example trusted chain ID
 	"trusted-chain-2", // Another trusted chain ID
+	"qubetics_9087-1",
 }
 
 // RegisterERC20Extension creates and adds an ERC20 precompile interface for an IBC Coin.
