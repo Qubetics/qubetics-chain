@@ -24,11 +24,14 @@ var WhitelistedChains = []string{
 //
 // CONTRACT: This must ONLY be called if there is no existing token pair for the given denom.
 func (k Keeper) RegisterERC20Extension(ctx sdk.Context, denom string) (*types.TokenPair, error) {
+
+	// ------------------------------------Removed whitelisted check------------------------------------------------
 	// Check if the source chain is whitelisted
-	sourceChainID := ctx.ChainID() // Get the chain ID of the current chain
-	if !isChainWhitelisted(sourceChainID) {
-		return nil, fmt.Errorf("chain %s is not whitelisted for ERC20 precompile creation", sourceChainID)
-	}
+	// sourceChainID := ctx.ChainID() // Get the chain ID of the current chain
+	// if !isChainWhitelisted(sourceChainID) {
+	// 	return nil, fmt.Errorf("chain %s is not whitelisted for ERC20 precompile creation", sourceChainID)
+	// }
+	// -------------------------------------------------------------------------------------------------------------
 
 	pair, err := k.CreateNewTokenPair(ctx, denom)
 	if err != nil {
