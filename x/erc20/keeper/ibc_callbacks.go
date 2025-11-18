@@ -101,6 +101,12 @@ func (k Keeper) OnRecvPacket(
 
 	pairID := k.GetTokenPairID(ctx, coin.Denom)
 	pair, found := k.GetTokenPair(ctx, pairID)
+	ctx.Logger().Info(
+		"Token pair lookup result",
+		"pair_denom", pair.Denom,
+		"pair_erc20", pair.Erc20Address,
+		"found", found,
+	)
 	switch {
 	// Case 1. token pair is not registered and is a single hop IBC Coin
 	// by checking the prefix we ensure that only coins not native from this chain are evaluated.
