@@ -136,6 +136,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/app/post"
 	v1 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v1"
 	v2 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v2"
+	v2_1_0 "github.com/qubetics/qubetics-blockchain/v2/app/upgrades/v2_1_0"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
 	bankprecompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/bank"
@@ -444,7 +445,6 @@ func NewQubetics(
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
-
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
 	app.CapabilityKeeper.Seal()
@@ -471,7 +471,7 @@ func NewQubetics(
 		stakingKeeper, authtypes.FeeCollectorName, authAddr,
 	)
 	app.VPNKeeper = vpnkeeper.NewKeeper(
-		appCodec, keys[vpntypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.DistrKeeper, 
+		appCodec, keys[vpntypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.DistrKeeper,
 		app.MsgServiceRouter(), govModuleAddr, authtypes.FeeCollectorName,
 	)
 
@@ -507,7 +507,7 @@ func NewQubetics(
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec, keys[ibcexported.StoreKey], app.GetSubspace(ibcexported.ModuleName), stakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
-	
+
 	// register the proposal types
 	govRouter := govv1beta1.NewRouter()
 	govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
@@ -1248,6 +1248,12 @@ func (app *Qubetics) setupUpgradeHandlers() {
 			app.mm, app.configurator,
 		),
 	)
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v2_1_0.UpgradeName,
+		v2_1_0.CreateUpgradeHandler(
+			app.mm, app.configurator,
+		),
+	)
 
 	// When a planned update height is reached, the old binary will panic
 	// writing on disk the height and name of the update that triggered it
@@ -1266,7 +1272,7 @@ func (app *Qubetics) setupUpgradeHandlers() {
 	switch upgradeInfo.Name {
 	case v2.UpgradeName:
 		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{customminttypes.StoreKey,vpntypes.StoreKey,validatorpoolmoduletypes.StoreKey},
+			Added: []string{customminttypes.StoreKey, vpntypes.StoreKey, validatorpoolmoduletypes.StoreKey},
 		}
 	default:
 		// no-op
