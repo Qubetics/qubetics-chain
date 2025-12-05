@@ -18,11 +18,11 @@ func GetTxCommands() []*cobra.Command {
 		Short: "Provider module sub-commands",
 	}
 
-	// cmd.AddCommand(
-	// 	txRegisterProvider(),
-	// 	txUpdateProviderDetails(),
-	// 	txUpdateProviderStatus(),
-	// )
+	cmd.AddCommand(
+		txRegisterProvider(),
+		txUpdateProviderDetails(),
+		txUpdateProviderStatus(),
+	)
 
 	return []*cobra.Command{cmd}
 }

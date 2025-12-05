@@ -94,6 +94,12 @@ func (k *Keeper) SessionUpdatePreHook(ctx sdk.Context, id uint64, currBytes sdkm
 	diffBytes := currBytes.Sub(session.Bytes())
 	alloc.UtilisedBytes = alloc.UtilisedBytes.Add(diffBytes)
 
+	//=====================================================================
+	// Validate that utilised bytes do not exceed granted bytes
+	if alloc.UtilisedBytes.GT(alloc.GrantedBytes) {
+		return types.NewErrorInvalidAllocation(session.SubscriptionID, accAddr)
+	}
+
 	// Store the updated allocation in the keeper.
 	k.SetAllocation(ctx, alloc)
 

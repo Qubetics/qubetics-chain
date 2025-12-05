@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	base "github.com/qubetics/qubetics-blockchain/v2/types"
@@ -56,13 +54,18 @@ func (k *Keeper) handleInactiveLeases(ctx sdk.Context) {
 		// Get the appropriate handler for processing the message
 		handler := k.router.Handler(msg)
 		if handler == nil {
-			panic(fmt.Errorf("nil handler for message route: %s", sdk.MsgTypeURL(msg)))
+			// Log error instead of panicking to prevent chain halt
+			k.Logger(ctx).Error("Handler not found for end lease message", "id", item.ID, "type", sdk.MsgTypeURL(msg))
+			return false
 		}
 
 		// Execute the handler and process the lease termination request
 		resp, err := handler(ctx, msg)
 		if err != nil {
-			panic(err)
+			// Log error instead of panicking. The lease remains in InactiveAt queue
+			// and will be retried in the next block
+			k.Logger(ctx).Error("Failed to end inactive lease", "id", item.ID, "error", err.Error())
+			return false
 		}
 
 		// Emit any events generated during the lease termination process
@@ -96,12 +99,14 @@ func (k *Keeper) handleLeasePayouts(ctx sdk.Context) {
 		// Get node and provider addresses from Bech32 strings
 		nodeAddr, err := base.NodeAddressFromBech32(item.NodeAddress)
 		if err != nil {
-			panic(err)
+			k.Logger(ctx).Error("Failed to parse node address for lease payout", "id", item.ID, "error", err.Error())
+			return false
 		}
 
 		provAddr, err := base.ProvAddressFromBech32(item.ProvAddress)
 		if err != nil {
-			panic(err)
+			k.Logger(ctx).Error("Failed to parse provider address for lease payout", "id", item.ID, "error", err.Error())
+			return false
 		}
 
 		totalPayment := item.Price.QuotePrice()
@@ -109,13 +114,15 @@ func (k *Keeper) handleLeasePayouts(ctx sdk.Context) {
 		// Calculate the staking reward and send it to the module
 		reward := baseutils.GetProportionOfCoin(totalPayment, share)
 		if err := k.SendCoinFromDepositToModule(ctx, provAddr.Bytes(), k.feeCollectorName, reward); err != nil {
-			panic(err)
+			k.Logger(ctx).Error("Failed to send staking reward for lease payout", "id", item.ID, "error", err.Error())
+			return false
 		}
 
 		// Calculate the remaining payment and send it to the node address
 		payment := totalPayment.Sub(reward)
 		if err := k.SendCoinFromDepositToAccount(ctx, provAddr.Bytes(), nodeAddr.Bytes(), payment); err != nil {
-			panic(err)
+			k.Logger(ctx).Error("Failed to send node payment for lease payout", "id", item.ID, "error", err.Error())
+			return false
 		}
 
 		// Emit an event for the payment processing
@@ -183,7 +190,11 @@ func (k *Keeper) handleLeaseRenewals(ctx sdk.Context) {
 		// Get the appropriate handler for processing the renewal message
 		handler := k.router.Handler(msg)
 		if handler == nil {
-			panic(fmt.Errorf("nil handler for message route: %s", sdk.MsgTypeURL(msg)))
+			// Log error instead of panicking to prevent chain halt
+			k.Logger(ctx).Error("Handler not found for renew lease message", "id", item.ID, "type", sdk.MsgTypeURL(msg))
+			// Remove the renewal queue entry to prevent infinite retries
+			k.DeleteLeaseForRenewalAt(ctx, item.RenewalAt(), item.ID)
+			return false
 		}
 
 		// Create a cache context to prevent state changes until lease renewal is successful
@@ -192,7 +203,9 @@ func (k *Keeper) handleLeaseRenewals(ctx sdk.Context) {
 		// Execute the handler to process the lease renewal
 		resp, err := handler(cc, msg)
 		if err != nil {
-			k.Logger(cc).Error("Failed to handle lease renewal", "id", item.ID, "msg", err)
+			// On renewal failure, remove the queue entry to prevent infinite retries
+			k.Logger(ctx).Error("Failed to handle lease renewal", "id", item.ID, "error", err.Error())
+			k.DeleteLeaseForRenewalAt(ctx, item.RenewalAt(), item.ID)
 			return false
 		}
 

@@ -38,9 +38,6 @@ func (k *Keeper) GetSession(ctx sdk.Context, id uint64) (session v3.Session, fou
 	if err := k.cdc.UnmarshalInterface(value, &session); err != nil {
 		panic(err)
 	}
-	if err := k.UpdateMaxValues(ctx, session); err != nil {
-		panic(err)
-	}
 
 	return session, true
 }
@@ -65,9 +62,6 @@ func (k *Keeper) GetSessions(ctx sdk.Context) (items []v3.Session) {
 		if err := k.cdc.UnmarshalInterface(iterator.Value(), &item); err != nil {
 			panic(err)
 		}
-		if err := k.UpdateMaxValues(ctx, item); err != nil {
-			panic(err)
-		}
 
 		items = append(items, item)
 	}
@@ -88,9 +82,6 @@ func (k *Keeper) IterateSessions(ctx sdk.Context, fn func(index int, item v3.Ses
 		if err := k.cdc.UnmarshalInterface(iterator.Value(), &item); err != nil {
 			panic(err)
 		}
-		if err := k.UpdateMaxValues(ctx, item); err != nil {
-			panic(err)
-		}
 
 		if stop := fn(i, item); stop {
 			break
@@ -99,7 +90,6 @@ func (k *Keeper) IterateSessions(ctx sdk.Context, fn func(index int, item v3.Ses
 	}
 }
 
-// SetSessionForAccount links a session ID to an account address in the module's KVStore.
 func (k *Keeper) SetSessionForAccount(ctx sdk.Context, addr sdk.AccAddress, id uint64) {
 	store := k.Store(ctx)
 	key := types.SessionForAccountKey(addr, id)

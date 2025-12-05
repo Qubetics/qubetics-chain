@@ -41,7 +41,7 @@ func (m *MsgEndLeaseRequest) ValidateBasic() error {
 func (m *MsgEndLeaseRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -84,7 +84,7 @@ func (m *MsgRenewLeaseRequest) ValidateBasic() error {
 func (m *MsgRenewLeaseRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -134,7 +134,7 @@ func (m *MsgStartLeaseRequest) ValidateBasic() error {
 func (m *MsgStartLeaseRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -168,7 +168,7 @@ func (m *MsgUpdateLeaseRequest) ValidateBasic() error {
 func (m *MsgUpdateLeaseRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -198,7 +198,7 @@ func (m *MsgUpdateParamsRequest) ValidateBasic() error {
 func (m *MsgUpdateParamsRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}

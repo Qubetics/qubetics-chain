@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"github.com/spf13/pflag"
 )
@@ -16,7 +17,7 @@ func GetSignature(flags *pflag.FlagSet) ([]byte, error) {
 		return nil, err
 	}
 	if s == "" {
-		return nil, nil
+		return nil, fmt.Errorf("signature cannot be empty")
 	}
 
 	return base64.StdEncoding.DecodeString(s)

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	v1base "github.com/qubetics/qubetics-blockchain/v2/types/v1"
-	"github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3"
+	v3 "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3"
 )
 
 func txRegisterProvider() *cobra.Command {
@@ -117,6 +117,7 @@ func txUpdateProviderStatus() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-provider-status [status]",
 		Short: "Update the operational status of an existing provider",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, err := client.GetClientTxContext(cmd)
 			if err != nil {

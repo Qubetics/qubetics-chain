@@ -3,8 +3,6 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	v3 "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v3"
 )
 
 func (k *Keeper) SendCoinFromDepositToAccount(ctx sdk.Context, from, to sdk.AccAddress, coin sdk.Coin) error {
@@ -36,17 +34,6 @@ func (k *Keeper) SessionInactivePreHook(ctx sdk.Context, id uint64) error {
 
 func (k *Keeper) SessionUpdatePreHook(ctx sdk.Context, id uint64, currBytes sdkmath.Int) error {
 	if err := k.subscription.SessionUpdatePreHook(ctx, id, currBytes); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (k *Keeper) UpdateMaxValues(ctx sdk.Context, session v3.Session) error {
-	if err := k.node.UpdateSessionMaxValues(ctx, session); err != nil {
-		return err
-	}
-	if err := k.subscription.UpdateSessionMaxValues(ctx, session); err != nil {
 		return err
 	}
 

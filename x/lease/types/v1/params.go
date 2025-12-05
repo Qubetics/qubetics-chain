@@ -10,6 +10,9 @@ var (
 	DefaultMaxHours     int64 = 10
 	DefaultMinHours     int64 = 1
 	DefaultStakingShare       = sdkmath.LegacyNewDecWithPrec(1, 1)
+
+	// MaxAllowedHours is the maximum hours allowed for a lease
+	MaxAllowedHours int64 = 100000
 )
 
 func (m *Params) Validate() error {
@@ -21,6 +24,11 @@ func (m *Params) Validate() error {
 	}
 	if err := validateStakingShare(m.StakingShare); err != nil {
 		return err
+	}
+
+	// Validate relationship: MinHours must be <= MaxHours
+	if m.MinHours > m.MaxHours {
+		return fmt.Errorf("min_hours (%d) cannot be greater than max_hours (%d)", m.MinHours, m.MaxHours)
 	}
 
 	return nil
@@ -54,6 +62,9 @@ func validateMaxHours(v interface{}) error {
 	if value == 0 {
 		return fmt.Errorf("max_hours cannot be zero")
 	}
+	if value > MaxAllowedHours {
+		return fmt.Errorf("max_hours (%d) cannot exceed maximum allowed hours (%d)", value, MaxAllowedHours)
+	}
 
 	return nil
 }
@@ -69,6 +80,9 @@ func validateMinHours(v interface{}) error {
 	}
 	if value == 0 {
 		return fmt.Errorf("min_hours cannot be zero")
+	}
+	if value > MaxAllowedHours {
+		return fmt.Errorf("min_hours (%d) cannot exceed maximum allowed hours (%d)", value, MaxAllowedHours)
 	}
 
 	return nil

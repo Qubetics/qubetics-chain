@@ -59,7 +59,7 @@ func (m *MsgCreatePlanRequest) ValidateBasic() error {
 func (m *MsgCreatePlanRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -96,7 +96,7 @@ func (m *MsgLinkNodeRequest) ValidateBasic() error {
 func (m *MsgLinkNodeRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -133,7 +133,7 @@ func (m *MsgUnlinkNodeRequest) ValidateBasic() error {
 func (m *MsgUnlinkNodeRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -167,7 +167,7 @@ func (m *MsgUpdatePlanStatusRequest) ValidateBasic() error {
 func (m *MsgUpdatePlanStatusRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -214,7 +214,7 @@ func (m *MsgStartSessionRequest) ValidateBasic() error {
 func (m *MsgStartSessionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}

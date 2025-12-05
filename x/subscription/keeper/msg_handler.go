@@ -193,6 +193,11 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 		return nil, err
 	}
 
+	// Prevent self-sharing to avoid allocation inflation
+	if fromAddr.Equals(toAddr) {
+		return nil, types.NewErrorSelfShareNotAllowed(toAddr.String())
+	}
+
 	toAlloc, found := k.GetAllocation(ctx, subscription.ID, toAddr)
 	if !found {
 		toAlloc = v2.Allocation{
@@ -433,11 +438,14 @@ func (k *Keeper) HandleMsgStartSession(ctx sdk.Context, msg *v3.MsgStartSessionR
 			UploadBytes:   sdkmath.ZeroInt(),
 			MaxBytes:      sdkmath.ZeroInt(),
 			Duration:      0,
-			MaxDuration:   0,
-			Status:        v1base.StatusActive,
-			InactiveAt:    inactiveAt,
-			StartAt:       ctx.BlockTime(),
-			StatusAt:      ctx.BlockTime(),
+			// MaxDuration is reserved for future session duration enforcement based on subscription constraints.
+			// Currently initialized to zero; will be populated when UpdateSessionMaxValues implements duration limits.
+			// See x/session/types/v3/session.go for interface documentation.
+			MaxDuration: 0,
+			Status:      v1base.StatusActive,
+			InactiveAt:  inactiveAt,
+			StartAt:     ctx.BlockTime(),
+			StatusAt:    ctx.BlockTime(),
 		},
 		SubscriptionID: subscription.ID,
 	}

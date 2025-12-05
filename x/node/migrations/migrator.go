@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/qubetics/qubetics-blockchain/v2/types"
-	"github.com/qubetics/qubetics-blockchain/v2/types/v1"
+	v1 "github.com/qubetics/qubetics-blockchain/v2/types/v1"
 	v2 "github.com/qubetics/qubetics-blockchain/v2/x/node/types/v2"
 	v3 "github.com/qubetics/qubetics-blockchain/v2/x/node/types/v3"
 )
@@ -29,8 +29,8 @@ func (k *Migrator) Migrate(ctx sdk.Context) error {
 	k.setParams(ctx)
 	k.migrateNodes(ctx)
 
-	nodeForInactiveAtKeys := k.deleteKeys(ctx, []byte{0x11})
-	nodeForPlanKeys := k.deleteKeys(ctx, []byte{0x12})
+	nodeForPlanKeys := k.deleteKeys(ctx, []byte{0x11})
+	nodeForInactiveAtKeys := k.deleteKeys(ctx, []byte{0x12})
 
 	k.setNodeForPlanKeys(ctx, nodeForPlanKeys...)
 	k.setNodeForInactiveAtKeys(ctx, nodeForInactiveAtKeys...)
@@ -56,7 +56,7 @@ func (k *Migrator) deleteKeys(ctx sdk.Context, keyPrefix []byte) (keys [][]byte)
 func (k *Migrator) setParams(ctx sdk.Context) {
 	params := v3.Params{
 		ActiveDuration:    1 * time.Hour,
-		Deposit:           sdk.NewInt64Coin("udvpn", 0),
+		Deposit:           sdk.NewInt64Coin("tics", 0),
 		MinGigabytePrices: []v1.Price{}, // TODO: set min gigabyte prices
 		MinHourlyPrices:   []v1.Price{}, // TODO: set min hourly prices
 	}

@@ -30,8 +30,12 @@ func (m *Provider) Validate() error {
 		return fmt.Errorf("website length cannot be greater than %d chars", 64)
 	}
 	if m.Website != "" {
-		if _, err := url.ParseRequestURI(m.Website); err != nil {
+		parsedURL, err := url.ParseRequestURI(m.Website)
+		if err != nil {
 			return sdkerrors.Wrapf(err, "invalid website %s", m.Website)
+		}
+		if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+			return fmt.Errorf("website scheme must be http or https, got %s", parsedURL.Scheme)
 		}
 	}
 	if len(m.Description) > 256 {

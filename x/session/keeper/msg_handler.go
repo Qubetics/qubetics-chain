@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"log"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	v1base "github.com/qubetics/qubetics-blockchain/v2/types/v1"
@@ -76,6 +78,15 @@ func (k *Keeper) HandleMsgUpdateSession(ctx sdk.Context, msg *v3.MsgUpdateSessio
 		return nil, types.NewErrorInvalidDuration(msg.Duration)
 	}
 
+	// Validate against upper bounds (MaxBytes and MaxDuration)
+	newBytes := msg.DownloadBytes.Add(msg.UploadBytes)
+	if !session.GetMaxBytes().IsZero() && newBytes.GT(session.GetMaxBytes()) {
+		return nil, types.NewErrorInvalidDownloadBytes(msg.DownloadBytes)
+	}
+	if session.GetMaxDuration() > 0 && msg.Duration > session.GetMaxDuration() {
+		return nil, types.NewErrorInvalidDuration(msg.Duration)
+	}
+
 	if ok := k.ProofVerificationEnabled(ctx); ok {
 		accAddr, err := sdk.AccAddressFromBech32(session.GetAccAddress())
 		if err != nil {
@@ -85,6 +96,9 @@ func (k *Keeper) HandleMsgUpdateSession(ctx sdk.Context, msg *v3.MsgUpdateSessio
 		if err := k.VerifySignature(ctx, accAddr, msg.Proof(), msg.Signature); err != nil {
 			return nil, types.NewErrorInvalidSignature(msg.Signature)
 		}
+	} else {
+		// WARN: Proof verification is disabled - session updates are not cryptographically verified
+		log.Printf("WARNING: ProofVerificationEnabled is disabled for session ID %d. Session updates from node %s are not verified.", msg.ID, msg.From)
 	}
 
 	if err := k.SessionUpdatePreHook(ctx, session.GetID(), msg.Bytes()); err != nil {

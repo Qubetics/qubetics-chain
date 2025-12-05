@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	base "github.com/qubetics/qubetics-blockchain/v2/types"
-	"github.com/qubetics/qubetics-blockchain/v2/types/v1"
+	v1 "github.com/qubetics/qubetics-blockchain/v2/types/v1"
 	"github.com/qubetics/qubetics-blockchain/v2/x/node/types"
 	v2 "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v2"
 	v3 "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v3"
@@ -32,7 +32,7 @@ func NewMigrator(cdc codec.BinaryCodec, node NodeKeeper, plan PlanKeeper) Migrat
 func (k *Migrator) Migrate(ctx sdk.Context) error {
 	k.migratePlans(ctx)
 
-	planForProviderKeys := k.deleteKeys(ctx, []byte{0x11})
+	planForProviderKeys := k.deleteKeys(ctx, []byte{0x12})
 
 	k.setPlanForNodeByProviderKeys(ctx)
 	k.setPlanForProviderKeys(ctx, planForProviderKeys...)

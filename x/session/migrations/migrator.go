@@ -57,7 +57,7 @@ func (k *Migrator) setParams(ctx sdk.Context) {
 		MinGigabytes:             1,
 		MaxHours:                 720,
 		MinHours:                 1,
-		ProofVerificationEnabled: false,
+		ProofVerificationEnabled: true,
 		StakingShare:             sdkmath.LegacyMustNewDecFromStr("0.2"),
 		StatusChangeDelay:        2 * time.Hour,
 	}

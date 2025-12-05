@@ -2,6 +2,8 @@ package v3
 
 import (
 	"fmt"
+
+	base "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 type (
@@ -33,6 +35,11 @@ func ValidateGenesis(state *GenesisState) error {
 		for _, addr := range item.Nodes {
 			if m[addr] {
 				return fmt.Errorf("found a duplicate node %s for the plan %d", addr, item.Plan.ID)
+			}
+
+			// Validate node address format
+			if _, err := base.NodeAddressFromBech32(addr); err != nil {
+				return fmt.Errorf("invalid node address format %s for plan %d: %w", addr, item.Plan.ID, err)
 			}
 
 			m[addr] = true

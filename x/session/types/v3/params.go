@@ -12,7 +12,7 @@ var (
 	DefaultMinGigabytes             int64 = 1
 	DefaultMaxHours                 int64 = 10
 	DefaultMinHours                 int64 = 1
-	DefaultProofVerificationEnabled       = false
+	DefaultProofVerificationEnabled       = true
 	DefaultStakingShare                   = math.LegacyNewDecWithPrec(1, 1)
 	DefaultStatusChangeDelay              = 1 * time.Minute
 )
