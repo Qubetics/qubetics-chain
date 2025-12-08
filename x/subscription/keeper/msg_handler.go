@@ -177,6 +177,9 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 	if msg.From != subscription.AccAddress {
 		return nil, types.NewErrorUnauthorized(msg.From)
 	}
+	if !subscription.Status.Equal(v1base.StatusActive) {
+		return nil, types.NewErrorInvalidSubscriptionStatus(subscription.ID, subscription.Status)
+	}
 
 	fromAddr, err := sdk.AccAddressFromBech32(msg.From)
 	if err != nil {

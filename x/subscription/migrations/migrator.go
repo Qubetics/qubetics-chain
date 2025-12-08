@@ -12,6 +12,7 @@ import (
 
 	"github.com/qubetics/qubetics-blockchain/v2/types"
 	v1base "github.com/qubetics/qubetics-blockchain/v2/types/v1"
+	subscriptiontypes "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types"
 	v2 "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types/v2"
 	v3 "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types/v3"
 )
@@ -42,19 +43,20 @@ func NewMigrator(
 func (k *Migrator) Migrate(ctx sdk.Context) error {
 	k.setParams(ctx)
 
-	_ = k.deleteKeys(ctx, []byte{0x11}) // SubscriptionForInactiveAtKeyPrefix
-	_ = k.deleteKeys(ctx, []byte{0x12}) // SubscriptionForAccountKeyPrefix
-	_ = k.deleteKeys(ctx, []byte{0x13}) // SubscriptionForNodeKeyPrefix
-	_ = k.deleteKeys(ctx, []byte{0x14}) // SubscriptionForPlanKeyPrefix
+	_ = k.deleteKeys(ctx, subscriptiontypes.SubscriptionForAccountKeyPrefix)    // SubscriptionForAccountKeyPrefix
+	_ = k.deleteKeys(ctx, subscriptiontypes.SubscriptionForPlanKeyPrefix)       // SubscriptionForPlanKeyPrefix
+	_ = k.deleteKeys(ctx, subscriptiontypes.SubscriptionForInactiveAtKeyPrefix) // SubscriptionForInactiveAtKeyPrefix
+	_ = k.deleteKeys(ctx, subscriptiontypes.SubscriptionForRenewalAtKeyPrefix)  // SubscriptionForRenewalAtKeyPrefix
 
-	_ = k.deleteKeys(ctx, []byte{0x31}) // PayoutForNextAtKeyPrefix
-	_ = k.deleteKeys(ctx, []byte{0x32}) // PayoutForAccountKeyPrefix
-	_ = k.deleteKeys(ctx, []byte{0x33}) // PayoutForNodeKeyPrefix
-	_ = k.deleteKeys(ctx, []byte{0x34}) // PayoutForAccountByNodeKeyPrefix
+	// Legacy payout keys (0x30-0x34) are deleted using hardcoded values as they don't exist in current types
+	_ = k.deleteKeys(ctx, []byte{0x31}) // PayoutForNextAtKeyPrefix (legacy)
+	_ = k.deleteKeys(ctx, []byte{0x32}) // PayoutForAccountKeyPrefix (legacy)
+	_ = k.deleteKeys(ctx, []byte{0x33}) // PayoutForNodeKeyPrefix (legacy)
+	_ = k.deleteKeys(ctx, []byte{0x34}) // PayoutForAccountByNodeKeyPrefix (legacy)
 
 	k.migrateSubscriptions(ctx)
 
-	_ = k.deleteKeys(ctx, []byte{0x30}) // PayoutKeyPrefix
+	_ = k.deleteKeys(ctx, []byte{0x30}) // PayoutKeyPrefix (legacy)
 
 	return nil
 }

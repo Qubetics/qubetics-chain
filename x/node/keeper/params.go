@@ -58,6 +58,9 @@ func (k *Keeper) IsValidGigabytePrices(ctx sdk.Context, prices v1base.Prices) bo
 	minPrices := k.MinGigabytePrices(ctx)
 	for _, price := range minPrices {
 		baseValue, quoteValue := prices.AmountOf(price.Denom)
+		// Zero values are allowed by design: nodes can opt out of gigabyte-based pricing (BaseValue=0)
+		// by not charging per GB. However, if a minimum is configured (BaseValue > 0),
+		// nodes must meet or exceed it. This prevents nodes from bypassing enforced minimums.
 		if !baseValue.IsZero() && baseValue.LT(price.BaseValue) {
 			return false
 		}
@@ -78,6 +81,9 @@ func (k *Keeper) IsValidHourlyPrices(ctx sdk.Context, prices v1base.Prices) bool
 	minPrices := k.MinHourlyPrices(ctx)
 	for _, price := range minPrices {
 		baseValue, quoteValue := prices.AmountOf(price.Denom)
+		// Zero values are allowed by design: nodes can opt out of hourly-based pricing (BaseValue=0)
+		// by not charging per hour. However, if a minimum is configured (BaseValue > 0),
+		// nodes must meet or exceed it. This prevents nodes from bypassing enforced minimums.
 		if !baseValue.IsZero() && baseValue.LT(price.BaseValue) {
 			return false
 		}
