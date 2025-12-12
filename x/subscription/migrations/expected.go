@@ -42,6 +42,7 @@ type SubscriptionKeeper interface {
 	IterateSubscriptions(ctx sdk.Context, fn func(index int, item v3.Subscription) (stop bool))
 	SetParams(ctx sdk.Context, params v3.Params)
 	SetSubscription(ctx sdk.Context, subscription v3.Subscription)
+	SetSubscriptionCount(ctx sdk.Context, count uint64)
 	SetSubscriptionForAccount(ctx sdk.Context, addr sdk.AccAddress, id uint64)
 	SetSubscriptionForInactiveAt(ctx sdk.Context, time time.Time, id uint64)
 	SetSubscriptionForPlan(ctx sdk.Context, planID, subscriptionID uint64)

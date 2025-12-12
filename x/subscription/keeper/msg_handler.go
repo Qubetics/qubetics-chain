@@ -400,6 +400,14 @@ func (k *Keeper) HandleMsgStartSession(ctx sdk.Context, msg *v3.MsgStartSessionR
 		return nil, types.NewErrorInvalidSubscriptionStatus(subscription.ID, subscription.Status)
 	}
 
+	plan, found := k.GetPlan(ctx, subscription.PlanID)
+	if !found {
+		return nil, types.NewErrorPlanNotFound(subscription.PlanID)
+	}
+	if !plan.Status.Equal(v1base.StatusActive) {
+		return nil, types.NewErrorInvalidPlanStatus(plan.ID, plan.Status)
+	}
+
 	nodeAddr, err := base.NodeAddressFromBech32(msg.NodeAddress)
 	if err != nil {
 		return nil, err
