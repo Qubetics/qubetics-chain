@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkquery "github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -14,6 +15,10 @@ import (
 var (
 	_ v1.QueryServiceServer = (*queryServer)(nil)
 )
+
+// maxDepositsPageLimit defines an upper bound for pagination limit to
+// prevent excessive memory/CPU/network usage on large queries.
+const maxDepositsPageLimit uint64 = 1000
 
 type queryServer struct {
 	keeper.Keeper
@@ -35,6 +40,14 @@ func (q *queryServer) QueryDeposit(c context.Context, req *v1.QueryDepositReques
 func (q *queryServer) QueryDeposits(c context.Context, req *v1.QueryDepositsRequest) (*v1.QueryDepositsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// Enforce a maximum page size to avoid resource exhaustion.
+	if req.Pagination == nil {
+		req.Pagination = &sdkquery.PageRequest{}
+	}
+	if req.Pagination.Limit == 0 || req.Pagination.Limit > maxDepositsPageLimit {
+		req.Pagination.Limit = maxDepositsPageLimit
 	}
 
 	ctx := sdk.UnwrapSDKContext(c)

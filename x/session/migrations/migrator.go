@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/qubetics/qubetics-blockchain/v2/x/session/types"
 	v3 "github.com/qubetics/qubetics-blockchain/v2/x/session/types/v3"
 )
 
@@ -26,12 +27,13 @@ func NewMigrator(cdc codec.BinaryCodec, session SessionKeeper) Migrator {
 func (k *Migrator) Migrate(ctx sdk.Context) error {
 	k.setParams(ctx)
 
-	_ = k.deleteKeys(ctx, []byte{0x10}) // sessionKeys
-	_ = k.deleteKeys(ctx, []byte{0x11}) // sessionForInactiveAtKeys
-	_ = k.deleteKeys(ctx, []byte{0x12}) // sessionForAccountKeys
-	_ = k.deleteKeys(ctx, []byte{0x13}) // sessionForNodeKeys
-	_ = k.deleteKeys(ctx, []byte{0x14}) // sessionForSubscriptionKeys
-	_ = k.deleteKeys(ctx, []byte{0x15}) // sessionForAllocationKeys
+	_ = k.deleteKeys(ctx, types.SessionKeyPrefix)                // sessionKeys
+	_ = k.deleteKeys(ctx, types.SessionForAccountKeyPrefix)      // sessionForAccountKeys
+	_ = k.deleteKeys(ctx, types.SessionForAllocationKeyPrefix)   // sessionForAllocationKeys
+	_ = k.deleteKeys(ctx, types.SessionForNodeKeyPrefix)         // sessionForNodeKeys
+	_ = k.deleteKeys(ctx, types.SessionForPlanKeyPrefix)         // sessionForPlanKeyPrefix
+	_ = k.deleteKeys(ctx, types.SessionForSubscriptionKeyPrefix) // sessionForSubscriptionKeys
+	_ = k.deleteKeys(ctx, types.SessionForInactiveAtKeyPrefix)   // sessionForInactiveAtKeys
 
 	return nil
 }
@@ -57,7 +59,7 @@ func (k *Migrator) setParams(ctx sdk.Context) {
 		MinGigabytes:             1,
 		MaxHours:                 720,
 		MinHours:                 1,
-		ProofVerificationEnabled: false,
+		ProofVerificationEnabled: true,
 		StakingShare:             sdkmath.LegacyMustNewDecFromStr("0.2"),
 		StatusChangeDelay:        2 * time.Hour,
 	}

@@ -48,8 +48,12 @@ func (m *MsgRegisterProviderRequest) ValidateBasic() error {
 		return sdkerrors.Wrapf(types.ErrInvalidMessage, "website length cannot be greater than %d chars", 64)
 	}
 	if m.Website != "" {
-		if _, err := url.ParseRequestURI(m.Website); err != nil {
+		parsedURL, err := url.ParseRequestURI(m.Website)
+		if err != nil {
 			return sdkerrors.Wrap(types.ErrInvalidMessage, err.Error())
+		}
+		if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+			return sdkerrors.Wrapf(types.ErrInvalidMessage, "website scheme must be http or https, got %s", parsedURL.Scheme)
 		}
 	}
 	if len(m.Description) > 256 {
@@ -62,7 +66,7 @@ func (m *MsgRegisterProviderRequest) ValidateBasic() error {
 func (m *MsgRegisterProviderRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -95,8 +99,12 @@ func (m *MsgUpdateProviderDetailsRequest) ValidateBasic() error {
 		return sdkerrors.Wrapf(types.ErrInvalidMessage, "website length cannot be greater than %d chars", 64)
 	}
 	if m.Website != "" {
-		if _, err := url.ParseRequestURI(m.Website); err != nil {
+		parsedURL, err := url.ParseRequestURI(m.Website)
+		if err != nil {
 			return sdkerrors.Wrap(types.ErrInvalidMessage, err.Error())
+		}
+		if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+			return sdkerrors.Wrapf(types.ErrInvalidMessage, "website scheme must be http or https, got %s", parsedURL.Scheme)
 		}
 	}
 	if len(m.Description) > 256 {
@@ -109,7 +117,7 @@ func (m *MsgUpdateProviderDetailsRequest) ValidateBasic() error {
 func (m *MsgUpdateProviderDetailsRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -139,7 +147,7 @@ func (m *MsgUpdateProviderStatusRequest) ValidateBasic() error {
 func (m *MsgUpdateProviderStatusRequest) GetSigners() []sdk.AccAddress {
 	from, err := base.ProvAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -169,7 +177,7 @@ func (m *MsgUpdateParamsRequest) ValidateBasic() error {
 func (m *MsgUpdateParamsRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}

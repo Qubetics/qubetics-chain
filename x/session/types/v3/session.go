@@ -21,6 +21,9 @@ type Session interface {
 	GetUploadBytes() sdkmath.Int
 	GetMaxBytes() sdkmath.Int
 	GetDuration() time.Duration
+	// GetMaxDuration returns the maximum allowable duration for the session.
+	// This field is reserved for future use in enforcing session duration limits based on subscription constraints.
+	// Currently initialized to zero but available for enhanced session management features.
 	GetMaxDuration() time.Duration
 	GetStatus() v1base.Status
 	GetInactiveAt() time.Time
@@ -34,6 +37,8 @@ type Session interface {
 	SetUploadBytes(v sdkmath.Int)
 	SetMaxBytes(v sdkmath.Int)
 	SetDuration(v time.Duration)
+	// SetMaxDuration sets the maximum allowable duration for the session.
+	// Reserved for future use in implementing session duration enforcement.
 	SetMaxDuration(v time.Duration)
 	SetStatus(v v1base.Status)
 	SetInactiveAt(v time.Time)
@@ -52,6 +57,10 @@ func (m *BaseSession) GetDownloadBytes() sdkmath.Int { return m.DownloadBytes }
 func (m *BaseSession) GetUploadBytes() sdkmath.Int   { return m.UploadBytes }
 func (m *BaseSession) GetMaxBytes() sdkmath.Int      { return m.MaxBytes }
 func (m *BaseSession) GetDuration() time.Duration    { return m.Duration }
+
+// GetMaxDuration returns the maximum allowable duration for the session.
+// Currently reserved for future session duration enforcement features.
+// See UpdateSessionMaxValues in subscription keeper for planned usage.
 func (m *BaseSession) GetMaxDuration() time.Duration { return m.MaxDuration }
 func (m *BaseSession) GetStatus() v1base.Status      { return m.Status }
 func (m *BaseSession) GetInactiveAt() time.Time      { return m.InactiveAt }
@@ -65,6 +74,10 @@ func (m *BaseSession) SetDownloadBytes(v sdkmath.Int) { m.DownloadBytes = v }
 func (m *BaseSession) SetUploadBytes(v sdkmath.Int)   { m.UploadBytes = v }
 func (m *BaseSession) SetMaxBytes(v sdkmath.Int)      { m.MaxBytes = v }
 func (m *BaseSession) SetDuration(v time.Duration)    { m.Duration = v }
+
+// SetMaxDuration sets the maximum allowable duration for the session.
+// Reserved for future session duration enforcement based on subscription constraints.
+// See UpdateSessionMaxValues in subscription keeper for planned implementation.
 func (m *BaseSession) SetMaxDuration(v time.Duration) { m.MaxDuration = v }
 func (m *BaseSession) SetStatus(v v1base.Status)      { m.Status = v }
 func (m *BaseSession) SetInactiveAt(v time.Time)      { m.InactiveAt = v }

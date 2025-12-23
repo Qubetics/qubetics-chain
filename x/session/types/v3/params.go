@@ -12,7 +12,7 @@ var (
 	DefaultMinGigabytes             int64 = 1
 	DefaultMaxHours                 int64 = 10
 	DefaultMinHours                 int64 = 1
-	DefaultProofVerificationEnabled       = false
+	DefaultProofVerificationEnabled       = true
 	DefaultStakingShare                   = math.LegacyNewDecWithPrec(1, 1)
 	DefaultStatusChangeDelay              = 1 * time.Minute
 )
@@ -29,6 +29,12 @@ func (m *Params) Validate() error {
 	}
 	if err := validateMinHours(m.MinHours); err != nil {
 		return err
+	}
+	if m.MinGigabytes > m.MaxGigabytes {
+		return fmt.Errorf("min_gigabytes (%d) cannot exceed max_gigabytes (%d)", m.MinGigabytes, m.MaxGigabytes)
+	}
+	if m.MinHours > m.MaxHours {
+		return fmt.Errorf("min_hours (%d) cannot exceed max_hours (%d)", m.MinHours, m.MaxHours)
 	}
 	if err := validateProofVerificationEnabled(m.ProofVerificationEnabled); err != nil {
 		return err

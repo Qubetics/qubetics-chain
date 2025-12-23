@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	v1base "github.com/qubetics/qubetics-blockchain/v2/types/v1"
@@ -10,8 +8,41 @@ import (
 	v3 "github.com/qubetics/qubetics-blockchain/v2/x/subscription/types/v3"
 )
 
+// Default per-category caps to bound work per block.
+const (
+	DefaultMaxInactivePendingSubscriptionsPerBlock = 1000
+	DefaultMaxInactiveSubscriptionsPerBlock        = 1000
+	DefaultMaxSubscriptionRenewalsPerBlock         = 1000
+)
+
+// MaxInactivePendingSubscriptionsPerBlock returns the maximum inactive pending subscriptions to process per block.
+func (k *Keeper) MaxInactivePendingSubscriptionsPerBlock(ctx sdk.Context) int {
+	return DefaultMaxInactivePendingSubscriptionsPerBlock
+}
+
+// MaxInactiveSubscriptionsPerBlock returns the maximum inactive subscriptions to process per block.
+func (k *Keeper) MaxInactiveSubscriptionsPerBlock(ctx sdk.Context) int {
+	return DefaultMaxInactiveSubscriptionsPerBlock
+}
+
+// MaxSubscriptionRenewalsPerBlock returns the maximum subscription renewals to process per block.
+func (k *Keeper) MaxSubscriptionRenewalsPerBlock(ctx sdk.Context) int {
+	return DefaultMaxSubscriptionRenewalsPerBlock
+}
+
+// shouldHaltForGas returns true if the block gas meter indicates we've exceeded the limit.
+func (k *Keeper) shouldHaltForGas(ctx sdk.Context) bool {
+	if ctx.BlockGasMeter() == nil {
+		return false
+	}
+	return ctx.BlockGasMeter().IsPastLimit()
+}
+
 // handleInactivePendingSubscriptions processes pending subscriptions that have become inactive.
 func (k *Keeper) handleInactivePendingSubscriptions(ctx sdk.Context) {
+	limit := k.MaxInactivePendingSubscriptionsPerBlock(ctx)
+	processed := 0
+
 	// Iterate through subscriptions that have become inactive at the current block time
 	k.IterateSubscriptionsForInactiveAt(ctx, ctx.BlockTime(), func(_ int, item v3.Subscription) bool {
 		// Skip the subscription if its status is not active
@@ -30,23 +61,41 @@ func (k *Keeper) handleInactivePendingSubscriptions(ctx sdk.Context) {
 		// Get the appropriate handler for processing the cancel subscription message
 		handler := k.router.Handler(msg)
 		if handler == nil {
-			panic(fmt.Errorf("nil handler for message route: %s", sdk.MsgTypeURL(msg)))
+			// Log error instead of panicking to prevent chain halt
+			k.Logger(ctx).Error("Handler not found for cancel subscription message", "id", item.ID, "type", sdk.MsgTypeURL(msg))
+			return false
 		}
 
 		// Execute the handler to process the cancel request
 		resp, err := handler(ctx, msg)
 		if err != nil {
-			panic(err)
+			// Log error instead of panicking. The subscription remains in InactivePending state
+			// and will be retried in the next block, or can be manually recovered by governance
+			k.Logger(ctx).Error("Failed to cancel inactive pending subscription", "id", item.ID, "error", err.Error())
+			return false
 		}
 
 		// Emit any events generated during the cancel process
 		ctx.EventManager().EmitEvents(resp.GetEvents())
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Inactive pending subscription processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Inactive pending subscription processing halted due to block gas limit")
+			return true
+		}
 		return false
 	})
 }
 
 // handleInactiveSubscriptions processes subscriptions that are in the inactive pending state.
 func (k *Keeper) handleInactiveSubscriptions(ctx sdk.Context) {
+	limit := k.MaxInactiveSubscriptionsPerBlock(ctx)
+	processed := 0
+
 	// Iterate through subscriptions that are inactive pending at the current block time
 	k.IterateSubscriptionsForInactiveAt(ctx, ctx.BlockTime(), func(_ int, item v3.Subscription) bool {
 		// Skip the subscription if its status is not inactive pending
@@ -64,7 +113,9 @@ func (k *Keeper) handleInactiveSubscriptions(ctx sdk.Context) {
 		k.IterateAllocationsForSubscription(ctx, item.ID, func(_ int, item v2.Allocation) bool {
 			accAddr, err := sdk.AccAddressFromBech32(item.Address)
 			if err != nil {
-				panic(err)
+				// Log error instead of panicking to prevent chain halt
+				k.Logger(ctx).Error("Failed to parse account address for allocation", "address", item.Address, "error", err.Error())
+				return false
 			}
 
 			// Delete allocation for the given subscription and account
@@ -87,12 +138,24 @@ func (k *Keeper) handleInactiveSubscriptions(ctx sdk.Context) {
 			},
 		)
 
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Inactive subscription processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Inactive subscription processing halted due to block gas limit")
+			return true
+		}
 		return false
 	})
 }
 
 // handleSubscriptionRenewals processes subscription renewals that are due at the current block time.
 func (k *Keeper) handleSubscriptionRenewals(ctx sdk.Context) {
+	limit := k.MaxSubscriptionRenewalsPerBlock(ctx)
+	processed := 0
+
 	// Iterate through subscriptions that are due for renewal at the current block time
 	k.IterateSubscriptionsForRenewalAt(ctx, ctx.BlockTime(), func(_ int, item v3.Subscription) bool {
 		k.Logger(ctx).Info("Handling subscription renewal", "id", item.ID)
@@ -107,7 +170,10 @@ func (k *Keeper) handleSubscriptionRenewals(ctx sdk.Context) {
 		// Get the appropriate handler for processing the renewal message
 		handler := k.router.Handler(msg)
 		if handler == nil {
-			panic(fmt.Errorf("nil handler for message route: %s", sdk.MsgTypeURL(msg)))
+			// Log error instead of panicking. Remove the renewal queue entry to prevent infinite retries
+			k.Logger(ctx).Error("Handler not found for renew subscription message", "id", item.ID, "type", sdk.MsgTypeURL(msg))
+			k.DeleteSubscriptionForRenewalAt(ctx, item.RenewalAt(), item.ID)
+			return false
 		}
 
 		// Create a cache context to prevent state changes until renewal is successful
@@ -116,7 +182,10 @@ func (k *Keeper) handleSubscriptionRenewals(ctx sdk.Context) {
 		// Execute the handler to process the subscription renewal
 		resp, err := handler(cc, msg)
 		if err != nil {
-			k.Logger(cc).Error("Failed to handle subscription renewal", "id", item.ID, "msg", err)
+			// On renewal failure, remove the queue entry to prevent infinite retries.
+			// The subscription will need manual intervention or can be renewed via explicit message.
+			k.Logger(ctx).Error("Failed to handle subscription renewal", "id", item.ID, "error", err.Error())
+			k.DeleteSubscriptionForRenewalAt(ctx, item.RenewalAt(), item.ID)
 			return false
 		}
 
@@ -125,6 +194,16 @@ func (k *Keeper) handleSubscriptionRenewals(ctx sdk.Context) {
 
 		// Emit any events generated during the renewal process
 		cc.EventManager().EmitEvents(resp.GetEvents())
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Subscription renewal processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Subscription renewal processing halted due to block gas limit")
+			return true
+		}
 		return false
 	})
 }

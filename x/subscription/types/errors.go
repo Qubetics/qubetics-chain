@@ -27,6 +27,7 @@ var (
 	ErrSessionNotFound           = sdkerrors.Register(ModuleName, 213, "session not found")
 	ErrSubscriptionNotFound      = sdkerrors.Register(ModuleName, 214, "subscription not found")
 	ErrUnauthorized              = sdkerrors.Register(ModuleName, 215, "unauthorized")
+	ErrSelfAllocationNotAllowed  = sdkerrors.Register(ModuleName, 216, "self-share not allowed")
 )
 
 // NewErrorAllocationNotFound returns an error indicating that the specified allocation does not exist.
@@ -97,4 +98,9 @@ func NewErrorSubscriptionNotFound(id uint64) error {
 // NewErrorUnauthorized returns an error indicating that the specified address is not authorized.
 func NewErrorUnauthorized(addr string) error {
 	return sdkerrors.Wrapf(ErrUnauthorized, "address %s is not authorized", addr)
+}
+
+// NewErrorSelfShareNotAllowed returns an error indicating that self-sharing is not allowed.
+func NewErrorSelfShareNotAllowed(addr string) error {
+	return sdkerrors.Wrapf(ErrSelfAllocationNotAllowed, "cannot share subscription to yourself: %s", addr)
 }

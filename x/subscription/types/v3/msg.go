@@ -44,7 +44,7 @@ func (m *MsgCancelSubscriptionRequest) ValidateBasic() error {
 func (m *MsgCancelSubscriptionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -80,7 +80,7 @@ func (m *MsgRenewSubscriptionRequest) ValidateBasic() error {
 func (m *MsgRenewSubscriptionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -124,7 +124,7 @@ func (m *MsgShareSubscriptionRequest) ValidateBasic() error {
 func (m *MsgShareSubscriptionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -164,7 +164,7 @@ func (m *MsgStartSubscriptionRequest) ValidateBasic() error {
 func (m *MsgStartSubscriptionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -198,7 +198,7 @@ func (m *MsgUpdateSubscriptionRequest) ValidateBasic() error {
 func (m *MsgUpdateSubscriptionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -235,7 +235,7 @@ func (m *MsgStartSessionRequest) ValidateBasic() error {
 func (m *MsgStartSessionRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}
@@ -265,7 +265,7 @@ func (m *MsgUpdateParamsRequest) ValidateBasic() error {
 func (m *MsgUpdateParamsRequest) GetSigners() []sdk.AccAddress {
 	from, err := sdk.AccAddressFromBech32(m.From)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return []sdk.AccAddress{from.Bytes()}

@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3"
+	v3 "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3"
 )
 
 type Migrator struct {
@@ -27,7 +27,7 @@ func (k *Migrator) Migrate(ctx sdk.Context) error {
 
 func (k *Migrator) setParams(ctx sdk.Context) {
 	params := v3.Params{
-		Deposit: sdk.NewInt64Coin("udvpn", 0),
+		Deposit: sdk.NewInt64Coin("tics", 0),
 	}
 
 	k.provider.SetParams(ctx, params)

@@ -177,6 +177,9 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 	if msg.From != subscription.AccAddress {
 		return nil, types.NewErrorUnauthorized(msg.From)
 	}
+	if !subscription.Status.Equal(v1base.StatusActive) {
+		return nil, types.NewErrorInvalidSubscriptionStatus(subscription.ID, subscription.Status)
+	}
 
 	fromAddr, err := sdk.AccAddressFromBech32(msg.From)
 	if err != nil {
@@ -193,6 +196,11 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 		return nil, err
 	}
 
+	// Prevent self-sharing to avoid allocation inflation
+	if fromAddr.Equals(toAddr) {
+		return nil, types.NewErrorSelfShareNotAllowed(toAddr.String())
+	}
+
 	toAlloc, found := k.GetAllocation(ctx, subscription.ID, toAddr)
 	if !found {
 		toAlloc = v2.Allocation{
@@ -205,33 +213,33 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 		k.SetSubscriptionForAccount(ctx, toAddr, subscription.ID)
 	}
 
-	grantedBytes := fromAlloc.GrantedBytes.Add(toAlloc.GrantedBytes)
-	utilisedBytes := fromAlloc.UtilisedBytes.Add(toAlloc.UtilisedBytes)
-	availableBytes := grantedBytes.Sub(utilisedBytes)
-
-	if msg.Bytes.GT(availableBytes) {
+	// Sender must have enough unutilised granted bytes to transfer
+	senderAvailable := fromAlloc.GrantedBytes.Sub(fromAlloc.UtilisedBytes)
+	if msg.Bytes.GT(senderAvailable) {
 		return nil, types.NewErrorInsufficientBytes(subscription.ID, msg.Bytes)
 	}
 
-	fromAlloc.GrantedBytes = availableBytes.Sub(msg.Bytes)
+	// Transfer strictly from sender to receiver
+	fromAlloc.GrantedBytes = fromAlloc.GrantedBytes.Sub(msg.Bytes)
 	if fromAlloc.GrantedBytes.LT(fromAlloc.UtilisedBytes) {
 		return nil, types.NewErrorInvalidAllocation(subscription.ID, fromAddr)
 	}
 
+	toAlloc.GrantedBytes = toAlloc.GrantedBytes.Add(msg.Bytes)
+	if toAlloc.GrantedBytes.LT(toAlloc.UtilisedBytes) {
+		return nil, types.NewErrorInvalidAllocation(subscription.ID, toAddr)
+	}
+
+	// Persist both allocations and emit events
 	k.SetAllocation(ctx, fromAlloc)
 	ctx.EventManager().EmitTypedEvent(
 		&v3.EventAllocate{
 			ID:            fromAlloc.ID,
 			AccAddress:    fromAlloc.Address,
 			GrantedBytes:  fromAlloc.GrantedBytes.String(),
-			UtilisedBytes: fromAlloc.GrantedBytes.String(),
+			UtilisedBytes: fromAlloc.UtilisedBytes.String(),
 		},
 	)
-
-	toAlloc.GrantedBytes = msg.Bytes
-	if toAlloc.GrantedBytes.LT(toAlloc.UtilisedBytes) {
-		return nil, types.NewErrorInvalidAllocation(subscription.ID, toAddr)
-	}
 
 	k.SetAllocation(ctx, toAlloc)
 	ctx.EventManager().EmitTypedEvent(
@@ -239,7 +247,7 @@ func (k *Keeper) HandleMsgShareSubscription(ctx sdk.Context, msg *v3.MsgShareSub
 			ID:            toAlloc.ID,
 			AccAddress:    toAlloc.Address,
 			GrantedBytes:  toAlloc.GrantedBytes.String(),
-			UtilisedBytes: toAlloc.GrantedBytes.String(),
+			UtilisedBytes: toAlloc.UtilisedBytes.String(),
 		},
 	)
 
@@ -433,11 +441,14 @@ func (k *Keeper) HandleMsgStartSession(ctx sdk.Context, msg *v3.MsgStartSessionR
 			UploadBytes:   sdkmath.ZeroInt(),
 			MaxBytes:      sdkmath.ZeroInt(),
 			Duration:      0,
-			MaxDuration:   0,
-			Status:        v1base.StatusActive,
-			InactiveAt:    inactiveAt,
-			StartAt:       ctx.BlockTime(),
-			StatusAt:      ctx.BlockTime(),
+			// MaxDuration is reserved for future session duration enforcement based on subscription constraints.
+			// Currently initialized to zero; will be populated when UpdateSessionMaxValues implements duration limits.
+			// See x/session/types/v3/session.go for interface documentation.
+			MaxDuration: 0,
+			Status:      v1base.StatusActive,
+			InactiveAt:  inactiveAt,
+			StartAt:     ctx.BlockTime(),
+			StatusAt:    ctx.BlockTime(),
 		},
 		SubscriptionID: subscription.ID,
 	}

@@ -7,6 +7,12 @@ import (
 )
 
 func (k *Keeper) InitGenesis(ctx sdk.Context, state *v3.GenesisState) {
+	// Restore all nodes from genesis state
+	for _, node := range state.Nodes {
+		k.SetNode(ctx, node)
+	}
+
+	// Restore parameters
 	k.SetParams(ctx, state.Params)
 }
 
