@@ -116,6 +116,12 @@ func (k *Keeper) HandleMsgRenewSubscription(ctx sdk.Context, msg *v3.MsgRenewSub
 		return nil, err
 	}
 
+	newStart := ctx.BlockTime()
+	// If the subscription is still active, extend from the existing end time
+	if subscription.InactiveAt.After(newStart) {
+		newStart = subscription.InactiveAt
+	}
+
 	subscription = v3.Subscription{
 		ID:                 subscription.ID,
 		AccAddress:         subscription.AccAddress,
@@ -123,7 +129,7 @@ func (k *Keeper) HandleMsgRenewSubscription(ctx sdk.Context, msg *v3.MsgRenewSub
 		Price:              price,
 		RenewalPricePolicy: subscription.RenewalPricePolicy,
 		Status:             v1base.StatusActive,
-		InactiveAt:         ctx.BlockTime().Add(plan.GetHours()),
+		InactiveAt:         newStart.Add(plan.GetHours()),
 		StartAt:            ctx.BlockTime(),
 		StatusAt:           ctx.BlockTime(),
 	}

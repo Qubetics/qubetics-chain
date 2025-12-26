@@ -157,7 +157,10 @@ func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
 	// TODO this is Tendermint-dependent
 	// ref https://github.com/cosmos/cosmos-sdk/issues/3095
 	if ctx.BlockHeight() > 1 {
-		am.keeper.AllocateTokens(ctx)
+		// am.keeper.AllocateTokens(ctx)
+		if err := am.keeper.AllocateTokens(ctx); err != nil {
+			ctx.Logger().Error("AllocateTokens failed", "error", err)
+		}
 	}
 
 }

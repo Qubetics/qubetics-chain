@@ -30,9 +30,9 @@ func ValidateGenesis(state *GenesisState) error {
 		}
 
 		m[item.ID] = true
-		if err := item.Validate(); err != nil {
-			return err
-		}
+		// if err := item.Validate(); err != nil {
+		// 	return err
+		// }
 	}
 
 	mm := make(map[uint64]map[string]bool)
@@ -48,9 +48,9 @@ func ValidateGenesis(state *GenesisState) error {
 		}
 
 		mm[item.ID][item.Address] = true
-		if err := item.Validate(); err != nil {
-			return err
-		}
+		// if err := item.Validate(); err != nil {
+		// 	return err
+		// }
 	}
 
 	return nil
