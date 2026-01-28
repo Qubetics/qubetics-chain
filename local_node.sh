@@ -14,6 +14,10 @@ HOMEDIR="/data/.tmp-qubeticsd"
 #TRACE="--trace"
 TRACE=""
 
+
+export DAEMON_NAME="qubeticsd"
+export DAEMON_HOME="/data/.tmp-qubeticsd"
+
 # feemarket params basefee
 BASEFEE=100000000000
 
@@ -275,10 +279,15 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 fi
 
 # Start the node
-qubeticsd start \
-	--metrics "$TRACE" \
-	--log_level $LOGLEVEL \
-	--minimum-gas-prices=0.0001tics \
-	--json-rpc.api eth,txpool,personal,net,debug,web3 \
-	--home "$HOMEDIR" \
-	--chain-id "$CHAINID"
+# qubeticsd start \
+# 	--metrics "$TRACE" \
+# 	--log_level $LOGLEVEL \
+# 	--minimum-gas-prices=0.0001tics \
+# 	--json-rpc.api eth,txpool,personal,net,debug,web3 \
+# 	--home "$HOMEDIR" \
+# 	--chain-id "$CHAINID"
+
+
+cosmovisor init $(which qubeticsd)
+
+cosmovisor run start --home /data/.tmp-qubeticsd

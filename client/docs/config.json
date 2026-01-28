@@ -168,6 +168,90 @@
       }
     },
     {
+      "url": "./tmp-swagger-gen/qubetics/deposit/v1/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QueryDeposits": "DepositQueryDeposits",
+          "QueryDeposit": "DepositQueryDeposit"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/qubetics/lease/v1/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QueryLeases": "LeaseQueryLeases",
+          "QueryLease": "LeaseQueryLease",
+          "QueryParams": "LeaseQueryParams"
+        }
+      }
+    },
+    
+    {
+      "url": "./tmp-swagger-gen/qubetics/node/v3/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QueryNodes": "NodeQueryNodes",
+          "QueryNode": "NodeQueryNode",
+          "QueryParams": "NodeQueryParams"
+        }
+      }
+    },
+    
+    {
+      "url": "./tmp-swagger-gen/qubetics/plan/v3/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QueryPlans": "PlanQueryPlans",
+          "QueryPlan": "PlanQueryPlan",
+          "QueryParams": "PlanQueryParams",
+          "QueryNodesForPlan": "PlanQueryNodesForPlan"
+
+
+        }
+      }
+    },
+    
+    {
+      "url": "./tmp-swagger-gen/qubetics/provider/v2/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QueryProviders": "ProviderQueryProviders",
+          "QueryProvider": "ProviderQueryProvider"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/qubetics/provider/v3/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QueryParams": "ProviderQueryParams"
+        }
+      }
+    },
+    
+    {
+      "url": "./tmp-swagger-gen/qubetics/session/v3/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QuerySessions": "SessionQuerySessions",
+          "QuerySession": "SessionQuerySession",
+          "QueryParams": "SessionQueryParams"
+        }
+      }
+    },
+    
+    {
+      "url": "./tmp-swagger-gen/qubetics/subscription/v3/querier.swagger.json",
+      "operationIds": {
+        "rename": {
+          "QuerySubscriptions": "SubscriptionQuerySubscriptions",
+          "QuerySubscription": "SubscriptionQuerySubscription",
+          "QueryParams": "SubscriptionQueryParams"
+        }
+      }
+    }, 
+    {
       "url": "./tmp-swagger-gen/cosmos/tx/v1beta1/service.swagger.json",
       "dereference": {
         "circular": "ignore"

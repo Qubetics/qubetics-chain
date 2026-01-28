@@ -1,0 +1,241 @@
+package keeper
+
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	base "github.com/qubetics/qubetics-blockchain/v2/types"
+	baseutils "github.com/qubetics/qubetics-blockchain/v2/utils"
+	v1 "github.com/qubetics/qubetics-blockchain/v2/x/lease/types/v1"
+)
+
+// Default per-category caps to bound work per block.
+const (
+	DefaultMaxLeaseRenewalsPerBlock  = 1000
+	DefaultMaxLeasePayoutsPerBlock   = 1000
+	DefaultMaxInactiveLeasesPerBlock = 1000
+)
+
+// MaxLeaseRenewalsPerBlock returns the maximum renewals to attempt per block.
+func (k *Keeper) MaxLeaseRenewalsPerBlock(ctx sdk.Context) int {
+	return DefaultMaxLeaseRenewalsPerBlock
+}
+
+// MaxLeasePayoutsPerBlock returns the maximum payouts to attempt per block.
+func (k *Keeper) MaxLeasePayoutsPerBlock(ctx sdk.Context) int { return DefaultMaxLeasePayoutsPerBlock }
+
+// MaxInactiveLeasesPerBlock returns the maximum inactive lease endings to attempt per block.
+func (k *Keeper) MaxInactiveLeasesPerBlock(ctx sdk.Context) int {
+	return DefaultMaxInactiveLeasesPerBlock
+}
+
+// shouldHaltForGas returns true if the block gas meter indicates we've exceeded the limit.
+func (k *Keeper) shouldHaltForGas(ctx sdk.Context) bool {
+	if ctx.BlockGasMeter() == nil {
+		return false
+	}
+	return ctx.BlockGasMeter().IsPastLimit()
+}
+
+// handleInactiveLeases processes all leases that have become inactive at the current block time.
+func (k *Keeper) handleInactiveLeases(ctx sdk.Context) {
+	limit := k.MaxInactiveLeasesPerBlock(ctx)
+	processed := 0
+
+	// Iterate through leases that have become inactive at the current block time
+	k.IterateLeasesForInactiveAt(ctx, ctx.BlockTime(), func(_ int, item v1.Lease) bool {
+		k.Logger(ctx).Info("Handling inactive lease", "id", item.ID)
+
+		// Create a message to end the lease
+		msg := &v1.MsgEndLeaseRequest{
+			From: item.ProvAddress,
+			ID:   item.ID,
+		}
+
+		// Get the appropriate handler for processing the message
+		handler := k.router.Handler(msg)
+		if handler == nil {
+			// Log error instead of panicking to prevent chain halt
+			k.Logger(ctx).Error("Handler not found for end lease message", "id", item.ID, "type", sdk.MsgTypeURL(msg))
+			return false
+		}
+
+		// Execute the handler and process the lease termination request
+		resp, err := handler(ctx, msg)
+		if err != nil {
+			// Log error instead of panicking. The lease remains in InactiveAt queue
+			// and will be retried in the next block
+			k.Logger(ctx).Error("Failed to end inactive lease", "id", item.ID, "error", err.Error())
+			return false
+		}
+
+		// Emit any events generated during the lease termination process
+		ctx.EventManager().EmitEvents(resp.GetEvents())
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Inactive lease processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Inactive lease processing halted due to block gas limit")
+			return true
+		}
+		return false
+	})
+}
+
+// handleLeasePayouts processes payouts for leases that are due at the current block time.
+func (k *Keeper) handleLeasePayouts(ctx sdk.Context) {
+	limit := k.MaxLeasePayoutsPerBlock(ctx)
+	processed := 0
+
+	// Get the staking share to calculate the reward portion
+	share := k.StakingShare(ctx)
+
+	// Iterate through leases that are due for payout at the current block time
+	k.IterateLeasesForPayoutAt(ctx, ctx.BlockTime(), func(_ int, item v1.Lease) bool {
+		k.Logger(ctx).Info("Handling lease payout", "id", item.ID)
+
+		// Get node and provider addresses from Bech32 strings
+		nodeAddr, err := base.NodeAddressFromBech32(item.NodeAddress)
+		if err != nil {
+			k.Logger(ctx).Error("Failed to parse node address for lease payout", "id", item.ID, "error", err.Error())
+			return false
+		}
+
+		provAddr, err := base.ProvAddressFromBech32(item.ProvAddress)
+		if err != nil {
+			k.Logger(ctx).Error("Failed to parse provider address for lease payout", "id", item.ID, "error", err.Error())
+			return false
+		}
+
+		totalPayment := item.Price.QuotePrice()
+
+		// Calculate the staking reward and send it to the module
+		reward := baseutils.GetProportionOfCoin(totalPayment, share)
+		if err := k.SendCoinFromDepositToModule(ctx, provAddr.Bytes(), k.feeCollectorName, reward); err != nil {
+			k.Logger(ctx).Error("Failed to send staking reward for lease payout", "id", item.ID, "error", err.Error())
+			return false
+		}
+
+		// Calculate the remaining payment and send it to the node address
+		payment := totalPayment.Sub(reward)
+		if err := k.SendCoinFromDepositToAccount(ctx, provAddr.Bytes(), nodeAddr.Bytes(), payment); err != nil {
+			k.Logger(ctx).Error("Failed to send node payment for lease payout", "id", item.ID, "error", err.Error())
+			return false
+		}
+
+		// Emit an event for the payment processing
+		ctx.EventManager().EmitTypedEvent(
+			&v1.EventPay{
+				ID:            item.ID,
+				NodeAddress:   item.NodeAddress,
+				ProvAddress:   item.ProvAddress,
+				Payment:       payment.String(),
+				StakingReward: reward.String(),
+			},
+		)
+
+		// Remove the lease from the payout queue as it has been processed
+		k.DeleteLeaseForPayoutAt(ctx, item.PayoutAt(), item.ID)
+
+		// Update lease hours
+		item.Hours = item.Hours + 1
+
+		// Update the lease in the store with new details
+		k.SetLease(ctx, item)
+		k.SetLeaseForPayoutAt(ctx, item.PayoutAt(), item.ID)
+
+		// Emit an event for the updated lease details
+		ctx.EventManager().EmitTypedEvent(
+			&v1.EventUpdate{
+				ID:          item.ID,
+				NodeAddress: item.NodeAddress,
+				ProvAddress: item.ProvAddress,
+				Hours:       item.Hours,
+				PayoutAt:    item.PayoutAt().String(),
+			},
+		)
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Lease payout processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Lease payout processing halted due to block gas limit")
+			return true
+		}
+		return false
+	})
+}
+
+// handleLeaseRenewals processes lease renewals that are due at the current block time.
+func (k *Keeper) handleLeaseRenewals(ctx sdk.Context) {
+	limit := k.MaxLeaseRenewalsPerBlock(ctx)
+	processed := 0
+
+	// Iterate through leases that are due for renewal at the current block time
+	k.IterateLeasesForRenewalAt(ctx, ctx.BlockTime(), func(_ int, item v1.Lease) bool {
+		k.Logger(ctx).Info("Handling lease renewal", "id", item.ID)
+
+		// Create a message to renew the lease
+		msg := &v1.MsgRenewLeaseRequest{
+			From:  item.ProvAddress,
+			ID:    item.ID,
+			Hours: item.MaxHours,
+			Denom: item.Price.Denom,
+		}
+
+		// Get the appropriate handler for processing the renewal message
+		handler := k.router.Handler(msg)
+		if handler == nil {
+			// Log error instead of panicking to prevent chain halt
+			k.Logger(ctx).Error("Handler not found for renew lease message", "id", item.ID, "type", sdk.MsgTypeURL(msg))
+			// Remove the renewal queue entry to prevent infinite retries
+			k.DeleteLeaseForRenewalAt(ctx, item.RenewalAt(), item.ID)
+			return false
+		}
+
+		// Create a cache context to prevent state changes until lease renewal is successful
+		cc, write := ctx.CacheContext()
+
+		// Execute the handler to process the lease renewal
+		resp, err := handler(cc, msg)
+		if err != nil {
+			// On renewal failure, remove the queue entry to prevent infinite retries
+			k.Logger(ctx).Error("Failed to handle lease renewal", "id", item.ID, "error", err.Error())
+			k.DeleteLeaseForRenewalAt(ctx, item.RenewalAt(), item.ID)
+			return false
+		}
+
+		// If the renewal is successful, commit the changes to the main context
+		defer write()
+
+		// Emit any events generated during the lease renewal process
+		cc.EventManager().EmitEvents(resp.GetEvents())
+
+		processed++
+		if processed >= limit {
+			k.Logger(ctx).Info("Lease renewal processing limit reached", "processed", processed)
+			return true
+		}
+		if k.shouldHaltForGas(ctx) {
+			k.Logger(ctx).Info("Lease renewal processing halted due to block gas limit")
+			return true
+		}
+		return false
+	})
+}
+
+// BeginBlock is called at the beginning of each block to handle lease-related operations.
+func (k *Keeper) BeginBlock(ctx sdk.Context) {
+	// Handle lease renewals at the beginning of each block
+	k.handleLeaseRenewals(ctx)
+
+	// Handle lease payouts at the beginning of each block
+	k.handleLeasePayouts(ctx)
+
+	// Handle leases that have become inactive at the beginning of each block
+	k.handleInactiveLeases(ctx)
+}

@@ -1,0 +1,4 @@
+syntax = "proto3";
+package qubetics.plan.v1;
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/plan/types/v1";

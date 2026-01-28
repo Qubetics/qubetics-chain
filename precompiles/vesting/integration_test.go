@@ -563,7 +563,7 @@ var _ = Describe("Interacting with the vesting extension", func() {
 					Expect(vestAccFinalBal.Amount).To(Equal(expVestAccFinalBal))
 
 					// check that funder balance is reduced by the fees paid, the amt to fund the vesting account,
-					// but also got the funds sent from the contract (when corresponds)
+					// but also got the funds  from the contract (when corresponds)
 					funderFinalBal := s.app.BankKeeper.GetBalance(s.ctx, s.address.Bytes(), s.bondDenom)
 
 					expFunderFinalBal := funderInitialBal.Amount.Sub(fees).Sub(vestCoinsAmt)

@@ -1,0 +1,35 @@
+syntax = "proto3";
+package qubetics.provider.v2;
+
+import "gogoproto/gogo.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v2";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message MsgRegisterRequest {
+  string from = 1;
+  string name = 2;
+  string identity = 3;
+  string website = 4;
+  string description = 5;
+}
+
+message MsgUpdateRequest {
+  string from = 1;
+  string name = 2;
+  string identity = 3;
+  string website = 4;
+  string description = 5;
+  qubetics.types.v1.Status status = 6;
+}
+
+message MsgRegisterResponse {}
+
+message MsgUpdateResponse {}
+
+service MsgService {
+  rpc MsgRegister(MsgRegisterRequest) returns (MsgRegisterResponse);
+  rpc MsgUpdate(MsgUpdateRequest) returns (MsgUpdateResponse);
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package qubetics.provider.v2;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v2";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Provider {
+  string address = 1;
+  string name = 2;
+  string identity = 3;
+  string website = 4;
+  string description = 5;
+  qubetics.types.v1.Status status = 6;
+  google.protobuf.Timestamp status_at = 7 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+}

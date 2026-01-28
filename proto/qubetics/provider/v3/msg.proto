@@ -1,0 +1,51 @@
+syntax = "proto3";
+package qubetics.provider.v3;
+
+import "gogoproto/gogo.proto";
+import "qubetics/provider/v3/params.proto";
+import "qubetics/types/v1/status.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/provider/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message MsgRegisterProviderRequest {
+  string from = 1;
+  string name = 2;
+  string identity = 3;
+  string website = 4;
+  string description = 5;
+}
+
+message MsgUpdateProviderDetailsRequest {
+  string from = 1;
+  string name = 2;
+  string identity = 3;
+  string website = 4;
+  string description = 5;
+}
+
+message MsgUpdateProviderStatusRequest {
+  string from = 1;
+  qubetics.types.v1.Status status = 2;
+}
+
+message MsgUpdateParamsRequest {
+  string from = 1;
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+message MsgRegisterProviderResponse {}
+
+message MsgUpdateProviderDetailsResponse {}
+
+message MsgUpdateProviderStatusResponse {}
+
+message MsgUpdateParamsResponse {}
+
+service MsgService {
+  rpc MsgRegisterProvider(MsgRegisterProviderRequest) returns (MsgRegisterProviderResponse);
+  rpc MsgUpdateProviderDetails(MsgUpdateProviderDetailsRequest) returns (MsgUpdateProviderDetailsResponse);
+  rpc MsgUpdateProviderStatus(MsgUpdateProviderStatusRequest) returns (MsgUpdateProviderStatusResponse);
+  rpc MsgUpdateParams(MsgUpdateParamsRequest) returns (MsgUpdateParamsResponse);
+}

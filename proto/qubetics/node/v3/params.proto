@@ -1,0 +1,21 @@
+syntax = "proto3";
+package qubetics.node.v3;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "qubetics/types/v1/price.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/node/types/v3";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+message Params {
+  google.protobuf.Duration active_duration = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdduration) = true
+  ];
+  cosmos.base.v1beta1.Coin deposit = 2 [(gogoproto.nullable) = false];
+  repeated qubetics.types.v1.Price min_gigabyte_prices = 3 [(gogoproto.nullable) = false];
+  repeated qubetics.types.v1.Price min_hourly_prices = 4 [(gogoproto.nullable) = false];
+}
