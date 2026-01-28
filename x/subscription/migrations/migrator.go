@@ -105,6 +105,7 @@ func (k *Migrator) migrateSubscriptions(ctx sdk.Context) {
 	defer it.Close()
 
 	leaseCount := uint64(0)
+	subscriptionCount := uint64(0)
 
 	for ; it.Valid(); it.Next() {
 		store.Delete(it.Key())
@@ -225,6 +226,10 @@ func (k *Migrator) migrateSubscriptions(ctx sdk.Context) {
 					StatusAt:           item.StatusAt,
 				}
 
+				if item.ID > subscriptionCount {
+					subscriptionCount = item.ID
+				}
+
 				k.subscription.SetSubscription(ctx, subscription)
 				k.subscription.SetSubscriptionForAccount(ctx, accAddr, subscription.ID)
 				k.subscription.SetSubscriptionForPlan(ctx, subscription.PlanID, subscription.ID)
@@ -235,4 +240,5 @@ func (k *Migrator) migrateSubscriptions(ctx sdk.Context) {
 	}
 
 	k.lease.SetLeaseCount(ctx, leaseCount)
+	k.subscription.SetSubscriptionCount(ctx, subscriptionCount)
 }

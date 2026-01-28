@@ -116,6 +116,12 @@ func (k *Keeper) HandleMsgRenewSubscription(ctx sdk.Context, msg *v3.MsgRenewSub
 		return nil, err
 	}
 
+	newStart := ctx.BlockTime()
+	// If the subscription is still active, extend from the existing end time
+	if subscription.InactiveAt.After(newStart) {
+		newStart = subscription.InactiveAt
+	}
+
 	subscription = v3.Subscription{
 		ID:                 subscription.ID,
 		AccAddress:         subscription.AccAddress,
@@ -123,7 +129,7 @@ func (k *Keeper) HandleMsgRenewSubscription(ctx sdk.Context, msg *v3.MsgRenewSub
 		Price:              price,
 		RenewalPricePolicy: subscription.RenewalPricePolicy,
 		Status:             v1base.StatusActive,
-		InactiveAt:         ctx.BlockTime().Add(plan.GetHours()),
+		InactiveAt:         newStart.Add(plan.GetHours()),
 		StartAt:            ctx.BlockTime(),
 		StatusAt:           ctx.BlockTime(),
 	}
@@ -398,6 +404,14 @@ func (k *Keeper) HandleMsgStartSession(ctx sdk.Context, msg *v3.MsgStartSessionR
 	}
 	if !subscription.Status.Equal(v1base.StatusActive) {
 		return nil, types.NewErrorInvalidSubscriptionStatus(subscription.ID, subscription.Status)
+	}
+
+	plan, found := k.GetPlan(ctx, subscription.PlanID)
+	if !found {
+		return nil, types.NewErrorPlanNotFound(subscription.PlanID)
+	}
+	if !plan.Status.Equal(v1base.StatusActive) {
+		return nil, types.NewErrorInvalidPlanStatus(plan.ID, plan.Status)
 	}
 
 	nodeAddr, err := base.NodeAddressFromBech32(msg.NodeAddress)
