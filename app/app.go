@@ -1241,7 +1241,7 @@ func initParamsKeeper(
 }
 
 func (app *Qubetics) setupUpgradeHandlers() {
-	// v17 upgrade handler
+	//  upgrade handler
 	app.UpgradeKeeper.SetUpgradeHandler(
 		v1.UpgradeName,
 		v1.CreateUpgradeHandler(
@@ -1255,6 +1255,12 @@ func (app *Qubetics) setupUpgradeHandlers() {
 		),
 	)
 
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v2.UpgradeName,
+		v2.CreateUpgradeHandler(
+			app.mm, app.configurator,
+		),
+	)
 	// When a planned update height is reached, the old binary will panic
 	// writing on disk the height and name of the update that triggered it
 	// This will read that value, and execute the preparations for the upgrade.
@@ -1272,7 +1278,7 @@ func (app *Qubetics) setupUpgradeHandlers() {
 	switch upgradeInfo.Name {
 	case v2.UpgradeName:
 		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{customminttypes.StoreKey, vpntypes.StoreKey, validatorpoolmoduletypes.StoreKey},
+			Added: []string{customminttypes.StoreKey, vpntypes.StoreKey},
 		}
 	default:
 		// no-op
