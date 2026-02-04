@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	DefaultMaxHours     int64 = 10
+	DefaultMaxHours     int64 = 2160
 	DefaultMinHours     int64 = 1
 	DefaultStakingShare       = sdkmath.LegacyNewDecWithPrec(1, 1)
 

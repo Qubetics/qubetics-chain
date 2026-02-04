@@ -7,16 +7,18 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	v1base "github.com/qubetics/qubetics-blockchain/v2/types/v1"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
-
+	v1base "github.com/qubetics/qubetics-blockchain/v2/types/v1"
 )
 
 var (
-	DefaultActiveDuration    = 30 * time.Second
-	DefaultDeposit           = sdk.NewCoin(qubeticstypes.AttoQubetics, sdkmath.NewInt(10))
-	DefaultMinGigabytePrices = v1base.Prices{{Denom: qubeticstypes.AttoQubetics, BaseValue: sdkmath.LegacyZeroDec(), QuoteValue: sdkmath.NewInt(10)}}
-	DefaultMinHourlyPrices   = v1base.Prices{{Denom: qubeticstypes.AttoQubetics, BaseValue: sdkmath.LegacyZeroDec(), QuoteValue: sdkmath.NewInt(10)}}
+	DefaultActiveDuration = 500 * time.Second
+	val, _                = sdkmath.NewIntFromString("10000000000000000000000")
+	DefaultDeposit        = sdk.NewCoin(qubeticstypes.AttoQubetics, val)
+	// DefaultMinGigabytePrices = v1base.Prices{{Denom: qubeticstypes.AttoQubetics, BaseValue: sdkmath.LegacyZeroDec(), QuoteValue: sdkmath.NewInt(1000000)}}
+	DefaultMinGigabytePrices = v1base.Prices{{Denom: qubeticstypes.AttoQubetics, BaseValue: sdkmath.LegacyMustNewDecFromStr("0.001000000000000000"), QuoteValue: sdkmath.NewInt(1000000)}}
+	// DefaultMinHourlyPrices   = v1base.Prices{{Denom: qubeticstypes.AttoQubetics, BaseValue: sdkmath.LegacyZeroDec(), QuoteValue: sdkmath.NewInt(1000000)}}
+	DefaultMinHourlyPrices = v1base.Prices{{Denom: qubeticstypes.AttoQubetics, BaseValue: sdkmath.LegacyMustNewDecFromStr("0.001000000000000000"), QuoteValue: sdkmath.NewInt(1000000)}}
 )
 
 func (m *Params) GetMinGigabytePrices() v1base.Prices {
@@ -71,7 +73,7 @@ func validateActiveDuration(v interface{}) error {
 	}
 
 	if value < 0 {
-		  return fmt.Errorf("active_duration cannot be negative")
+		return fmt.Errorf("active_duration cannot be negative")
 	}
 	if value == 0 {
 		return fmt.Errorf("active_duration cannot be zero")

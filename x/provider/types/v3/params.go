@@ -6,12 +6,12 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
-
 )
 
 var (
 	// DefaultDeposit = sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(1000))
-	DefaultDeposit = sdk.NewCoin(qubeticstypes.AttoQubetics, sdkmath.NewInt(1000))
+	val, _         = sdkmath.NewIntFromString("20000000000000000000000")
+	DefaultDeposit = sdk.NewCoin(qubeticstypes.AttoQubetics, val)
 )
 
 func (m *Params) Validate() error {
@@ -29,7 +29,6 @@ func NewParams(deposit sdk.Coin) Params {
 }
 
 func DefaultParams() Params {
-	fmt.Println("DefaultDeposit===========================", DefaultDeposit)
 	return NewParams(DefaultDeposit)
 
 }

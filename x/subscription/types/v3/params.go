@@ -9,7 +9,7 @@ import (
 
 var (
 	DefaultStakingShare      = math.LegacyMustNewDecFromStr("0.1")
-	DefaultStatusChangeDelay = 2 * time.Minute
+	DefaultStatusChangeDelay = 20 * time.Minute
 )
 
 func (m *Params) Validate() error {

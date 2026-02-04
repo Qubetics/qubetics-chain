@@ -8,13 +8,13 @@ import (
 )
 
 var (
-	DefaultMaxGigabytes             int64 = 10
+	DefaultMaxGigabytes             int64 = 1000000
 	DefaultMinGigabytes             int64 = 1
-	DefaultMaxHours                 int64 = 10
+	DefaultMaxHours                 int64 = 24
 	DefaultMinHours                 int64 = 1
-	DefaultProofVerificationEnabled       = true
+	DefaultProofVerificationEnabled       = false
 	DefaultStakingShare                   = math.LegacyNewDecWithPrec(1, 1)
-	DefaultStatusChangeDelay              = 1 * time.Minute
+	DefaultStatusChangeDelay              = 10 * time.Minute
 )
 
 func (m *Params) Validate() error {
