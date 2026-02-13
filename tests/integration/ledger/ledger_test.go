@@ -10,9 +10,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/hd"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/tests/integration/ledger/mocks"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
@@ -59,7 +59,7 @@ var _ = Describe("Ledger CLI and keyring functionality: ", func() {
 	Describe("Adding a key from ledger using the CLI", func() {
 		BeforeEach(func() {
 			krHome = s.T().TempDir()
-			encCfg = encoding.MakeConfig(app.ModuleBasics)
+			encCfg = encoding.MakeConfig(qubeticsd.ModuleBasics)
 
 			cmd = s.qubeticsAddKeyCmd()
 
@@ -104,7 +104,7 @@ var _ = Describe("Ledger CLI and keyring functionality: ", func() {
 	Describe("Singing a transactions", func() {
 		BeforeEach(func() {
 			krHome = s.T().TempDir()
-			encCfg = encoding.MakeConfig(app.ModuleBasics)
+			encCfg = encoding.MakeConfig(qubeticsd.ModuleBasics)
 
 			var err error
 

@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 )
 
@@ -44,7 +44,7 @@ type CosmosTxArgs struct {
 // It returns the signed transaction and an error
 func PrepareCosmosTx(
 	ctx sdk.Context,
-	appQubetics *app.Qubetics,
+	appQubetics *qubeticsd.Qubetics,
 	args CosmosTxArgs,
 ) (authsigning.Tx, error) {
 	txBuilder := args.TxCfg.NewTxBuilder()
@@ -77,7 +77,7 @@ func PrepareCosmosTx(
 // the provided private key
 func signCosmosTx(
 	ctx sdk.Context,
-	appQubetics *app.Qubetics,
+	appQubetics *qubeticsd.Qubetics,
 	args CosmosTxArgs,
 	txBuilder client.TxBuilder,
 ) (authsigning.Tx, error) {

@@ -14,7 +14,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	"github.com/qubetics/qubetics-blockchain/v2/indexer"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend/mocks"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (suite *BackendTestSuite) TestTraceTransaction() {

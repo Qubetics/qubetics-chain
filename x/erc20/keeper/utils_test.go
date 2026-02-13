@@ -8,10 +8,10 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/contracts"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	ibctesting "github.com/qubetics/qubetics-blockchain/v2/ibc/testing"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/server/config"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
@@ -19,9 +19,9 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/keeper/testdata"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
-	evm "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evm "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -74,7 +74,7 @@ func (suite *KeeperTestSuite) DoSetupTest(t require.TestingT) {
 
 	// init app
 	chainID := utils.TestnetChainID + "-1"
-	suite.app = app.Setup(false, feemarkettypes.DefaultGenesisState(), chainID)
+	suite.app = qubeticsd.Setup(false, feemarkettypes.DefaultGenesisState(), chainID)
 	header := testutil.NewHeader(
 		1, time.Now().UTC(), chainID, consAddress, nil, nil,
 	)
@@ -146,7 +146,7 @@ func (suite *KeeperTestSuite) SetupIBCTest() {
 	suite.coordinator.CommitNBlocks(suite.IBCOsmosisChain, 2)
 	suite.coordinator.CommitNBlocks(suite.IBCCosmosChain, 2)
 
-	s.app = suite.QubeticsChain.App.(*app.Qubetics)
+	s.app = suite.QubeticsChain.App.(*qubeticsd.Qubetics)
 	evmParams := s.app.EvmKeeper.GetParams(s.QubeticsChain.GetContext())
 	evmParams.EvmDenom = utils.BaseDenom
 	err := s.app.EvmKeeper.SetParams(s.QubeticsChain.GetContext(), evmParams)
@@ -363,7 +363,7 @@ func (suite *KeeperTestSuite) DeployContractDirectBalanceManipulation() (common.
 func (suite *KeeperTestSuite) DeployContractToChain(name, symbol string, decimals uint8) (common.Address, error) {
 	return testutil.DeployContract(
 		s.QubeticsChain.GetContext(),
-		s.QubeticsChain.App.(*app.Qubetics),
+		s.QubeticsChain.App.(*qubeticsd.Qubetics),
 		suite.QubeticsChain.SenderPrivKey,
 		suite.queryClientEvm,
 		contracts.ERC20MinterBurnerDecimalsContract,

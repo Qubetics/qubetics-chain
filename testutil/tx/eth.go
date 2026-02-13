@@ -16,17 +16,17 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/server/config"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // PrepareEthTx creates an ethereum tx and signs it with the provided messages and private key.
 // It returns the signed transaction and an error
 func PrepareEthTx(
 	txCfg client.TxConfig,
-	appQubetics *app.Qubetics,
+	appQubetics *qubeticsd.Qubetics,
 	priv cryptotypes.PrivKey,
 	msgs ...sdk.Msg,
 ) (authsigning.Tx, error) {
@@ -89,7 +89,7 @@ func PrepareEthTx(
 // Should this not be the case, just pass in zero.
 func CreateEthTx(
 	ctx sdk.Context,
-	appQubetics *app.Qubetics,
+	appQubetics *qubeticsd.Qubetics,
 	privKey cryptotypes.PrivKey,
 	from sdk.AccAddress,
 	dest sdk.AccAddress,

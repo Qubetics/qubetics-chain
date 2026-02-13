@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	erc20keeper "github.com/qubetics/qubetics-blockchain/v2/x/erc20/keeper"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/qubetics/qubetics-blockchain/v2/contracts"

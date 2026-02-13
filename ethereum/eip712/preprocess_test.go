@@ -14,10 +14,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
-	"github.com/qubetics/qubetics-blockchain/v2/cmd/config"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/config"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
@@ -28,7 +28,7 @@ import (
 var (
 	chainID = utils.TestnetChainID + "-1"
 	ctx     = client.Context{}.WithTxConfig(
-		encoding.MakeConfig(app.ModuleBasics).TxConfig,
+		encoding.MakeConfig(qubeticsd.ModuleBasics).TxConfig,
 	)
 )
 var feePayerAddress = "qubetics10jmp6sgh4cc6zt3e8gw05wavvejgr5pwggzvrn"

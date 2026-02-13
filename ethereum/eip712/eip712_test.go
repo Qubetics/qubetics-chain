@@ -23,9 +23,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
-	"github.com/qubetics/qubetics-blockchain/v2/cmd/config"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/config"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -69,7 +69,7 @@ func TestEIP712TestSuite(t *testing.T) {
 }
 
 func (suite *EIP712TestSuite) SetupTest() {
-	suite.config = encoding.MakeConfig(app.ModuleBasics)
+	suite.config = encoding.MakeConfig(qubeticsd.ModuleBasics)
 	suite.clientCtx = client.Context{}.WithTxConfig(suite.config.TxConfig)
 	suite.denom = utils.BaseDenom
 

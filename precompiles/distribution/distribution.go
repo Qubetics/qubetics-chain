@@ -9,7 +9,7 @@ import (
 	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	"github.com/ethereum/go-ethereum/common"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 
 	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"

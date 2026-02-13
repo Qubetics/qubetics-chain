@@ -8,11 +8,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/distribution"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (s *PrecompileTestSuite) TestIsTransaction() {
@@ -194,7 +194,7 @@ func (s *PrecompileTestSuite) TestRun() {
 				To:        &contractAddr,
 				Amount:    nil,
 				GasLimit:  100000,
-				GasPrice:  app.MainnetMinGasPrices.BigInt(),
+				GasPrice:  qubeticsd.MainnetMinGasPrices.BigInt(),
 				GasFeeCap: baseFee,
 				GasTipCap: big.NewInt(1),
 				Accesses:  &ethtypes.AccessList{},

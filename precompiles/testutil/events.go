@@ -12,7 +12,7 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // CheckAuthorizationEvents is a helper function used in the integration tests and checks if the approval event is emitted.

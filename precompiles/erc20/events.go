@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 
 	auth "github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"

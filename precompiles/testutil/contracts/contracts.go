@@ -8,11 +8,11 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/testutil"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // Call is a helper function to call any arbitrary smart contract.

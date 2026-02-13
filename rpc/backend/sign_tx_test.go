@@ -17,7 +17,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend/mocks"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (suite *BackendTestSuite) TestSendTransaction() {

@@ -18,8 +18,8 @@ import (
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/testutil"
 	testutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	//nolint:revive // dot imports are fine for Ginkgo
 	. "github.com/onsi/ginkgo/v2"

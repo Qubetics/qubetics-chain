@@ -17,7 +17,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/staking"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/testutil"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 func (s *PrecompileTestSuite) TestApprove() {

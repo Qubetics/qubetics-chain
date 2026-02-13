@@ -4,7 +4,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/bank"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/factory"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"

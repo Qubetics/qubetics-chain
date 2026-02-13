@@ -31,20 +31,19 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/staking"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil/contracts"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/testutil"
 	testutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
-	vestingtypes "github.com/qubetics/qubetics-blockchain/v2/x/vesting/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // stipend to pay EVM tx fees
@@ -539,40 +538,6 @@ func (s *PrecompileTestSuite) CheckValidatorOutput(valOut staking.ValidatorInfo)
 
 	Expect(slices.Contains(validatorAddrs, operatorAddress)).To(BeTrue(), "operator address not found in test suite validators")
 	Expect(valOut.DelegatorShares).To(Equal(big.NewInt(1e18)), "expected different delegator shares")
-}
-
-// setupVestingAccount is a helper function used in integraiton tests to setup a vesting account
-// using the TestVestingSchedule. Also, funds the account with extra funds to pay for transaction fees
-func (s *PrecompileTestSuite) setupVestingAccount(funder, vestAcc sdk.AccAddress) *vestingtypes.ClawbackVestingAccount {
-	vestingAmtTotal := qubeticsutil.TestVestingSchedule.TotalVestingCoins
-
-	vestingStart := s.ctx.BlockTime()
-	baseAccount := authtypes.NewBaseAccountWithAddress(vestAcc.Bytes())
-	clawbackAccount := vestingtypes.NewClawbackVestingAccount(
-		baseAccount,
-		funder,
-		vestingAmtTotal,
-		vestingStart,
-		qubeticsutil.TestVestingSchedule.LockupPeriods,
-		qubeticsutil.TestVestingSchedule.VestingPeriods,
-	)
-
-	err := qubeticsutil.FundAccount(s.ctx, s.app.BankKeeper, clawbackAccount.GetAddress(), vestingAmtTotal)
-	Expect(err).To(BeNil())
-	acc := s.app.AccountKeeper.NewAccount(s.ctx, clawbackAccount)
-	s.app.AccountKeeper.SetAccount(s.ctx, acc)
-
-	// Check all coins are locked up
-	lockedUp := clawbackAccount.GetLockedUpCoins(s.ctx.BlockTime())
-	Expect(vestingAmtTotal).To(Equal(lockedUp))
-
-	// Grant gas stipend to cover EVM fees
-	err = qubeticsutil.FundAccount(s.ctx, s.app.BankKeeper, clawbackAccount.GetAddress(), accountGasCoverage)
-	Expect(err).To(BeNil())
-	granteeBalance := s.app.BankKeeper.GetBalance(s.ctx, clawbackAccount.GetAddress(), s.bondDenom)
-	Expect(granteeBalance).To(Equal(accountGasCoverage[0].Add(vestingAmtTotal[0])))
-
-	return clawbackAccount
 }
 
 // Generate the Base64 encoded PubKey associated with a PrivKey generated with

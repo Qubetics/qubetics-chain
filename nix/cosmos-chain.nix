@@ -22,5 +22,5 @@ buildGo119Module rec {
   ]);
 
   doCheck = false;
-  subPackages = [ "cmd/${appName}" ];
+  subPackages = [ "qubeticsd/cmd/${appName}" ];
 }

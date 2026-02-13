@@ -13,7 +13,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
 	integrationutils "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	qubeticsutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 

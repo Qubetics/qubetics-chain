@@ -13,7 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 const (

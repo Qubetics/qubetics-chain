@@ -21,15 +21,15 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/distribution"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/testutil"
 	qubeticsutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // SetupWithGenesisValSet initializes a new QubeticsApp with a validator set and genesis accounts

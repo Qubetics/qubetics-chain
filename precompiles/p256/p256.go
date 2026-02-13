@@ -21,7 +21,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/secp256r1"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 var _ vm.PrecompiledContract = &Precompile{}

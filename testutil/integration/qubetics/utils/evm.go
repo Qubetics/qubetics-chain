@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/qubetics/qubetics-blockchain/v2/contracts"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // GetERC20Balance returns the token balance of a given account address for

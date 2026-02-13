@@ -8,7 +8,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend/mocks"
 	ethrpc "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (suite *BackendTestSuite) TestGetLogs() {

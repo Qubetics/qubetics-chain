@@ -16,8 +16,8 @@ import (
 	"github.com/pkg/errors"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // ChainID is the EIP-155 replay-protection chain id for the current ethereum chain config.

@@ -6,7 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (suite *KeeperTestSuite) TestGetTokenPairs() {

@@ -9,10 +9,10 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/staking"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	//nolint:revive // dot imports are fine for Ginkgo
 	. "github.com/onsi/ginkgo/v2"

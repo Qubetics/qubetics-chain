@@ -21,14 +21,14 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	"github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	"github.com/stretchr/testify/require"
 
@@ -83,7 +83,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool, chainID string) {
 	err = suite.app.StakingKeeper.SetParams(suite.ctx, stakingParams)
 	require.NoError(t, err)
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig(qubeticsd.ModuleBasics)
 	suite.clientCtx = client.Context{}.WithTxConfig(encodingConfig.TxConfig)
 	suite.ethSigner = ethtypes.LatestSignerForChainID(suite.app.EvmKeeper.ChainID())
 	suite.appCodec = encodingConfig.Codec
@@ -150,21 +150,21 @@ func setupChain(localMinGasPricesStr string, chainID string) {
 	// Initialize the app, so we can use SetMinGasPrices to set the
 	// validator-specific min-gas-prices setting
 	db := dbm.NewMemDB()
-	newapp := app.NewQubetics(
+	newapp := qubeticsd.NewQubetics(
 		log.NewNopLogger(),
 		db,
 		nil,
 		true,
 		map[int64]bool{},
-		app.DefaultNodeHome,
+		qubeticsd.DefaultNodeHome,
 		5,
-		encoding.MakeConfig(app.ModuleBasics),
-		simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
+		encoding.MakeConfig(qubeticsd.ModuleBasics),
+		simutils.NewAppOptionsWithFlagHome(qubeticsd.DefaultNodeHome),
 		baseapp.SetChainID(chainID),
 		baseapp.SetMinGasPrices(localMinGasPricesStr),
 	)
 
-	genesisState := app.NewTestGenesisState(newapp.AppCodec())
+	genesisState := qubeticsd.NewTestGenesisState(newapp.AppCodec())
 	genesisState[types.ModuleName] = newapp.AppCodec().MustMarshalJSON(types.DefaultGenesisState())
 
 	stateBytes, err := json.MarshalIndent(genesisState, "", "  ")
@@ -176,7 +176,7 @@ func setupChain(localMinGasPricesStr string, chainID string) {
 			ChainId:         chainID,
 			Validators:      []abci.ValidatorUpdate{},
 			AppStateBytes:   stateBytes,
-			ConsensusParams: app.DefaultConsensusParams,
+			ConsensusParams: qubeticsd.DefaultConsensusParams,
 		},
 	)
 

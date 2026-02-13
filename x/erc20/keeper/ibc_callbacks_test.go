@@ -27,7 +27,7 @@ import (
 
 	"github.com/qubetics/qubetics-blockchain/v2/contracts"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 var erc20Denom = "erc20/0xdac17f958d2ee523a2206206994597c13d831ec7"

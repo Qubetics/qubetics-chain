@@ -1,7 +1,7 @@
-diff --git a/x/evm/keeper/precompiles.go b/x/evm/keeper/precompiles.go
+diff --git a/x/vm/keeper/precompiles.go b/x/vm/keeper/precompiles.go
 index b0aa3202..39668025 100644
---- a/x/evm/keeper/precompiles.go
-+++ b/x/evm/keeper/precompiles.go
+--- a/x/vm/keeper/precompiles.go
++++ b/x/vm/keeper/precompiles.go
 @@ -88,8 +88,10 @@ func AvailablePrecompiles(
  		panic(fmt.Errorf("failed to instantiate stride outpost: %w", err))
  	}

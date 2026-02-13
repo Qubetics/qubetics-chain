@@ -12,13 +12,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	evmenc "github.com/qubetics/qubetics-blockchain/v2/encoding"
 	"github.com/qubetics/qubetics-blockchain/v2/indexer"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -190,5 +190,5 @@ func TestKVIndexer(t *testing.T) {
 
 // MakeEncodingConfig creates the EncodingConfig
 func MakeEncodingConfig() params.EncodingConfig {
-	return evmenc.MakeConfig(app.ModuleBasics)
+	return evmenc.MakeConfig(qubeticsd.ModuleBasics)
 }

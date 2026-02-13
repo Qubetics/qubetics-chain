@@ -3,8 +3,8 @@ package network
 import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarketypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (n *IntegrationNetwork) UpdateEvmParams(params evmtypes.Params) error {

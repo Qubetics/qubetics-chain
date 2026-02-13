@@ -4,8 +4,8 @@ import (
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
 )
 
 // UnitTestNetwork is the implementation of the Network interface for unit tests.
@@ -13,7 +13,7 @@ import (
 // makes the App public for easier testing.
 type UnitTestNetwork struct {
 	IntegrationNetwork
-	App *app.Qubetics
+	App *qubeticsd.Qubetics
 }
 
 var _ Network = (*UnitTestNetwork)(nil)

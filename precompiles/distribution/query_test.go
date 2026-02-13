@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 
 	"github.com/qubetics/qubetics-blockchain/v2/testutil"
 	testutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"

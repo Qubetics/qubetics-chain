@@ -6,8 +6,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/tests/e2e/upgrade"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +18,7 @@ func TestUnpackBalancesResponse(t *testing.T) {
 	expAmount, ok := sdk.NewIntFromString("1000000000000000000000")
 	require.True(t, ok, "failed to convert amount to int")
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig(qubeticsd.ModuleBasics)
 	protoCodec, ok := encodingConfig.Codec.(*codec.ProtoCodec)
 	require.True(t, ok, "failed to cast codec to proto codec")
 

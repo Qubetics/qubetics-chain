@@ -47,8 +47,8 @@ import (
 	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/qubetics/qubetics-blockchain/v2/cmd/qubeticsd/opendb"
 	"github.com/qubetics/qubetics-blockchain/v2/indexer"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/opendb"
 	ethdebug "github.com/qubetics/qubetics-blockchain/v2/rpc/namespaces/ethereum/debug"
 	"github.com/qubetics/qubetics-blockchain/v2/server/config"
 	srvflags "github.com/qubetics/qubetics-blockchain/v2/server/flags"

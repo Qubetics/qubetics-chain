@@ -19,7 +19,7 @@ import (
 	testkeyring "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/keyring"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/utils"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 type IntegrationTestSuite struct {

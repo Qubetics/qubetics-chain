@@ -23,8 +23,8 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/utils"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	//nolint:revive // dot imports are fine for Ginkgo
 	. "github.com/onsi/ginkgo/v2"

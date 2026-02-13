@@ -11,7 +11,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 var (

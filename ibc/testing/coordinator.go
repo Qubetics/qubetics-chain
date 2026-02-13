@@ -11,7 +11,7 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ibctesting "github.com/cosmos/ibc-go/v7/testing"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/stretchr/testify/require"
 )
 
@@ -124,7 +124,7 @@ func SendMsgs(chain *ibctesting.TestChain, feeAmt int64, msgs ...sdk.Msg) (*sdk.
 	// ensure the chain has the latest time
 	chain.Coordinator.UpdateTimeForChain(chain)
 
-	if qubeticsChain, ok := chain.App.(*app.Qubetics); ok {
+	if qubeticsChain, ok := chain.App.(*qubeticsd.Qubetics); ok {
 		bondDenom = qubeticsChain.StakingKeeper.BondDenom(chain.GetContext())
 	} else {
 		bondDenom = chain.GetSimApp().StakingKeeper.BondDenom(chain.GetContext())

@@ -42,7 +42,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/server/config"
 	srvflags "github.com/qubetics/qubetics-blockchain/v2/server/flags"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/network"
 )

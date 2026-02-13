@@ -5,8 +5,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	commongrpc "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/common/grpc"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // Handler is an interface that defines the methods that are used to query

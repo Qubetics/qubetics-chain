@@ -18,8 +18,8 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend/mocks"
 	rpc "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (suite *BackendTestSuite) TestBaseFee() {

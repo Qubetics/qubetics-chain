@@ -20,7 +20,7 @@ import (
 
 	ibcgotesting "github.com/cosmos/ibc-go/v7/testing"
 
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 )

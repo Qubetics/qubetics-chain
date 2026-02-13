@@ -5,7 +5,7 @@ import (
 	gethaccounts "github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
 	"github.com/qubetics/qubetics-blockchain/v2/wallets/accounts"
@@ -17,7 +17,7 @@ import (
 
 // Load encoding config for sign doc encoding/decoding
 func init() {
-	config := encoding.MakeConfig(app.ModuleBasics)
+	config := encoding.MakeConfig(qubeticsd.ModuleBasics)
 	eip712.SetEncodingConfig(config)
 	sdk.GetConfig().SetBech32PrefixForAccount("cosmos", "")
 }

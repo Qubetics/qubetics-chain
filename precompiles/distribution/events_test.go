@@ -8,11 +8,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/qubetics/qubetics-blockchain/v2/cmd/config"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/distribution"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/config"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 func (s *PrecompileTestSuite) TestSetWithdrawAddressEvent() {

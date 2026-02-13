@@ -9284,7 +9284,7 @@
     },
     "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards": {
       "get": {
-        "summary": "DelegationTotalRewards queries the total rewards accrued by each\nvalidator.",
+        "summary": "DelegationTotalRewards queries the total rewards accrued by a each\nvalidator.",
         "operationId": "DelegationTotalRewards",
         "responses": {
           "200": {
@@ -12003,6 +12003,18 @@
                     "min_initial_deposit_ratio": {
                       "type": "string",
                       "description": "The ratio representing the proportion of the deposit value that must be paid at proposal submission."
+                    },
+                    "burn_vote_quorum": {
+                      "type": "boolean",
+                      "title": "burn deposits if a proposal does not meet quorum"
+                    },
+                    "burn_proposal_deposit_prevote": {
+                      "type": "boolean",
+                      "title": "burn deposits if the proposal does not enter voting period"
+                    },
+                    "burn_vote_veto": {
+                      "type": "boolean",
+                      "title": "burn deposits if quorum with vote type no_veto is met"
                     }
                   }
                 }
@@ -14810,7 +14822,7 @@
                           "format": "byte"
                         }
                       },
-                      "description": "Header defines the structure of a Tendermint block header."
+                      "description": "Header defines the structure of a block header."
                     },
                     "valset": {
                       "type": "array",
@@ -21347,7 +21359,7 @@
                           "format": "byte"
                         }
                       },
-                      "description": "Header defines the structure of a Tendermint block header."
+                      "description": "Header defines the structure of a block header."
                     },
                     "data": {
                       "type": "object",
@@ -21621,7 +21633,7 @@
                                                 "format": "byte"
                                               }
                                             },
-                                            "description": "Header defines the structure of a Tendermint block header."
+                                            "description": "Header defines the structure of a block header."
                                           },
                                           "commit": {
                                             "type": "object",
@@ -21719,7 +21731,7 @@
                                                       "format": "byte"
                                                     }
                                                   },
-                                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                  "title": "PublicKey defines the keys available for use with Validators"
                                                 },
                                                 "voting_power": {
                                                   "type": "string",
@@ -21751,7 +21763,7 @@
                                                     "format": "byte"
                                                   }
                                                 },
-                                                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                "title": "PublicKey defines the keys available for use with Validators"
                                               },
                                               "voting_power": {
                                                 "type": "string",
@@ -21796,7 +21808,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -22268,7 +22280,7 @@
                                                 "format": "byte"
                                               }
                                             },
-                                            "description": "Header defines the structure of a Tendermint block header."
+                                            "description": "Header defines the structure of a block header."
                                           },
                                           "commit": {
                                             "type": "object",
@@ -22366,7 +22378,7 @@
                                                       "format": "byte"
                                                     }
                                                   },
-                                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                  "title": "PublicKey defines the keys available for use with Validators"
                                                 },
                                                 "voting_power": {
                                                   "type": "string",
@@ -22398,7 +22410,7 @@
                                                     "format": "byte"
                                                   }
                                                 },
-                                                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                "title": "PublicKey defines the keys available for use with Validators"
                                               },
                                               "voting_power": {
                                                 "type": "string",
@@ -22443,7 +22455,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -22722,7 +22734,7 @@
                           "format": "byte"
                         }
                       },
-                      "description": "Header defines the structure of a Tendermint block header."
+                      "description": "Header defines the structure of a block header."
                     },
                     "data": {
                       "type": "object",
@@ -22996,7 +23008,7 @@
                                                 "format": "byte"
                                               }
                                             },
-                                            "description": "Header defines the structure of a Tendermint block header."
+                                            "description": "Header defines the structure of a block header."
                                           },
                                           "commit": {
                                             "type": "object",
@@ -23094,7 +23106,7 @@
                                                       "format": "byte"
                                                     }
                                                   },
-                                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                  "title": "PublicKey defines the keys available for use with Validators"
                                                 },
                                                 "voting_power": {
                                                   "type": "string",
@@ -23126,7 +23138,7 @@
                                                     "format": "byte"
                                                   }
                                                 },
-                                                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                "title": "PublicKey defines the keys available for use with Validators"
                                               },
                                               "voting_power": {
                                                 "type": "string",
@@ -23171,7 +23183,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -23643,7 +23655,7 @@
                                                 "format": "byte"
                                               }
                                             },
-                                            "description": "Header defines the structure of a Tendermint block header."
+                                            "description": "Header defines the structure of a block header."
                                           },
                                           "commit": {
                                             "type": "object",
@@ -23741,7 +23753,7 @@
                                                       "format": "byte"
                                                     }
                                                   },
-                                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                  "title": "PublicKey defines the keys available for use with Validators"
                                                 },
                                                 "voting_power": {
                                                   "type": "string",
@@ -23773,7 +23785,7 @@
                                                     "format": "byte"
                                                   }
                                                 },
-                                                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                                "title": "PublicKey defines the keys available for use with Validators"
                                               },
                                               "voting_power": {
                                                 "type": "string",
@@ -23818,7 +23830,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -30768,6 +30780,18 @@
         "min_initial_deposit_ratio": {
           "type": "string",
           "description": "The ratio representing the proportion of the deposit value that must be paid at proposal submission."
+        },
+        "burn_vote_quorum": {
+          "type": "boolean",
+          "title": "burn deposits if a proposal does not meet quorum"
+        },
+        "burn_proposal_deposit_prevote": {
+          "type": "boolean",
+          "title": "burn deposits if the proposal does not enter voting period"
+        },
+        "burn_vote_veto": {
+          "type": "boolean",
+          "title": "burn deposits if quorum with vote type no_veto is met"
         }
       },
       "description": "Params defines the parameters for the x/gov module.\n\nSince: cosmos-sdk 0.47"
@@ -31099,6 +31123,18 @@
             "min_initial_deposit_ratio": {
               "type": "string",
               "description": "The ratio representing the proportion of the deposit value that must be paid at proposal submission."
+            },
+            "burn_vote_quorum": {
+              "type": "boolean",
+              "title": "burn deposits if a proposal does not meet quorum"
+            },
+            "burn_proposal_deposit_prevote": {
+              "type": "boolean",
+              "title": "burn deposits if the proposal does not enter voting period"
+            },
+            "burn_vote_veto": {
+              "type": "boolean",
+              "title": "burn deposits if quorum with vote type no_veto is met"
             }
           }
         }
@@ -32168,7 +32204,7 @@
               "format": "byte"
             }
           },
-          "description": "Header defines the structure of a Tendermint block header."
+          "description": "Header defines the structure of a block header."
         },
         "valset": {
           "type": "array",
@@ -32924,7 +32960,7 @@
                   "format": "byte"
                 }
               },
-              "description": "Header defines the structure of a Tendermint block header."
+              "description": "Header defines the structure of a block header."
             },
             "valset": {
               "type": "array",
@@ -34316,7 +34352,7 @@
           "format": "byte"
         }
       },
-      "description": "Header defines the structure of a Tendermint block header."
+      "description": "Header defines the structure of a block header."
     },
     "tendermint.types.PartSetHeader": {
       "type": "object",
@@ -37231,7 +37267,7 @@
                   "format": "byte"
                 }
               },
-              "description": "Header defines the structure of a Tendermint block header."
+              "description": "Header defines the structure of a block header."
             },
             "data": {
               "type": "object",
@@ -37505,7 +37541,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "description": "Header defines the structure of a Tendermint block header."
+                                    "description": "Header defines the structure of a block header."
                                   },
                                   "commit": {
                                     "type": "object",
@@ -37603,7 +37639,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -37635,7 +37671,7 @@
                                             "format": "byte"
                                           }
                                         },
-                                        "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                        "title": "PublicKey defines the keys available for use with Validators"
                                       },
                                       "voting_power": {
                                         "type": "string",
@@ -37680,7 +37716,7 @@
                                       "format": "byte"
                                     }
                                   },
-                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                  "title": "PublicKey defines the keys available for use with Validators"
                                 },
                                 "voting_power": {
                                   "type": "string",
@@ -38674,7 +38710,7 @@
           "format": "byte"
         }
       },
-      "title": "PublicKey defines the keys available for use with Tendermint Validators"
+      "title": "PublicKey defines the keys available for use with Validators"
     },
     "tendermint.types.Block": {
       "type": "object",
@@ -38772,7 +38808,7 @@
               "format": "byte"
             }
           },
-          "description": "Header defines the structure of a Tendermint block header."
+          "description": "Header defines the structure of a block header."
         },
         "data": {
           "type": "object",
@@ -39046,7 +39082,7 @@
                                     "format": "byte"
                                   }
                                 },
-                                "description": "Header defines the structure of a Tendermint block header."
+                                "description": "Header defines the structure of a block header."
                               },
                               "commit": {
                                 "type": "object",
@@ -39144,7 +39180,7 @@
                                           "format": "byte"
                                         }
                                       },
-                                      "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                      "title": "PublicKey defines the keys available for use with Validators"
                                     },
                                     "voting_power": {
                                       "type": "string",
@@ -39176,7 +39212,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                    "title": "PublicKey defines the keys available for use with Validators"
                                   },
                                   "voting_power": {
                                     "type": "string",
@@ -39221,7 +39257,7 @@
                                   "format": "byte"
                                 }
                               },
-                              "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                              "title": "PublicKey defines the keys available for use with Validators"
                             },
                             "voting_power": {
                               "type": "string",
@@ -39847,7 +39883,7 @@
                           "format": "byte"
                         }
                       },
-                      "description": "Header defines the structure of a Tendermint block header."
+                      "description": "Header defines the structure of a block header."
                     },
                     "commit": {
                       "type": "object",
@@ -39945,7 +39981,7 @@
                                 "format": "byte"
                               }
                             },
-                            "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                            "title": "PublicKey defines the keys available for use with Validators"
                           },
                           "voting_power": {
                             "type": "string",
@@ -39977,7 +40013,7 @@
                               "format": "byte"
                             }
                           },
-                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                          "title": "PublicKey defines the keys available for use with Validators"
                         },
                         "voting_power": {
                           "type": "string",
@@ -40022,7 +40058,7 @@
                         "format": "byte"
                       }
                     },
-                    "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                    "title": "PublicKey defines the keys available for use with Validators"
                   },
                   "voting_power": {
                     "type": "string",
@@ -40306,7 +40342,7 @@
                                 "format": "byte"
                               }
                             },
-                            "description": "Header defines the structure of a Tendermint block header."
+                            "description": "Header defines the structure of a block header."
                           },
                           "commit": {
                             "type": "object",
@@ -40404,7 +40440,7 @@
                                       "format": "byte"
                                     }
                                   },
-                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                  "title": "PublicKey defines the keys available for use with Validators"
                                 },
                                 "voting_power": {
                                   "type": "string",
@@ -40436,7 +40472,7 @@
                                     "format": "byte"
                                   }
                                 },
-                                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                "title": "PublicKey defines the keys available for use with Validators"
                               },
                               "voting_power": {
                                 "type": "string",
@@ -40481,7 +40517,7 @@
                               "format": "byte"
                             }
                           },
-                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                          "title": "PublicKey defines the keys available for use with Validators"
                         },
                         "voting_power": {
                           "type": "string",
@@ -40609,7 +40645,7 @@
                   "format": "byte"
                 }
               },
-              "description": "Header defines the structure of a Tendermint block header."
+              "description": "Header defines the structure of a block header."
             },
             "commit": {
               "type": "object",
@@ -40707,7 +40743,7 @@
                         "format": "byte"
                       }
                     },
-                    "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                    "title": "PublicKey defines the keys available for use with Validators"
                   },
                   "voting_power": {
                     "type": "string",
@@ -40739,7 +40775,7 @@
                       "format": "byte"
                     }
                   },
-                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                  "title": "PublicKey defines the keys available for use with Validators"
                 },
                 "voting_power": {
                   "type": "string",
@@ -40861,7 +40897,7 @@
                       "format": "byte"
                     }
                   },
-                  "description": "Header defines the structure of a Tendermint block header."
+                  "description": "Header defines the structure of a block header."
                 },
                 "commit": {
                   "type": "object",
@@ -40959,7 +40995,7 @@
                             "format": "byte"
                           }
                         },
-                        "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                        "title": "PublicKey defines the keys available for use with Validators"
                       },
                       "voting_power": {
                         "type": "string",
@@ -40991,7 +41027,7 @@
                           "format": "byte"
                         }
                       },
-                      "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                      "title": "PublicKey defines the keys available for use with Validators"
                     },
                     "voting_power": {
                       "type": "string",
@@ -41036,7 +41072,7 @@
                     "format": "byte"
                   }
                 },
-                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                "title": "PublicKey defines the keys available for use with Validators"
               },
               "voting_power": {
                 "type": "string",
@@ -41156,7 +41192,7 @@
               "format": "byte"
             }
           },
-          "description": "Header defines the structure of a Tendermint block header."
+          "description": "Header defines the structure of a block header."
         },
         "commit": {
           "type": "object",
@@ -41260,7 +41296,7 @@
               "format": "byte"
             }
           },
-          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+          "title": "PublicKey defines the keys available for use with Validators"
         },
         "voting_power": {
           "type": "string",
@@ -41296,7 +41332,7 @@
                     "format": "byte"
                   }
                 },
-                "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                "title": "PublicKey defines the keys available for use with Validators"
               },
               "voting_power": {
                 "type": "string",
@@ -41328,7 +41364,7 @@
                   "format": "byte"
                 }
               },
-              "title": "PublicKey defines the keys available for use with Tendermint Validators"
+              "title": "PublicKey defines the keys available for use with Validators"
             },
             "voting_power": {
               "type": "string",
@@ -41842,7 +41878,7 @@
                                     "format": "byte"
                                   }
                                 },
-                                "description": "Header defines the structure of a Tendermint block header."
+                                "description": "Header defines the structure of a block header."
                               },
                               "commit": {
                                 "type": "object",
@@ -41940,7 +41976,7 @@
                                           "format": "byte"
                                         }
                                       },
-                                      "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                      "title": "PublicKey defines the keys available for use with Validators"
                                     },
                                     "voting_power": {
                                       "type": "string",
@@ -41972,7 +42008,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                    "title": "PublicKey defines the keys available for use with Validators"
                                   },
                                   "voting_power": {
                                     "type": "string",
@@ -42017,7 +42053,7 @@
                                   "format": "byte"
                                 }
                               },
-                              "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                              "title": "PublicKey defines the keys available for use with Validators"
                             },
                             "voting_power": {
                               "type": "string",
@@ -42243,7 +42279,7 @@
                   "format": "byte"
                 }
               },
-              "description": "Header defines the structure of a Tendermint block header."
+              "description": "Header defines the structure of a block header."
             },
             "data": {
               "type": "object",
@@ -42517,7 +42553,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "description": "Header defines the structure of a Tendermint block header."
+                                    "description": "Header defines the structure of a block header."
                                   },
                                   "commit": {
                                     "type": "object",
@@ -42615,7 +42651,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -42647,7 +42683,7 @@
                                             "format": "byte"
                                           }
                                         },
-                                        "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                        "title": "PublicKey defines the keys available for use with Validators"
                                       },
                                       "voting_power": {
                                         "type": "string",
@@ -42692,7 +42728,7 @@
                                       "format": "byte"
                                     }
                                   },
-                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                  "title": "PublicKey defines the keys available for use with Validators"
                                 },
                                 "voting_power": {
                                   "type": "string",
@@ -43164,7 +43200,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "description": "Header defines the structure of a Tendermint block header."
+                                    "description": "Header defines the structure of a block header."
                                   },
                                   "commit": {
                                     "type": "object",
@@ -43262,7 +43298,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -43294,7 +43330,7 @@
                                             "format": "byte"
                                           }
                                         },
-                                        "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                        "title": "PublicKey defines the keys available for use with Validators"
                                       },
                                       "voting_power": {
                                         "type": "string",
@@ -43339,7 +43375,7 @@
                                       "format": "byte"
                                     }
                                   },
-                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                  "title": "PublicKey defines the keys available for use with Validators"
                                 },
                                 "voting_power": {
                                   "type": "string",
@@ -43568,7 +43604,7 @@
                   "format": "byte"
                 }
               },
-              "description": "Header defines the structure of a Tendermint block header."
+              "description": "Header defines the structure of a block header."
             },
             "data": {
               "type": "object",
@@ -43842,7 +43878,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "description": "Header defines the structure of a Tendermint block header."
+                                    "description": "Header defines the structure of a block header."
                                   },
                                   "commit": {
                                     "type": "object",
@@ -43940,7 +43976,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -43972,7 +44008,7 @@
                                             "format": "byte"
                                           }
                                         },
-                                        "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                        "title": "PublicKey defines the keys available for use with Validators"
                                       },
                                       "voting_power": {
                                         "type": "string",
@@ -44017,7 +44053,7 @@
                                       "format": "byte"
                                     }
                                   },
-                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                  "title": "PublicKey defines the keys available for use with Validators"
                                 },
                                 "voting_power": {
                                   "type": "string",
@@ -44489,7 +44525,7 @@
                                         "format": "byte"
                                       }
                                     },
-                                    "description": "Header defines the structure of a Tendermint block header."
+                                    "description": "Header defines the structure of a block header."
                                   },
                                   "commit": {
                                     "type": "object",
@@ -44587,7 +44623,7 @@
                                               "format": "byte"
                                             }
                                           },
-                                          "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                          "title": "PublicKey defines the keys available for use with Validators"
                                         },
                                         "voting_power": {
                                           "type": "string",
@@ -44619,7 +44655,7 @@
                                             "format": "byte"
                                           }
                                         },
-                                        "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                        "title": "PublicKey defines the keys available for use with Validators"
                                       },
                                       "voting_power": {
                                         "type": "string",
@@ -44664,7 +44700,7 @@
                                       "format": "byte"
                                     }
                                   },
-                                  "title": "PublicKey defines the keys available for use with Tendermint Validators"
+                                  "title": "PublicKey defines the keys available for use with Validators"
                                 },
                                 "voting_power": {
                                   "type": "string",

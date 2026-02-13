@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	errorsmod "cosmossdk.io/errors"
 	amino "github.com/cosmos/cosmos-sdk/codec"

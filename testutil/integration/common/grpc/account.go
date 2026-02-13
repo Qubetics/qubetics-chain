@@ -4,8 +4,8 @@ import (
 	"context"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 )
 
 // GetAccount returns the account for the given address.
@@ -18,7 +18,7 @@ func (gqh *IntegrationHandler) GetAccount(address string) (authtypes.AccountI, e
 		return nil, err
 	}
 
-	encodingCgf := encoding.MakeConfig(app.ModuleBasics)
+	encodingCgf := encoding.MakeConfig(qubeticsd.ModuleBasics)
 	var acc authtypes.AccountI
 	if err = encodingCgf.InterfaceRegistry.UnpackAny(res.Account, &acc); err != nil {
 		return nil, err

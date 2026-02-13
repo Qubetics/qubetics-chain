@@ -12,11 +12,11 @@ import (
 	ibctesting "github.com/cosmos/ibc-go/v7/testing"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
 	qubeticsibc "github.com/qubetics/qubetics-blockchain/v2/ibc/testing"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/ics20"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	//nolint:revive // dot imports are fine for Ginkgo
 	. "github.com/onsi/ginkgo/v2"

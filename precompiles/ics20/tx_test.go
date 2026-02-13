@@ -14,7 +14,7 @@ import (
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/testutil"
 	testutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 var (

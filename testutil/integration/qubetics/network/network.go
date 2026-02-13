@@ -9,7 +9,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	gethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
 
 	abcitypes "github.com/cometbft/cometbft/abci/types"
@@ -22,8 +22,8 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	commonnetwork "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/common/network"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // Network is the interface that wraps the methods to interact with integration test network.
@@ -58,7 +58,7 @@ type IntegrationNetwork struct {
 	cfg        Config
 	ctx        sdktypes.Context
 	validators []stakingtypes.Validator
-	app        *app.Qubetics
+	app        *qubeticsd.Qubetics
 
 	// This is only needed for IBC chain testing setup
 	valSet     *tmtypes.ValidatorSet
@@ -161,7 +161,7 @@ func (n *IntegrationNetwork) configureAndInitChain() error {
 		return err
 	}
 
-	consensusParams := app.DefaultConsensusParams
+	consensusParams := qubeticsd.DefaultConsensusParams
 	now := time.Now()
 	qubeticsApp.InitChain(
 		abcitypes.RequestInitChain{

@@ -2,7 +2,7 @@ package erc20_test
 
 import (
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/erc20"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // TODO: This is not yet producing the correct reason bytes so we skip this test for now,

@@ -11,7 +11,7 @@ import (
 	testkeyring "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/keyring"
 	testnetwork "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/utils"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/stretchr/testify/require"
 )
 

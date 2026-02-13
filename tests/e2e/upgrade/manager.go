@@ -18,8 +18,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 )
 
 // safetyDelta is the number of blocks that are added to the upgrade height to make sure
@@ -61,7 +61,7 @@ func NewManager(networkName string) (*Manager, error) {
 		return nil, fmt.Errorf("docker network creation error: %w", err)
 	}
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig(qubeticsd.ModuleBasics)
 	protoCodec, ok := encodingConfig.Codec.(*codec.ProtoCodec)
 	if !ok {
 		return nil, fmt.Errorf("failed to get proto codec")

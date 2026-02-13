@@ -22,7 +22,7 @@ import (
 	network "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	//nolint:revive // dot imports are fine for Gomega
 	. "github.com/onsi/gomega"

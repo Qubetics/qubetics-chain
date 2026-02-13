@@ -10,12 +10,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	geth "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/qubetics/qubetics-blockchain/v2/cmd/config"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/staking"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/config"
 	qubeticsutiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 func (s *PrecompileTestSuite) TestCreateValidator() {

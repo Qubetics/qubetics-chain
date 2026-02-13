@@ -20,7 +20,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	feemarkettypes "github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
 )
@@ -28,7 +28,7 @@ import (
 type GenesisTestSuite struct {
 	suite.Suite
 	ctx     sdk.Context
-	app     *app.Qubetics
+	app     *qubeticsd.Qubetics
 	genesis types.GenesisState
 }
 
@@ -48,7 +48,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 	consAddress := sdk.ConsAddress(utiltx.GenerateAddress().Bytes())
 
 	chainID := utils.TestnetChainID + "-1"
-	suite.app = app.Setup(false, feemarkettypes.DefaultGenesisState(), chainID)
+	suite.app = qubeticsd.Setup(false, feemarkettypes.DefaultGenesisState(), chainID)
 	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{
 		Height:          1,
 		ChainID:         chainID,

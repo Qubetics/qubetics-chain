@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/erc20"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 // GetERC20PrecompileInstance returns the precompile instance for the given address.

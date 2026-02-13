@@ -7,7 +7,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 const (

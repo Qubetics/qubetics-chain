@@ -10,8 +10,8 @@ import (
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
 )
 
 // Precompile is a common struct for all precompiles that holds the common data each

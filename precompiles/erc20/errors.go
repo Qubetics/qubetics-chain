@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/qubetics/qubetics-blockchain/v2/ibc"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // Errors that have formatted information are defined here as a string.

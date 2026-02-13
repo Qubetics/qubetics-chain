@@ -8,7 +8,7 @@ import (
 	"github.com/cometbft/cometbft/crypto"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/p256"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 var trueValue = common.LeftPadBytes(common.Big1.Bytes(), 32)

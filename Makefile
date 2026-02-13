@@ -9,7 +9,7 @@ BINDIR ?= $(GOPATH)/bin
 QUBETICS_BINARY = qubeticsd
 QUBETICS_DIR = qubetics
 BUILDDIR ?= $(CURDIR)/build
-HTTPS_GIT := github.com/anshul-antier/qubetics-blockchain.git
+HTTPS_GIT := https://github.com/Qubetics/qubetics-chain.git
 DOCKER := $(shell which docker)
 DOCKER_BUILDKIT=1
 DOCKER_ARGS=
@@ -28,9 +28,10 @@ MOUNT_PATH := $(shell pwd)/build/:/root/
 E2E_SKIP_CLEANUP := false
 ROCKSDB_VERSION ?= "9.2.1"
 # Deps
-DEPS_COSMOS_SDK_VERSION := $(shell cat go.sum | grep 'github.com/qubetics/cosmos-sdk' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
+DEPS_COSMOS_SDK_REPO := https://github.com/Qubetics/cosmos-sdk.git
+DEPS_COSMOS_SDK_VERSION := $(shell cat go.sum | grep -i 'github.com/qubetics/cosmos-sdk' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
 DEPS_IBC_GO_VERSION := $(shell cat go.sum | grep 'github.com/cosmos/ibc-go' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
-DEPS_COSMOS_PROTO := $(shell cat go.sum | grep 'github.com/cosmos/cosmos-proto' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
+DEPS_COSMOS_PROTO_VERSION := $(shell cat go.sum | grep 'github.com/cosmos/cosmos-proto' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
 DEPS_COSMOS_GOGOPROTO := $(shell cat go.sum | grep 'github.com/cosmos/gogoproto' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
 DEPS_COSMOS_ICS23 := go/$(shell cat go.sum | grep 'github.com/cosmos/ics23/go' | grep -v -e 'go.mod' | tail -n 1 | awk '{ print $$2; }')
 
@@ -283,7 +284,7 @@ else
 endif
 
 tools: tools-stamp
-tools-stamp: contract-tools docs-tools statik runsim
+tools-stamp: contract-tools statik runsim
 	# Create dummy file to satisfy dependency and avoid
 	# rebuilding when this Makefile target is hit twice
 	# in a row.
@@ -308,15 +309,23 @@ vulncheck: $(BUILDDIR)/
 ###                              Documentation                              ###
 ###############################################################################
 
-swagger-update-docs: statik
-	$(BINDIR)/statik -src=client/docs/swagger-ui -dest=client/docs -f -m
-	@if [ -n "$(git status --porcelain)" ]; then \
-        echo "\033[92mSwagger docs are in sync\033[0m";\
-    else \
-        echo "\033[91mSwagger docs are out of sync!!!\033[0m";\
-        exit 1;\
-    fi
-.PHONY: swagger-update-docs
+# regenerates the swagger.json from proto files and embeds it into the binary via statik
+swagger: proto-swagger-gen update-swagger-docs
+
+update-swagger-docs: statik
+	$(STATIK) -src=client/docs/swagger-ui -dest=client/docs -f -m
+	@if [ -n "$$(git status --porcelain client/docs)" ]; then \
+		echo "\033[92mSwagger docs updated\033[0m"; \
+	else \
+		echo "\033[92mSwagger docs are in sync\033[0m"; \
+	fi
+
+# CI check: fails if the embedded swagger docs differ from swagger-ui
+swagger-check-docs: update-swagger-docs
+	@git diff --exit-code client/docs || (echo "\033[91mSwagger docs are out of sync, run 'make swagger'\033[0m"; exit 1)
+
+swagger-update-docs: update-swagger-docs
+.PHONY: swagger update-swagger-docs swagger-check-docs swagger-update-docs
 
 godocs:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/qubetics/qubetics"
@@ -439,11 +448,11 @@ format-isort:
 
 protoVer=0.11.6
 protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
-protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace --user 0 $(protoImageName)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace --user $(shell id -u):$(shell id -g) -e HOME=/tmp $(protoImageName)
 
 protoLintVer=0.44.0
 protoLinterImage=yoheimuta/protolint
-protoLinter=$(DOCKER) run --rm -v "$(CURDIR):/workspace" --workdir /workspace --user 0 $(protoLinterImage):$(protoLintVer)
+protoLinter=$(DOCKER) run --rm -v "$(CURDIR):/workspace" --workdir /workspace --user $(shell id -u):$(shell id -g) $(protoLinterImage):$(protoLintVer)
 
 # ------
 # NOTE: If you are experiencing problems running these commands, try deleting
@@ -463,7 +472,7 @@ proto-swagger-gen:
 
 proto-format:
 	@echo "Formatting Protobuf files"
-	$(protoImage) find ./ -name *.proto -exec clang-format -i {} \;
+	$(protoImage) find ./proto -name '*.proto' -exec clang-format -i {} \;
 
 proto-lint:
 	@echo "Linting Protobuf files"
@@ -478,13 +487,15 @@ SWAGGER_DIR=./swagger-proto
 THIRD_PARTY_DIR=$(SWAGGER_DIR)/third_party
 
 proto-download-deps:
+	rm -rf "$(SWAGGER_DIR)"
 	mkdir -p "$(THIRD_PARTY_DIR)/cosmos_tmp" && \
 	cd "$(THIRD_PARTY_DIR)/cosmos_tmp" && \
 	git init && \
-	git remote add origin "https://github.com/evmos/cosmos-sdk.git" && \
+	git remote add origin "$(DEPS_COSMOS_SDK_REPO)" && \
 	git config core.sparseCheckout true && \
 	printf "proto\nthird_party\n" > .git/info/sparse-checkout && \
-	git pull origin "$(DEPS_COSMOS_SDK_VERSION)" && \
+	git fetch --depth 1 origin "$(DEPS_COSMOS_SDK_VERSION)" && \
+	git checkout -q FETCH_HEAD && \
 	rm -f ./proto/buf.* && \
 	mv ./proto/* ..
 	rm -rf "$(THIRD_PARTY_DIR)/cosmos_tmp"
@@ -495,7 +506,8 @@ proto-download-deps:
 	git remote add origin "https://github.com/cosmos/ibc-go.git" && \
 	git config core.sparseCheckout true && \
 	printf "proto\n" > .git/info/sparse-checkout && \
-	git pull origin "$(DEPS_IBC_GO_VERSION)" && \
+	git fetch --depth 1 origin "$(DEPS_IBC_GO_VERSION)" && \
+	git checkout -q FETCH_HEAD && \
 	rm -f ./proto/buf.* && \
 	mv ./proto/* ..
 	rm -rf "$(THIRD_PARTY_DIR)/ibc_tmp"
@@ -506,7 +518,8 @@ proto-download-deps:
 	git remote add origin "https://github.com/cosmos/cosmos-proto.git" && \
 	git config core.sparseCheckout true && \
 	printf "proto\n" > .git/info/sparse-checkout && \
-	git pull origin "$(DEPS_COSMOS_PROTO_VERSION)" && \
+	git fetch --depth 1 origin "$(DEPS_COSMOS_PROTO_VERSION)" && \
+	git checkout -q FETCH_HEAD && \
 	rm -f ./proto/buf.* && \
 	mv ./proto/* ..
 	rm -rf "$(THIRD_PARTY_DIR)/cosmos_proto_tmp"

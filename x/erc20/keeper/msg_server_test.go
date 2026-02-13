@@ -12,8 +12,8 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/keeper"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
 	erc20mocks "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types/mocks"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/stretchr/testify/mock"
 )
 

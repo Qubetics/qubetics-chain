@@ -16,10 +16,10 @@ import (
 	ibcgotesting "github.com/cosmos/ibc-go/v7/testing"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	ibctesting "github.com/qubetics/qubetics-blockchain/v2/ibc/testing"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evm "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evm "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -27,7 +27,7 @@ type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx              sdk.Context
-	app              *app.Qubetics
+	app              *qubeticsd.Qubetics
 	queryClientEvm   evm.QueryClient
 	queryClient      types.QueryClient
 	address          common.Address

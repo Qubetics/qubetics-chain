@@ -31,7 +31,7 @@ import (
 	rpcfilters "github.com/qubetics/qubetics-blockchain/v2/rpc/namespaces/ethereum/eth/filters"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/server/config"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 type WebsocketsServer interface {

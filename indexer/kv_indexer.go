@@ -15,7 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 const (

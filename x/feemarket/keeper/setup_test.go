@@ -14,7 +14,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
 	"github.com/stretchr/testify/suite"
@@ -24,7 +24,7 @@ type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	app         *app.Qubetics
+	app         *qubeticsd.Qubetics
 	queryClient types.QueryClient
 	address     common.Address
 	consAddress sdk.ConsAddress
@@ -53,6 +53,6 @@ func TestKeeperTestSuite(t *testing.T) {
 func (suite *KeeperTestSuite) SetupTest() {
 	checkTx := false
 	chainID := utils.TestnetChainID + "-1"
-	suite.app = app.Setup(checkTx, nil, chainID)
+	suite.app = qubeticsd.Setup(checkTx, nil, chainID)
 	suite.SetupApp(checkTx, chainID)
 }

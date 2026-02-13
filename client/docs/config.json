@@ -13,9 +13,6 @@
   },
   "apis": [
     {
-      "url": "./tmp-swagger-gen/qubetics/epochs/v1/query.swagger.json"
-    },
-    {
       "url": "./tmp-swagger-gen/qubetics/erc20/v1/query.swagger.json",
       "operationIds": {
         "rename": {
@@ -31,9 +28,6 @@
           "Params": "ValidatorPoolParams"
         }
       }
-    },
-    {
-      "url": "./tmp-swagger-gen/qubetics/vesting/v2/query.swagger.json"
     },
     {
       "url": "./tmp-swagger-gen/ethermint/evm/v1/query.swagger.json",

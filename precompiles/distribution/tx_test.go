@@ -6,7 +6,7 @@ import (
 
 	"cosmossdk.io/math"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 
 	"github.com/ethereum/go-ethereum/common"
 

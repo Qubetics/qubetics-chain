@@ -16,7 +16,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend/mocks"
 	rpc "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	utiltx "github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	mock "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"

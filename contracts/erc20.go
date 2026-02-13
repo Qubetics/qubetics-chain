@@ -4,7 +4,7 @@ import (
 	_ "embed"
 
 	contractutils "github.com/qubetics/qubetics-blockchain/v2/contracts/utils"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/qubetics/qubetics-blockchain/v2/contracts"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evm "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evm "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 func (suite *KeeperTestSuite) MintERC20Token(contractAddr, from, to common.Address, amount *big.Int) *evm.MsgEthereumTx {

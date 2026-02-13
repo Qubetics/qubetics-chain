@@ -21,7 +21,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // ChainIDPrefix defines the default chain ID prefix for Qubetics test chains

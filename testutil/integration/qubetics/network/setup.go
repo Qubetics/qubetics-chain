@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 
 	"cosmossdk.io/simapp"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -30,7 +30,7 @@ import (
 	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	qubeticsutil "github.com/qubetics/qubetics-blockchain/v2/utils"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // createValidatorSetAndSigners creates validator set with the amount of validators specified
@@ -95,19 +95,19 @@ func createBalances(accounts []sdktypes.AccAddress, coin sdktypes.Coin) []bankty
 }
 
 // createQubeticsApp creates an qubetics app
-func createQubeticsApp(chainID string) *app.Qubetics {
+func createQubeticsApp(chainID string) *qubeticsd.Qubetics {
 	// Create qubetics app
 	db := dbm.NewMemDB()
 	logger := log.NewNopLogger()
 	loadLatest := true
 	skipUpgradeHeights := map[int64]bool{}
-	homePath := app.DefaultNodeHome
+	homePath := qubeticsd.DefaultNodeHome
 	invCheckPeriod := uint(5)
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
-	appOptions := simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome)
+	encodingConfig := encoding.MakeConfig(qubeticsd.ModuleBasics)
+	appOptions := simutils.NewAppOptionsWithFlagHome(qubeticsd.DefaultNodeHome)
 	baseAppOptions := []func(*baseapp.BaseApp){baseapp.SetChainID(chainID)}
 
-	return app.NewQubetics(
+	return qubeticsd.NewQubetics(
 		logger,
 		db,
 		nil,
@@ -185,7 +185,7 @@ type StakingCustomGenesisState struct {
 }
 
 // setDefaultStakingGenesisState sets the staking genesis state
-func setDefaultStakingGenesisState(qubeticsApp *app.Qubetics, genesisState simapp.GenesisState, overwriteParams StakingCustomGenesisState) simapp.GenesisState {
+func setDefaultStakingGenesisState(qubeticsApp *qubeticsd.Qubetics, genesisState simapp.GenesisState, overwriteParams StakingCustomGenesisState) simapp.GenesisState {
 	// Set staking params
 	stakingParams := stakingtypes.DefaultParams()
 	stakingParams.BondDenom = overwriteParams.denom
@@ -199,7 +199,7 @@ func setDefaultStakingGenesisState(qubeticsApp *app.Qubetics, genesisState simap
 	return genesisState
 }
 
-func setDefaultMintGenesisState(qubeticsApp *app.Qubetics, genesisState simapp.GenesisState) simapp.GenesisState {
+func setDefaultMintGenesisState(qubeticsApp *qubeticsd.Qubetics, genesisState simapp.GenesisState) simapp.GenesisState {
 	minter := minttypes.DefaultInitialMinter()
 	mintParams := minttypes.DefaultParams()
 	mintGenesis := minttypes.NewGenesisState(minter, mintParams)
@@ -214,7 +214,7 @@ type BankCustomGenesisState struct {
 
 // setDefaultBankGenesisState sets the bank genesis state
 func setDefaultBankGenesisState(
-	qubeticsApp *app.Qubetics,
+	qubeticsApp *qubeticsd.Qubetics,
 	genesisState simapp.GenesisState,
 	overwriteParams BankCustomGenesisState,
 ) simapp.GenesisState {
@@ -231,7 +231,7 @@ func setDefaultBankGenesisState(
 
 // genSetupFn is the type for the module genesis setup functions
 type genSetupFn func(
-	qubeticsApp *app.Qubetics,
+	qubeticsApp *qubeticsd.Qubetics,
 	genesisState simapp.GenesisState,
 	customGenesis interface{},
 ) (simapp.GenesisState, error)
@@ -247,7 +247,7 @@ type defaultGenesisParams struct {
 // genStateSetter is a generic function to set module-specific genesis state
 func genStateSetter[T proto.Message](moduleName string) genSetupFn {
 	return func(
-		qubeticsApp *app.Qubetics,
+		qubeticsApp *qubeticsd.Qubetics,
 		genesisState simapp.GenesisState,
 		customGenesis interface{},
 	) (simapp.GenesisState, error) {
@@ -273,7 +273,7 @@ var genesisSetupFunctions = map[string]genSetupFn{
 
 // setDefaultAuthGenesisState sets the default auth genesis state
 func setDefaultAuthGenesisState(
-	qubeticsApp *app.Qubetics,
+	qubeticsApp *qubeticsd.Qubetics,
 	genesisState simapp.GenesisState,
 	genAccs []authtypes.GenesisAccount,
 ) simapp.GenesisState {
@@ -283,7 +283,7 @@ func setDefaultAuthGenesisState(
 }
 
 // setDefaultGovGenesisState sets the default gov genesis state
-func setDefaultGovGenesisState(qubeticsApp *app.Qubetics, genesisState simapp.GenesisState) simapp.GenesisState {
+func setDefaultGovGenesisState(qubeticsApp *qubeticsd.Qubetics, genesisState simapp.GenesisState) simapp.GenesisState {
 	govGen := govtypesv1.DefaultGenesisState()
 	updatedParams := govGen.Params
 	// set 'tics' as deposit denom
@@ -293,7 +293,7 @@ func setDefaultGovGenesisState(qubeticsApp *app.Qubetics, genesisState simapp.Ge
 	return genesisState
 }
 
-func setDefaultErc20GenesisState(qubeticsApp *app.Qubetics, genesisState simapp.GenesisState) simapp.GenesisState {
+func setDefaultErc20GenesisState(qubeticsApp *qubeticsd.Qubetics, genesisState simapp.GenesisState) simapp.GenesisState {
 	erc20Gen := erc20types.DefaultGenesisState()
 	genesisState[erc20types.ModuleName] = qubeticsApp.AppCodec().MustMarshalJSON(erc20Gen)
 	return genesisState
@@ -301,8 +301,8 @@ func setDefaultErc20GenesisState(qubeticsApp *app.Qubetics, genesisState simapp.
 
 // defaultAuthGenesisState sets the default genesis state
 // for the testing setup
-func newDefaultGenesisState(qubeticsApp *app.Qubetics, params defaultGenesisParams) simapp.GenesisState {
-	genesisState := app.NewDefaultGenesisState()
+func newDefaultGenesisState(qubeticsApp *qubeticsd.Qubetics, params defaultGenesisParams) simapp.GenesisState {
+	genesisState := qubeticsd.NewDefaultGenesisState()
 
 	genesisState = setDefaultAuthGenesisState(qubeticsApp, genesisState, params.genAccounts)
 	genesisState = setDefaultStakingGenesisState(qubeticsApp, genesisState, params.staking)
@@ -317,7 +317,7 @@ func newDefaultGenesisState(qubeticsApp *app.Qubetics, params defaultGenesisPara
 // customizeGenesis modifies genesis state if there're any custom genesis state
 // for specific modules
 func customizeGenesis(
-	qubeticsApp *app.Qubetics,
+	qubeticsApp *qubeticsd.Qubetics,
 	customGen CustomGenesisState,
 	genesisState simapp.GenesisState,
 ) (simapp.GenesisState, error) {

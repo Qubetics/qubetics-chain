@@ -16,8 +16,8 @@ import (
 	"github.com/pkg/errors"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/core/vm"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

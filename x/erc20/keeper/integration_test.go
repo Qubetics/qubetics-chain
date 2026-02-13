@@ -15,8 +15,8 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
@@ -213,12 +213,12 @@ var _ = Describe("ERC20:", Ordered, func() {
 	})
 })
 
-func submitRegisterERC20Proposal(ctx sdk.Context, appQubetics *app.Qubetics, pk *ethsecp256k1.PrivKey, addrs []string) (id uint64, err error) {
+func submitRegisterERC20Proposal(ctx sdk.Context, appQubetics *qubeticsd.Qubetics, pk *ethsecp256k1.PrivKey, addrs []string) (id uint64, err error) {
 	content := types.NewRegisterERC20Proposal("test token", "foo", addrs...)
 	return testutil.SubmitProposal(ctx, appQubetics, pk, content, 8)
 }
 
-func convertERC20(ctx sdk.Context, appQubetics *app.Qubetics, pk *ethsecp256k1.PrivKey, amt math.Int, contract common.Address) {
+func convertERC20(ctx sdk.Context, appQubetics *qubeticsd.Qubetics, pk *ethsecp256k1.PrivKey, amt math.Int, contract common.Address) {
 	addrBz := pk.PubKey().Address().Bytes()
 	convertERC20Msg := types.NewMsgConvertERC20(amt, sdk.AccAddress(addrBz), contract, common.BytesToAddress(addrBz))
 	res, err := testutil.DeliverTx(ctx, appQubetics, pk, nil, convertERC20Msg)

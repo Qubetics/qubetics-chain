@@ -13,13 +13,13 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/testutil"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	commonfactory "github.com/qubetics/qubetics-blockchain/v2/testutil/integration/common/factory"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/grpc"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/integration/qubetics/network"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // TxFactory defines a struct that can build and broadcast transactions for the Qubetics
@@ -80,7 +80,7 @@ func New(
 	network network.Network,
 	grpcHandler grpc.Handler,
 ) TxFactory {
-	ec := makeConfig(app.ModuleBasics)
+	ec := makeConfig(qubeticsd.ModuleBasics)
 	return &IntegrationTxFactory{
 		IntegrationTxFactory: commonfactory.New(network, grpcHandler, &ec),
 		grpcHandler:          grpcHandler,

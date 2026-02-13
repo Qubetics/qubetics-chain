@@ -16,9 +16,9 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/qubetics/qubetics-blockchain/v2/app"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/testutil/tx"
-	evm "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	evm "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // ContractArgs are the params used for calling a smart contract.
@@ -51,7 +51,7 @@ type ContractCallArgs struct {
 // compiled contract data and constructor arguments
 func DeployContract(
 	ctx sdk.Context,
-	qubeticsApp *app.Qubetics,
+	qubeticsApp *qubeticsd.Qubetics,
 	priv cryptotypes.PrivKey,
 	queryClientEvm evm.QueryClient,
 	contract evm.CompiledContract,
@@ -99,7 +99,7 @@ func DeployContract(
 // with the provided factoryAddress
 func DeployContractWithFactory(
 	ctx sdk.Context,
-	qubeticsApp *app.Qubetics,
+	qubeticsApp *qubeticsd.Qubetics,
 	priv cryptotypes.PrivKey,
 	factoryAddress common.Address,
 ) (common.Address, abci.ResponseDeliverTx, error) {

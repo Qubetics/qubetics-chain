@@ -13,8 +13,8 @@ import (
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/qubetics/qubetics-blockchain/v2/cmd/config"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/config"
 )
 
 // EventSetWithdrawAddress defines the event data for the SetWithdrawAddress transaction.

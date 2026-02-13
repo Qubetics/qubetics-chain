@@ -10,8 +10,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/qubetics/qubetics-blockchain/v2/app"
 	"github.com/qubetics/qubetics-blockchain/v2/encoding"
+	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
 	"github.com/qubetics/qubetics-blockchain/v2/tests/e2e/upgrade"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/stretchr/testify/suite"
@@ -279,7 +279,7 @@ func (s *IntegrationTestSuite) checkProposalPassed(ctx context.Context) {
 		"failed to query proposals;\nstdout: %s,\nstderr: %s", outBuf.String(), errBuf.String(),
 	)
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig(qubeticsd.ModuleBasics)
 	protoCodec, ok := encodingConfig.Codec.(*codec.ProtoCodec)
 	s.Require().True(ok, "encoding config codec is not a proto codec")
 

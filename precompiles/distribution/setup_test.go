@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/distribution"
-	"github.com/qubetics/qubetics-blockchain/v2/x/evm/statedb"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
 
 	//nolint:revive // dot imports are fine for Ginkgo
 	. "github.com/onsi/ginkgo/v2"
@@ -18,8 +18,8 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/app"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/evm/types"
+	qubeticsapp "github.com/qubetics/qubetics-blockchain/v2/qubeticsd"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/stretchr/testify/suite"
 )
 
