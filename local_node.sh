@@ -279,15 +279,15 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 fi
 
 # Start the node
-# qubeticsd start \
-# 	--metrics "$TRACE" \
-# 	--log_level $LOGLEVEL \
-# 	--minimum-gas-prices=0.0001tics \
-# 	--json-rpc.api eth,txpool,personal,net,debug,web3 \
-# 	--home "$HOMEDIR" \
-# 	--chain-id "$CHAINID"
+qubeticsd start \
+	--metrics "$TRACE" \
+	--log_level $LOGLEVEL \
+	--minimum-gas-prices=0.0001tics \
+	--json-rpc.api eth,txpool,personal,net,debug,web3 \
+	--home "$HOMEDIR" \
+	--chain-id "$CHAINID"
 
 
-cosmovisor init $(which qubeticsd)
+# cosmovisor init $(which qubeticsd)
 
-cosmovisor run start --home /data/.tmp-qubeticsd
+# cosmovisor run start --home /data/.tmp-qubeticsd
