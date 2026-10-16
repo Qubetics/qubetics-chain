@@ -37,7 +37,7 @@ Qubetics is a next-generation blockchain platform that combines the best feature
 
 ### Prerequisites
 
-- Go 1.20 or later
+- Go 1.22.7 or later
 - Docker (optional, for containerized deployment)
 - Git
 - Make
