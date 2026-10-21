@@ -17,6 +17,32 @@ Qubetics is a next-generation blockchain platform that combines the best feature
 - **High Performance**: Optimized for high throughput and low latency
 - **Proof-of-Stake Security**: Secure consensus mechanism with validator staking
 
+## License
+
+> [!IMPORTANT]
+> **Parts of this codebase are derived from [Evmos](https://github.com/evmos/evmos) v19 and are not licensed for commercial use.**
+
+Files that begin with the following header are derived from Evmos and are licensed under the
+[Evmos Non-Commercial License (ENCL-1.0)](https://github.com/evmos/evmos/blob/main/LICENSE), owned by Tharsis Labs Ltd.:
+
+```go
+// Copyright Tharsis Labs Ltd.(Evmos)
+// SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/evmos/blob/main/LICENSE)
+```
+
+Under that license, these files:
+
+- may only be used for **non-commercial purposes** (academic, scientific, research and development, or evaluation such as auditing);
+- **may not be used to launch a publicly available blockchain**, precompiled smart contracts, or other distributed-ledger system that facilitates transactions of economic value;
+- may not be used commercially without permission from Tharsis Labs Ltd.
+
+The Apache-2.0 [LICENSE](LICENSE) file in this repository does **not** apply to these Evmos-derived files.
+Files carrying other headers (for example go-ethereum's LGPL-3.0 notice) remain under their original licenses.
+
+If you plan to use this code, please review the
+[Evmos license](https://github.com/evmos/evmos/blob/main/LICENSE) and its
+[FAQ](https://github.com/evmos/evmos/blob/main/LICENSE_FAQ.md) first.
+
 ## Features
 
 - **Smart Contract Execution**
