@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package eip712
 
 import (
@@ -5,7 +12,6 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -96,6 +102,10 @@ func getPayloadMessages(payload gjson.Result) ([]gjson.Result, error) {
 
 	if !rawMsgs.Exists() {
 		return nil, errorsmod.Wrap(errortypes.ErrInvalidRequest, "no messages found in payload, unable to parse")
+	}
+
+	if rawMsgs.Type == gjson.Null {
+		return []gjson.Result{}, nil
 	}
 
 	if !rawMsgs.IsArray() {

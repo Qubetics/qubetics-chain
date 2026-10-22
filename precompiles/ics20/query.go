@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package ics20
 
 import (
@@ -36,7 +43,7 @@ func (p Precompile) DenomTrace(
 		return nil, err
 	}
 
-	res, err := p.transferKeeper.DenomTrace(sdk.WrapSDKContext(ctx), req)
+	res, err := p.transferKeeper.DenomTrace(ctx, req)
 	if err != nil {
 		// if the trace does not exist, return empty array
 		if strings.Contains(err.Error(), ErrTraceNotFound) {
@@ -60,7 +67,7 @@ func (p Precompile) DenomTraces(
 		return nil, err
 	}
 
-	res, err := p.transferKeeper.DenomTraces(sdk.WrapSDKContext(ctx), req)
+	res, err := p.transferKeeper.DenomTraces(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +87,7 @@ func (p Precompile) DenomHash(
 		return nil, err
 	}
 
-	res, err := p.transferKeeper.DenomHash(sdk.WrapSDKContext(ctx), req)
+	res, err := p.transferKeeper.DenomHash(ctx, req)
 	if err != nil {
 		// if the denom hash does not exist, return empty string
 		if strings.Contains(err.Error(), ErrTraceNotFound) {

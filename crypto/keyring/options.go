@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keyring
 
 import (
@@ -10,19 +17,19 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/wallets/ledger"
 )
 
-// AppName defines the Ledger app used for signing. Qubetics uses the Ethereum app
+// AppName defines the Ledger app used for signing. Cosmos EVM uses the Ethereum app
 const AppName = "Ethereum"
 
 var (
-	// SupportedAlgorithms defines the list of signing algorithms used on Qubetics:
+	// SupportedAlgorithms defines the list of signing algorithms used on Cosmos EVM:
 	//  - eth_secp256k1 (Ethereum)
 	SupportedAlgorithms = keyring.SigningAlgoList{hd.EthSecp256k1}
-	// SupportedAlgorithmsLedger defines the list of signing algorithms used on Qubetics for the Ledger device:
+	// SupportedAlgorithmsLedger defines the list of signing algorithms used by Cosmos EVM for the Ledger device:
 	//  - secp256k1 (in order to comply with Cosmos SDK)
 	// The Ledger derivation function is responsible for all signing and address generation.
 	SupportedAlgorithmsLedger = keyring.SigningAlgoList{hd.EthSecp256k1}
-	// LedgerDerivation defines the Qubetics Ledger Go derivation (Ethereum app with EIP-712 signing)
-	LedgerDerivation = ledger.QubeticsLedgerDerivation()
+	// LedgerDerivation defines the Cosmos EVM Ledger Go derivation (Ethereum app with EIP-712 signing)
+	LedgerDerivation = ledger.EvmLedgerDerivation()
 	// CreatePubkey uses the ethsecp256k1 pubkey with Ethereum address generation and keccak hashing
 	CreatePubkey = func(key []byte) types.PubKey { return &ethsecp256k1.PubKey{Key: key} }
 	// SkipDERConversion represents whether the signed Ledger output should skip conversion from DER to BER.

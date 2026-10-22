@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -15,7 +22,7 @@ var (
 	regexEIP155          = `[1-9][0-9]*`
 	regexEpochSeparator  = `-{1}`
 	regexEpoch           = `[1-9][0-9]*`
-	qubeticsChainID      = regexp.MustCompile(fmt.Sprintf(`^(%s)%s(%s)%s(%s)$`,
+	cosmosEvmChainID     = regexp.MustCompile(fmt.Sprintf(`^(%s)%s(%s)%s(%s)$`,
 		regexChainID,
 		regexEIP155Separator,
 		regexEIP155,
@@ -29,7 +36,7 @@ func IsValidChainID(chainID string) bool {
 		return false
 	}
 
-	return qubeticsChainID.MatchString(chainID)
+	return cosmosEvmChainID.MatchString(chainID)
 }
 
 // ParseChainID parses a string chain identifier's epoch to an Ethereum-compatible
@@ -40,7 +47,7 @@ func ParseChainID(chainID string) (*big.Int, error) {
 		return nil, errorsmod.Wrapf(ErrInvalidChainID, "chain-id '%s' cannot exceed 48 chars", chainID)
 	}
 
-	matches := qubeticsChainID.FindStringSubmatch(chainID)
+	matches := cosmosEvmChainID.FindStringSubmatch(chainID)
 	if matches == nil || len(matches) != 4 || matches[1] == "" {
 		return nil, errorsmod.Wrapf(ErrInvalidChainID, "%s: %v", chainID, matches)
 	}

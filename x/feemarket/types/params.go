@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -9,6 +16,8 @@ import (
 )
 
 var (
+	// DefaultBaseFee for the Cosmos EVM chain
+	DefaultBaseFee = math.LegacyNewDec(1_000_000_000)
 	// DefaultMinGasMultiplier is 0.5 or 50%
 	DefaultMinGasMultiplier = math.LegacyNewDecWithPrec(50, 2)
 	// DefaultMinGasPrice is 0 (i.e disabled)
@@ -54,7 +63,7 @@ func NewParams(
 	noBaseFee bool,
 	baseFeeChangeDenom,
 	elasticityMultiplier uint32,
-	baseFee uint64,
+	baseFee math.LegacyDec,
 	enableHeight int64,
 	minGasPrice math.LegacyDec,
 	minGasPriceMultiplier math.LegacyDec,
@@ -63,7 +72,7 @@ func NewParams(
 		NoBaseFee:                noBaseFee,
 		BaseFeeChangeDenominator: baseFeeChangeDenom,
 		ElasticityMultiplier:     elasticityMultiplier,
-		BaseFee:                  math.NewIntFromUint64(baseFee),
+		BaseFee:                  baseFee,
 		EnableHeight:             enableHeight,
 		MinGasPrice:              minGasPrice,
 		MinGasMultiplier:         minGasPriceMultiplier,
@@ -76,7 +85,7 @@ func DefaultParams() Params {
 		NoBaseFee:                DefaultNoBaseFee,
 		BaseFeeChangeDenominator: params.BaseFeeChangeDenominator,
 		ElasticityMultiplier:     params.ElasticityMultiplier,
-		BaseFee:                  math.NewIntFromUint64(params.InitialBaseFee),
+		BaseFee:                  DefaultBaseFee,
 		EnableHeight:             DefaultEnableHeight,
 		MinGasPrice:              DefaultMinGasPrice,
 		MinGasMultiplier:         DefaultMinGasMultiplier,

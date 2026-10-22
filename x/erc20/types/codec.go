@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -19,15 +26,16 @@ var (
 	ModuleCdc = codec.NewProtoCodec(codectypes.NewInterfaceRegistry())
 
 	// AminoCdc is a amino codec created to support amino JSON compatible msgs.
-	AminoCdc = codec.NewAminoCodec(amino)
+	AminoCdc = codec.NewAminoCodec(amino) //nolint:staticcheck
 )
 
 const (
 	// Amino names
-	convertERC20Name = "qubetics/MsgConvertERC20"
-	updateParams     = "qubetics/erc20/MsgUpdateParams"
-	convertCoinName  = "qubetics/MsgConvertCoin"
-
+	convertERC20Name = "cosmos/evm/MsgConvertERC20"
+	convertCoinName  = "cosmos/evm/MsgConvertCoin" // keep it for backwards compatibility when querying txs
+	updateParams     = "cosmos/evm/erc20/MsgUpdateParams"
+	registerERC20    = "cosmos/evm/erc20/MsgRegisterERC20"
+	toggleConversion = "cosmos/evm/erc20/MsgToggleConversion"
 )
 
 // NOTE: This is required for the GetSignBytes function
@@ -40,8 +48,11 @@ func init() {
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
+		&MsgConvertCoin{}, // keep it for backwards compatibility when querying txs
 		&MsgConvertERC20{},
 		&MsgUpdateParams{},
+		&MsgRegisterERC20{},
+		&MsgToggleConversion{},
 	)
 	registry.RegisterImplementations(
 		(*govv1beta1.Content)(nil),
@@ -60,5 +71,6 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgUpdateParams{}, updateParams, nil)
 	cdc.RegisterConcrete(&MsgConvertERC20{}, convertERC20Name, nil)
 	cdc.RegisterConcrete(&MsgConvertCoin{}, convertCoinName, nil)
-
+	cdc.RegisterConcrete(&MsgRegisterERC20{}, registerERC20, nil)
+	cdc.RegisterConcrete(&MsgToggleConversion{}, toggleConversion, nil)
 }

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package utils
 
 import (
@@ -5,60 +12,48 @@ import (
 	"sort"
 	"strings"
 
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	"github.com/ethereum/go-ethereum/common"
-
-	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
-
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/crypto/types/multisig"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/qubetics/qubetics-blockchain/v2/crypto/ethsecp256k1"
 	"golang.org/x/exp/constraints"
 )
 
-const (
-	// MainnetChainID defines the Qubetics EIP155 chain ID for mainnet
-	MainnetChainID = "qubetics_9001"
-	// TestnetChainID defines the Qubetics EIP155 chain ID for testnet
-	TestnetChainID = "qubetics_9000"
-	// TestingChainID defines the Qubetics EIP155 chain ID for integration test
-	TestingChainID = "test_9000"
-	// BaseDenom defines the Qubetics mainnet denomination
-	BaseDenom = "tics"
-)
-
-// EthHexToSDKAddr takes a given Hex string and derives a Cosmos SDK account address
+// EthHexToCosmosAddr takes a given Hex string and derives a Cosmos SDK account address
 // from it.
-func EthHexToSDKAddr(hexAddr string) sdk.AccAddress {
-	return EthToSDKAddr(common.HexToAddress(hexAddr))
+func EthHexToCosmosAddr(hexAddr string) sdk.AccAddress {
+	return EthToCosmosAddr(common.HexToAddress(hexAddr))
 }
 
-// EthToSDKAddr converts a given Ethereum style address to an SDK address.
-func EthToSDKAddr(addr common.Address) sdk.AccAddress {
+// EthToCosmosAddr converts a given Ethereum style address to an SDK address.
+func EthToCosmosAddr(addr common.Address) sdk.AccAddress {
 	return sdk.AccAddress(addr.Bytes())
 }
 
-// IsMainnet returns true if the chain-id has the Qubetics mainnet EIP155 chain prefix.
-func IsMainnet(chainID string) bool {
-	return strings.HasPrefix(chainID, MainnetChainID)
+// Bech32ToHexAddr converts a given Bech32 address string and converts it to
+// an Ethereum address.
+func Bech32ToHexAddr(bech32Addr string) (common.Address, error) {
+	accAddr, err := sdk.AccAddressFromBech32(bech32Addr)
+	if err != nil {
+		return common.Address{}, errorsmod.Wrapf(err, "failed to convert bech32 string to address")
+	}
+
+	return CosmosToEthAddr(accAddr), nil
 }
 
-// IsTestnet returns true if the chain-id has the Qubetics testnet EIP155 chain prefix.
-func IsTestnet(chainID string) bool {
-	return strings.HasPrefix(chainID, TestnetChainID)
-}
-
-// IsTesting returns true if the chain-id has the "test" prefix.
-// NOTE: for tests only
-func IsTesting(chainID string) bool {
-	return strings.HasPrefix(chainID, TestingChainID)
+// CosmosToEthAddr converts a given SDK account address to
+// an Ethereum address.
+func CosmosToEthAddr(accAddr sdk.AccAddress) common.Address {
+	return common.BytesToAddress(accAddr.Bytes())
 }
 
 // IsSupportedKey returns true if the pubkey type is supported by the chain
-// (i.e eth_secp256k1, amino multisig, ed25519).
+// (i.e. eth_secp256k1, amino multisig, ed25519).
 // NOTE: Nested multisigs are not supported.
 func IsSupportedKey(pubkey cryptotypes.PubKey) bool {
 	switch pubkey := pubkey.(type) {
@@ -85,11 +80,12 @@ func IsSupportedKey(pubkey cryptotypes.PubKey) bool {
 	}
 }
 
-// GetQubeticsAddressFromBech32 returns the sdk.Account address of given address,
+// GetAccAddressFromBech32 returns the sdk.Account address of given address,
 // while also changing bech32 human readable prefix (HRP) to the value set on
-// the global sdk.Config (eg: `qubetics`).
+// the global sdk.Config (eg: `evmos`).
+//
 // The function fails if the provided bech32 address is invalid.
-func GetQubeticsAddressFromBech32(address string) (sdk.AccAddress, error) {
+func GetAccAddressFromBech32(address string) (sdk.AccAddress, error) {
 	bech32Prefix := strings.SplitN(address, "1", 2)[0]
 	if bech32Prefix == address {
 		return nil, errorsmod.Wrapf(errortypes.ErrInvalidAddress, "invalid bech32 address: %s", address)

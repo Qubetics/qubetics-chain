@@ -1,0 +1,34 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
+syntax = "proto3";
+package cosmos.evm.types.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/types";
+
+// ExtensionOptionsWeb3Tx is an extension option that specifies the typed chain
+// id, the fee payer as well as its signature data.
+message ExtensionOptionsWeb3Tx {
+  option (gogoproto.goproto_getters) = false;
+
+  // typed_data_chain_id is used only in EIP712 Domain and should match
+  // Ethereum network ID in a Web3 provider (e.g. Metamask).
+  uint64 typed_data_chain_id = 1 [
+    (gogoproto.jsontag) = "typedDataChainID,omitempty",
+    (gogoproto.customname) = "TypedDataChainID"
+  ];
+
+  // fee_payer is an account address for the fee payer. It will be validated
+  // during EIP712 signature checking.
+  string fee_payer = 2 [ (gogoproto.jsontag) = "feePayer,omitempty" ];
+
+  // fee_payer_sig is a signature data from the fee paying account,
+  // allows to perform fee delegation when using EIP712 Domain.
+  bytes fee_payer_sig = 3 [ (gogoproto.jsontag) = "feePayerSig,omitempty" ];
+}

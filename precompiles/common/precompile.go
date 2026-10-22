@@ -1,7 +1,14 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package common
 
 import (
-	"fmt"
+	"errors"
 	"math/big"
 	"time"
 
@@ -49,7 +56,7 @@ func NewBalanceChangeEntry(acc common.Address, amt *big.Int, op Operation) balan
 // This is needed to allow us to revert the changes
 // during the EVM execution
 type snapshot struct {
-	MultiStore sdk.CacheMultiStore
+	MultiStore storetypes.CacheMultiStore
 	Events     sdk.Events
 }
 
@@ -72,11 +79,11 @@ func (p Precompile) RunSetup(
 	evm *vm.EVM,
 	contract *vm.Contract,
 	readOnly bool,
-	isTransaction func(name string) bool,
+	isTransaction func(name *abi.Method) bool,
 ) (ctx sdk.Context, stateDB *statedb.StateDB, s snapshot, method *abi.Method, gasConfig storetypes.Gas, args []interface{}, err error) { //nolint:revive
 	stateDB, ok := evm.StateDB.(*statedb.StateDB)
 	if !ok {
-		return sdk.Context{}, nil, s, nil, uint64(0), nil, fmt.Errorf(ErrNotRunInEvm)
+		return sdk.Context{}, nil, s, nil, uint64(0), nil, errors.New(ErrNotRunInEvm)
 	}
 
 	// get the stateDB cache ctx
@@ -123,7 +130,7 @@ func (p Precompile) RunSetup(
 	}
 
 	// return error if trying to write to state during a read-only call
-	if readOnly && isTransaction(method.Name) {
+	if readOnly && isTransaction(method) {
 		return sdk.Context{}, nil, s, nil, uint64(0), nil, vm.ErrWriteProtection
 	}
 
@@ -157,7 +164,7 @@ func HandleGasError(ctx sdk.Context, contract *vm.Contract, initialGas storetype
 	return func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
-			case sdk.ErrorOutOfGas:
+			case storetypes.ErrorOutOfGas:
 				// update contract gas
 				usedGas := ctx.GasMeter().GasConsumed() - initialGas
 				_ = contract.UseGas(usedGas)

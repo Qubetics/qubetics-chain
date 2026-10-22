@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package filters
 
 import (
@@ -6,34 +13,30 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
-
-	tmjson "github.com/cometbft/cometbft/libs/json"
+	cmtjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/cometbft/cometbft/libs/log"
-	tmquery "github.com/cometbft/cometbft/libs/pubsub/query"
+	cmtquery "github.com/cometbft/cometbft/libs/pubsub/query"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
-	tmtypes "github.com/cometbft/cometbft/types"
-
+	cmttypes "github.com/cometbft/cometbft/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/filters"
 	"github.com/ethereum/go-ethereum/rpc"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/pkg/errors"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/ethereum/pubsub"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 var (
-	txEvents  = tmtypes.QueryForEvent(tmtypes.EventTx).String()
-	evmEvents = tmquery.MustParse(fmt.Sprintf("%s='%s' AND %s.%s='%s'",
-		tmtypes.EventTypeKey,
-		tmtypes.EventTx,
+	txEvents  = cmttypes.QueryForEvent(cmttypes.EventTx).String()
+	evmEvents = cmtquery.MustParse(fmt.Sprintf("%s='%s' AND %s.%s='%s'",
+		cmttypes.EventTypeKey,
+		cmttypes.EventTx,
 		sdk.EventTypeMessage,
 		sdk.AttributeKeyModule, evmtypes.ModuleName)).String()
-	headerEvents = tmtypes.QueryForEvent(tmtypes.EventNewBlockHeader).String()
+	headerEvents = cmttypes.QueryForEvent(cmttypes.EventNewBlockHeader).String()
 )
 
 // EventSystem creates subscriptions, processes events and broadcasts them to the
@@ -277,7 +280,7 @@ func (es *EventSystem) consumeEvents() {
 			if rpcResp.Error != nil {
 				time.Sleep(5 * time.Second)
 				continue
-			} else if err := tmjson.Unmarshal(rpcResp.Result, &ev); err != nil {
+			} else if err := cmtjson.Unmarshal(rpcResp.Result, &ev); err != nil {
 				es.logger.Error("failed to JSON unmarshal ResponsesCh result event", "error", err.Error())
 				continue
 			}

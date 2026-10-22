@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package eip712
 
 import (
@@ -5,13 +12,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txTypes "github.com/cosmos/cosmos-sdk/types/tx"
-
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	apitypes "github.com/ethereum/go-ethereum/signer/core/apitypes"
-	qubetics "github.com/qubetics/qubetics-blockchain/v2/types"
+	ostypes "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 type aminoMessage struct {
@@ -88,12 +93,13 @@ func legacyDecodeAminoSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 	msg := msgs[0]
 
 	// By convention, the fee payer is the first address in the list of signers.
-	feePayer := msg.GetSigners()[0]
+	signers := msg.GetSigners()
+	feePayer := signers[0]
 	feeDelegation := &FeeDelegationOptions{
 		FeePayer: feePayer,
 	}
 
-	chainID, err := qubetics.ParseChainID(aminoDoc.ChainID)
+	chainID, err := ostypes.ParseChainID(aminoDoc.ChainID)
 	if err != nil {
 		return apitypes.TypedData{}, errors.New("invalid chain ID passed as argument")
 	}
@@ -163,7 +169,7 @@ func legacyDecodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error
 
 	signerInfo := authInfo.SignerInfos[0]
 
-	chainID, err := qubetics.ParseChainID(signDoc.ChainId)
+	chainID, err := ostypes.ParseChainID(signDoc.ChainId)
 	if err != nil {
 		return apitypes.TypedData{}, fmt.Errorf("invalid chain ID passed as argument: %w", err)
 	}
@@ -173,12 +179,11 @@ func legacyDecodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error
 		Gas:    authInfo.Fee.GasLimit,
 	}
 
-	feePayer := msg.GetSigners()[0]
+	signers := msg.GetSigners()
+	feePayer := signers[0]
 	feeDelegation := &FeeDelegationOptions{
 		FeePayer: feePayer,
 	}
-
-	tip := authInfo.Tip
 
 	// WrapTxToTypedData expects the payload as an Amino Sign Doc
 	signBytes := legacytx.StdSignBytes(
@@ -189,7 +194,7 @@ func legacyDecodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error
 		*stdFee,
 		msgs,
 		body.Memo,
-		tip,
+		nil,
 	)
 
 	typedData, err := LegacyWrapTxToTypedData(
@@ -222,13 +227,14 @@ func legacyValidatePayloadMessages(msgs []sdk.Msg) error {
 			return err
 		}
 
-		if len(m.GetSigners()) != 1 {
+		signers := m.GetSigners()
+		if len(signers) != 1 {
 			return errors.New("unable to build EIP-712 payload: expect exactly 1 signer")
 		}
 
 		if i == 0 {
 			msgType = t
-			msgSigner = m.GetSigners()[0]
+			msgSigner = signers[0]
 			continue
 		}
 
@@ -236,7 +242,7 @@ func legacyValidatePayloadMessages(msgs []sdk.Msg) error {
 			return errors.New("unable to build EIP-712 payload: different types of messages detected")
 		}
 
-		if !msgSigner.Equals(m.GetSigners()[0]) {
+		if !msgSigner.Equals(sdk.AccAddress(signers[0])) {
 			return errors.New("unable to build EIP-712 payload: multiple signers detected")
 		}
 	}

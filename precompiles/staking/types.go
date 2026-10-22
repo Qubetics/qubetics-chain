@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package staking
 
 import (
@@ -14,9 +21,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 )
 
 const (
@@ -116,7 +123,7 @@ func NewMsgCreateValidator(args []interface{}, denom string) (*stakingtypes.MsgC
 		return nil, common.Address{}, fmt.Errorf(cmn.ErrInvalidValidator, args[3])
 	}
 
-	// use cli `qubeticsd tendermint show-validator` get pubkey
+	// use cli `evmd tendermint show-validator` get pubkey
 	pubkeyBase64Str, ok := args[4].(string)
 	if !ok {
 		return nil, common.Address{}, fmt.Errorf(cmn.ErrInvalidType, "pubkey", "string", args[4])
@@ -151,19 +158,15 @@ func NewMsgCreateValidator(args []interface{}, denom string) (*stakingtypes.MsgC
 			Details:         description.Details,
 		},
 		Commission: stakingtypes.CommissionRates{
-			Rate:          sdk.NewDecFromBigIntWithPrec(commission.Rate, sdk.Precision),
-			MaxRate:       sdk.NewDecFromBigIntWithPrec(commission.Rate, sdk.Precision),
-			MaxChangeRate: sdk.NewDecFromBigIntWithPrec(commission.Rate, sdk.Precision),
+			Rate:          math.LegacyNewDecFromBigIntWithPrec(commission.Rate, math.LegacyPrecision),
+			MaxRate:       math.LegacyNewDecFromBigIntWithPrec(commission.Rate, math.LegacyPrecision),
+			MaxChangeRate: math.LegacyNewDecFromBigIntWithPrec(commission.Rate, math.LegacyPrecision),
 		},
-		MinSelfDelegation: sdk.NewIntFromBigInt(minSelfDelegation),
+		MinSelfDelegation: math.NewIntFromBigInt(minSelfDelegation),
 		DelegatorAddress:  sdk.AccAddress(validatorAddress.Bytes()).String(),
 		ValidatorAddress:  sdk.ValAddress(validatorAddress.Bytes()).String(),
 		Pubkey:            pubkey,
 		Value:             sdk.Coin{Denom: denom, Amount: math.NewIntFromBigInt(value)},
-	}
-
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
 	}
 
 	return msg, validatorAddress, nil
@@ -195,7 +198,7 @@ func NewMsgEditValidator(args []interface{}) (*stakingtypes.MsgEditValidator, co
 	// If the value passed in by the user is not DoNotModifyCommissionRate, which is -1, it means that the user wants to modify its value.
 	var commissionRate *math.LegacyDec
 	if commissionRateBigInt.Cmp(big.NewInt(DoNotModifyCommissionRate)) != 0 {
-		cr := sdk.NewDecFromBigIntWithPrec(commissionRateBigInt, sdk.Precision)
+		cr := math.LegacyNewDecFromBigIntWithPrec(commissionRateBigInt, math.LegacyPrecision)
 		commissionRate = &cr
 	}
 
@@ -223,10 +226,6 @@ func NewMsgEditValidator(args []interface{}) (*stakingtypes.MsgEditValidator, co
 		MinSelfDelegation: minSelfDelegation,
 	}
 
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
-	}
-
 	return msg, validatorHexAddr, nil
 }
 
@@ -247,10 +246,6 @@ func NewMsgDelegate(args []interface{}, denom string) (*stakingtypes.MsgDelegate
 		},
 	}
 
-	if err = msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
-	}
-
 	return msg, delegatorAddr, nil
 }
 
@@ -269,10 +264,6 @@ func NewMsgUndelegate(args []interface{}, denom string) (*stakingtypes.MsgUndele
 			Denom:  denom,
 			Amount: math.NewIntFromBigInt(amount),
 		},
-	}
-
-	if err = msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
 	}
 
 	return msg, delegatorAddr, nil
@@ -315,10 +306,6 @@ func NewMsgRedelegate(args []interface{}, denom string) (*stakingtypes.MsgBeginR
 		},
 	}
 
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
-	}
-
 	return msg, delegatorAddr, nil
 }
 
@@ -357,10 +344,6 @@ func NewMsgCancelUnbondingDelegation(args []interface{}, denom string) (*staking
 			Amount: math.NewIntFromBigInt(amount),
 		},
 		CreationHeight: creationHeight.Int64(),
-	}
-
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
 	}
 
 	return msg, delegatorAddr, nil
@@ -633,7 +616,7 @@ func (vo *ValidatorOutput) FromResponse(res *stakingtypes.QueryValidatorResponse
 			OperatorAddress: common.BytesToAddress(operatorAddress.Bytes()).String(),
 			ConsensusPubkey: FormatConsensusPubkey(res.Validator.ConsensusPubkey),
 			Jailed:          res.Validator.Jailed,
-			Status:          uint8(stakingtypes.BondStatus_value[res.Validator.Status.String()]),
+			Status:          uint8(stakingtypes.BondStatus_value[res.Validator.Status.String()]), //#nosec G115 // enum will always be convertible to uint8
 			Tokens:          res.Validator.Tokens.BigInt(),
 			DelegatorShares: res.Validator.DelegatorShares.BigInt(), // TODO: Decimal
 			// TODO: create description type,
@@ -672,7 +655,7 @@ func (vo *ValidatorsOutput) FromResponse(res *stakingtypes.QueryValidatorsRespon
 				OperatorAddress:   common.BytesToAddress(operatorAddress.Bytes()).String(),
 				ConsensusPubkey:   FormatConsensusPubkey(v.ConsensusPubkey),
 				Jailed:            v.Jailed,
-				Status:            uint8(stakingtypes.BondStatus_value[v.Status.String()]),
+				Status:            uint8(stakingtypes.BondStatus_value[v.Status.String()]), //#nosec G115 // enum will always be convertible to uint8
 				Tokens:            v.Tokens.BigInt(),
 				DelegatorShares:   v.DelegatorShares.BigInt(),
 				Description:       v.Description.Details,

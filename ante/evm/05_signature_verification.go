@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package evm
 
 import (
@@ -6,17 +13,18 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	anteinterfaces "github.com/qubetics/qubetics-blockchain/v2/ante/interfaces"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 // EthSigVerificationDecorator validates an ethereum signatures
 type EthSigVerificationDecorator struct {
-	evmKeeper EVMKeeper
+	evmKeeper anteinterfaces.EVMKeeper
 }
 
 // NewEthSigVerificationDecorator creates a new EthSigVerificationDecorator
-func NewEthSigVerificationDecorator(ek EVMKeeper) EthSigVerificationDecorator {
+func NewEthSigVerificationDecorator(ek anteinterfaces.EVMKeeper) EthSigVerificationDecorator {
 	return EthSigVerificationDecorator{
 		evmKeeper: ek,
 	}
@@ -28,15 +36,18 @@ func NewEthSigVerificationDecorator(ek EVMKeeper) EthSigVerificationDecorator {
 // Failure in RecheckTx will prevent tx to be included into block, especially when CheckTx succeed, in which case user
 // won't see the error message.
 func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
-	chainID := esvd.evmKeeper.ChainID()
 	evmParams := esvd.evmKeeper.GetParams(ctx)
-	chainCfg := evmParams.GetChainConfig()
-	ethCfg := chainCfg.EthereumConfig(chainID)
+	ethCfg := evmtypes.GetEthChainConfig()
 	blockNum := big.NewInt(ctx.BlockHeight())
 	signer := ethtypes.MakeSigner(ethCfg, blockNum)
 	allowUnprotectedTxs := evmParams.GetAllowUnprotectedTxs()
 
-	for _, msg := range tx.GetMsgs() {
+	msgs := tx.GetMsgs()
+	if msgs == nil {
+		return ctx, errorsmod.Wrap(errortypes.ErrUnknownRequest, "invalid transaction. Transaction without messages")
+	}
+
+	for _, msg := range msgs {
 		msgEthTx, ok := msg.(*evmtypes.MsgEthereumTx)
 		if !ok {
 			return ctx, errorsmod.Wrapf(errortypes.ErrUnknownRequest, "invalid message type %T, expected %T", msg, (*evmtypes.MsgEthereumTx)(nil))
@@ -53,6 +64,8 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 // SignatureVerification checks that the registered chain id is the same as the one on the message, and
 // that the signer address matches the one defined on the message.
+// The function set the field from of the given message equal to the sender
+// computed from the signature of the Ethereum transaction.
 func SignatureVerification(
 	msg *evmtypes.MsgEthereumTx,
 	signer ethtypes.Signer,
@@ -63,7 +76,7 @@ func SignatureVerification(
 	if !allowUnprotectedTxs && !ethTx.Protected() {
 		return errorsmod.Wrapf(
 			errortypes.ErrNotSupported,
-			"rejected unprotected Ethereum transaction. Please EIP155 sign your transaction to protect it against replay-attacks")
+			"rejected unprotected ethereum transaction; please sign your transaction according to EIP-155 to protect it against replay-attacks")
 	}
 
 	sender, err := signer.Sender(ethTx)

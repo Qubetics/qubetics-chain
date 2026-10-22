@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package server
 
 import (
@@ -7,8 +14,7 @@ import (
 	"github.com/cometbft/cometbft/libs/service"
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	"github.com/cometbft/cometbft/types"
-
-	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 const (
@@ -21,13 +27,13 @@ const (
 type EVMIndexerService struct {
 	service.BaseService
 
-	txIdxr qubeticstypes.EVMTxIndexer
+	txIdxr cosmosevmtypes.EVMTxIndexer
 	client rpcclient.Client
 }
 
 // NewEVMIndexerService returns a new service instance.
 func NewEVMIndexerService(
-	txIdxr qubeticstypes.EVMTxIndexer,
+	txIdxr cosmosevmtypes.EVMTxIndexer,
 	client rpcclient.Client,
 ) *EVMIndexerService {
 	is := &EVMIndexerService{txIdxr: txIdxr, client: client}
@@ -35,7 +41,7 @@ func NewEVMIndexerService(
 	return is
 }
 
-// OnStart implements service.Service by sub	scribing for new blocks
+// OnStart implements service.Service by subscribing for new blocks
 // and indexing them by events.
 func (eis *EVMIndexerService) OnStart() error {
 	ctx := context.Background()

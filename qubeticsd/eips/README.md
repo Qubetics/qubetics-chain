@@ -1,14 +1,14 @@
-# Qubetics Custom EIPs
+# Cosmos EVM Custom EIPs
 
-This document explain how **qubetics** allows chain built on top of it to define custom EIPs to modify the behavior of EVM
-opcodes.
+This document explain how **Cosmos EVM** allows chain built on top of it to define custom EIPs to modify
+the behavior of EVM opcodes.
 
 ## Custom EIPs
 
 Inside an EVM, every state transition or query is executed by evaluating opcodes. Custom EIPs are functions used to
 change the behavior of these opcodes to tailor the EVM functionalities to fit the app-chain requirements.
 
-Custom EIPs should be defined in an `eips` package inside the `./qubeticsd/eips/` folder of chains using the **qubetics**
+Custom EIPs should be defined in an `eips` package inside the `./app/eips/` folder of chains using the **Cosmos EVM**
 framework. This organization of custom implementations is not a strict requirement, but is the suggested approach to
 have a clean organization of functionalities. In this file, only the custom modifier should be defined.
 
@@ -19,6 +19,7 @@ defined with the signature:
 func(jt *vm.JumpTable) {}
 ```
 
+where `vm` is the package `"github.com/cosmos/evm/x/evm/core/vm"`.
 
 Custom EIPs are used to modify the behavior of opcodes, which are described by the `operation` structure:
 
@@ -39,7 +40,7 @@ type operation struct {
 }
 ```
 
-With the **qubetics** framework, it is possible to modify any of the fields defined in the type via the `operation` setter
+With the **Cosmos EVM** framework, it is possible to modify any of the fields defined in the type via the `operation` setter
 methods:
 
 - `SetExecute`: update the execution logic for the opcode.
@@ -67,10 +68,10 @@ In the same folder should also be defined tests and contracts used to verify the
 
 ## Activate Custom EIPs
 
-The activation of custom EIPs should be done inside the `config.go` file defined in the `./qubeticsd/` folder. This file has
+The activation of custom EIPs should be done inside the `config.go` file defined in the `./app/` folder. This file has
 the role of the single source for modify the EVM implementation which is defined in the
-[`x/vm/`] folder
-of **qubetics**.
+[`x/evm/`](https://github.com/cosmos/evm/tree/main/x/evm) folder
+of **Cosmos EVM**.
 
 In this file, 3 main components should be defined:
 
@@ -96,14 +97,14 @@ It can be interpreted as a list of available functionalities that can be toggled
 structure is a map where the key is the EIP number in the octal representation, and the value is the custom EIP
 function that has to be evaluated.
 
-In **qubetics**, custom activators should be defined in a structure with the same data type, like in the example below:
+In **Cosmos EVM**, custom activators should be defined in a structure with the same data type, like in the example below:
 
 ```go
 // Activate custom EIPs: 0000, 0001, 0002, etc
-qubeticsActivators = map[int]func(*vm.JumpTable){
-        "qubetics_0": eips.Enable0000,
-	"qubetics_1": eips.Enable0001,
-	"qubetics_2": eips.Enable0002,
+cosmosEVMActivators = map[int]func(*vm.JumpTable){
+	"evmos_0": eips.Enable0000,
+	"evmos_1": eips.Enable0001,
+	"evmos_2": eips.Enable0002,
 }
 ```
 
@@ -114,19 +115,19 @@ example provided at the of the [Custom EIPs](#custom-eips) section.
 
 Custom EIPs defined in the `activators` map are not enabled by default. This type is only used to define the list of
 custom functionalities that can be activated. To specify which custom EIP activate, we should modify the
-**qubetics** `x/evm` module params. The parameter orchestrating enabled custom EIPs is the `DefaultExtraEIPs` and
-**qubetics** provide an easy and safe way to customize it.
+**Cosmos EVM** `x/evm` module params. The parameter orchestrating enabled custom EIPs is the `DefaultExtraEIPs` and
+**Cosmos EVM** provide an easy and safe way to customize it.
 
 To specify which activator enable in the chain, a new variable containing a slice of keys of the custom activators
 should be defined. An example is reported below:
 
 ```go
-qubeticsEnabledEIPs = []int64{
-    "qubetics_0",
+cosmosEVMEnabledEIPs = []int64{
+    "evmos_0",
 }
 ```
 
-In this way, even though the custom activators defined $3$ new EIPs, we are going to activate only the number `qubetics_0`
+In this way, even though the custom activators defined $3$ new EIPs, we are going to activate only the number `evmos_0`
 
 ### EVM Configurator
 
@@ -147,7 +148,7 @@ Currently, only 2 customizations are possible:
 - `WithExtendedDefaultExtraEIPs`: extended the default active EIPs.
 
 It is important to notice that the configurator will only allow to append new entries to the default ones defined by
-**qubetics**. The reason behind this choice is to ensure the correct and safe execution of the virtual machine but still
+**Cosmos EVM**. The reason behind this choice is to ensure the correct and safe execution of the virtual machine but still
 allowing partners to customize their implementation.
 
 The `EVMConfigurator` type should be constructed using the builder pattern inside the `init()` function of the file so
@@ -224,7 +225,7 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 As we can see, a new `JumpTable` is created if it is not received from previous evm executions in the same transaction.
 After that, the function iterate over the `ExtraEips` defined in the configuration. Then, it is checked if the EIP is
 associated with an activator. If yes, the activator function is execute, otherwise an error is returned and the EIP is
-removed from the  VM configuration. At this point, all the opcodes are ready to be executed.
+removed from the VM configuration. At this point, all the opcodes are ready to be executed.
 
 ## How to Use It
 

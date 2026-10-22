@@ -1,9 +1,16 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package statedb
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // ExtStateDB defines an extension to the interface provided by the go-ethereum
@@ -27,7 +34,9 @@ type Keeper interface {
 
 	// Write methods, only called by `StateDB.Commit()`
 	SetAccount(ctx sdk.Context, addr common.Address, account Account) error
+	DeleteState(ctx sdk.Context, addr common.Address, key common.Hash)
 	SetState(ctx sdk.Context, addr common.Address, key common.Hash, value []byte)
+	DeleteCode(ctx sdk.Context, codeHash []byte)
 	SetCode(ctx sdk.Context, codeHash []byte, code []byte)
 	DeleteAccount(ctx sdk.Context, addr common.Address) error
 }

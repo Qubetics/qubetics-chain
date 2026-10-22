@@ -1,19 +1,23 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package eip712
 
 import (
 	"errors"
 	"fmt"
 
-	"cosmossdk.io/simapp/params"
-	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
-
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txTypes "github.com/cosmos/cosmos-sdk/types/tx"
-
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	apitypes "github.com/ethereum/go-ethereum/signer/core/apitypes"
-	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
-
-	"github.com/cosmos/cosmos-sdk/codec"
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 var (
@@ -25,9 +29,9 @@ var (
 // The process of unmarshaling SignDoc bytes into a SignDoc object requires having a codec
 // populated with all relevant message types. As a result, we must call this method on app
 // initialization with the app's encoding config.
-func SetEncodingConfig(cfg params.EncodingConfig) {
-	aminoCodec = cfg.Amino
-	protoCodec = codec.NewProtoCodec(cfg.InterfaceRegistry)
+func SetEncodingConfig(cdc *codec.LegacyAmino, interfaceRegistry types.InterfaceRegistry) {
+	aminoCodec = cdc
+	protoCodec = codec.NewProtoCodec(interfaceRegistry)
 }
 
 // GetEIP712BytesForMsg returns the EIP-712 object bytes for the given SignDoc bytes by decoding the bytes into
@@ -101,7 +105,7 @@ func decodeAminoSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		return apitypes.TypedData{}, err
 	}
 
-	chainID, err := qubeticstypes.ParseChainID(aminoDoc.ChainID)
+	chainID, err := cosmosevmtypes.ParseChainID(aminoDoc.ChainID)
 	if err != nil {
 		return apitypes.TypedData{}, errors.New("invalid chain ID passed as argument")
 	}
@@ -165,7 +169,7 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 
 	signerInfo := authInfo.SignerInfos[0]
 
-	chainID, err := qubeticstypes.ParseChainID(signDoc.ChainId)
+	chainID, err := cosmosevmtypes.ParseChainID(signDoc.ChainId)
 	if err != nil {
 		return apitypes.TypedData{}, fmt.Errorf("invalid chain ID passed as argument: %w", err)
 	}
@@ -174,8 +178,6 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		Amount: authInfo.Fee.Amount,
 		Gas:    authInfo.Fee.GasLimit,
 	}
-
-	tip := authInfo.Tip
 
 	// WrapTxToTypedData expects the payload as an Amino Sign Doc
 	signBytes := legacytx.StdSignBytes(
@@ -186,7 +188,7 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		*stdFee,
 		msgs,
 		body.Memo,
-		tip,
+		nil,
 	)
 
 	typedData, err := WrapTxToTypedData(
@@ -220,16 +222,17 @@ func validatePayloadMessages(msgs []sdk.Msg) error {
 	var msgSigner sdk.AccAddress
 
 	for i, m := range msgs {
-		if len(m.GetSigners()) != 1 {
+		signers := m.GetSigners()
+		if len(signers) != 1 {
 			return errors.New("unable to build EIP-712 payload: expect exactly 1 signer")
 		}
 
 		if i == 0 {
-			msgSigner = m.GetSigners()[0]
+			msgSigner = signers[0]
 			continue
 		}
 
-		if !msgSigner.Equals(m.GetSigners()[0]) {
+		if !msgSigner.Equals(sdk.AccAddress(signers[0])) {
 			return errors.New("unable to build EIP-712 payload: multiple signers detected")
 		}
 	}

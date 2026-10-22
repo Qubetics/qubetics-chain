@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package block
 
 import (
@@ -6,7 +13,7 @@ import (
 	"path/filepath"
 
 	dbm "github.com/cometbft/cometbft-db"
-	tmstore "github.com/cometbft/cometbft/proto/tendermint/store"
+	cmtstore "github.com/cometbft/cometbft/proto/tendermint/store"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cometbft/cometbft/types"
 	"github.com/cosmos/gogoproto/proto"
@@ -32,7 +39,7 @@ func newStore(rootDir string, backendType dbm.BackendType) (*store, error) {
 }
 
 // state returns the BlockStoreState as loaded from disk.
-func (s *store) state() (*tmstore.BlockStoreState, error) {
+func (s *store) state() (*cmtstore.BlockStoreState, error) {
 	bytes, err := s.Get(storeKey)
 	if err != nil {
 		return nil, err
@@ -42,7 +49,7 @@ func (s *store) state() (*tmstore.BlockStoreState, error) {
 		return nil, errors.New("could not find a BlockStoreState persisted in db")
 	}
 
-	var bss tmstore.BlockStoreState
+	var bss cmtstore.BlockStoreState
 	if err := proto.Unmarshal(bytes, &bss); err != nil {
 		return nil, fmt.Errorf("could not unmarshal bytes: %X", bytes)
 	}

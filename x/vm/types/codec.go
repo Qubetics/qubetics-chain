@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -18,12 +25,12 @@ var (
 	ModuleCdc = codec.NewProtoCodec(codectypes.NewInterfaceRegistry())
 
 	// AminoCdc is a amino codec created to support amino JSON compatible msgs.
-	AminoCdc = codec.NewAminoCodec(amino)
+	AminoCdc = codec.NewAminoCodec(amino) //nolint:staticcheck
 )
 
 const (
 	// Amino names
-	updateParamsName = "ethermint/MsgUpdateParams"
+	updateParamsName = "os/evm/MsgUpdateParams"
 )
 
 // NOTE: This is required for the GetSignBytes function
@@ -44,7 +51,7 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 		&MsgUpdateParams{},
 	)
 	registry.RegisterInterface(
-		"ethermint.evm.v1.TxData",
+		"os.vm.v1.TxData",
 		(*TxData)(nil),
 		&DynamicFeeTx{},
 		&AccessListTx{},
@@ -73,14 +80,14 @@ func PackTxData(txData TxData) (*codectypes.Any, error) {
 
 // UnpackTxData unpacks an Any into a TxData. It returns an error if the
 // client state can't be unpacked into a TxData.
-func UnpackTxData(any *codectypes.Any) (TxData, error) {
-	if any == nil {
+func UnpackTxData(anyTxData *codectypes.Any) (TxData, error) {
+	if anyTxData == nil {
 		return nil, errorsmod.Wrap(errortypes.ErrUnpackAny, "protobuf Any message cannot be nil")
 	}
 
-	txData, ok := any.GetCachedValue().(TxData)
+	txData, ok := anyTxData.GetCachedValue().(TxData)
 	if !ok {
-		return nil, errorsmod.Wrapf(errortypes.ErrUnpackAny, "cannot unpack Any into TxData %T", any)
+		return nil, errorsmod.Wrapf(errortypes.ErrUnpackAny, "cannot unpack Any into TxData %T", anyTxData)
 	}
 
 	return txData, nil

@@ -1,94 +1,20 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
 	"fmt"
 	"slices"
 
-	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	channelkeeper "github.com/cosmos/ibc-go/v7/modules/core/04-channel/keeper"
-	"github.com/ethereum/go-ethereum/common"
-	bankprecompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/bank"
-	"github.com/qubetics/qubetics-blockchain/v2/precompiles/bech32"
-	distprecompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/distribution"
-	ics20precompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/ics20"
-	"github.com/qubetics/qubetics-blockchain/v2/precompiles/p256"
-	stakingprecompile "github.com/qubetics/qubetics-blockchain/v2/precompiles/staking"
-	erc20Keeper "github.com/qubetics/qubetics-blockchain/v2/x/erc20/keeper"
-	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
-
-	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	"golang.org/x/exp/maps"
+	"github.com/ethereum/go-ethereum/common"
 )
-
-const bech32PrecompileBaseGas = 6_000
-
-// AvailableStaticPrecompiles returns the list of all available static precompiled contracts.
-// NOTE: this should only be used during initialization of the Keeper.
-func NewAvailableStaticPrecompiles(
-	stakingKeeper stakingkeeper.Keeper,
-	distributionKeeper distributionkeeper.Keeper,
-	bankKeeper bankkeeper.Keeper,
-	erc20Keeper erc20Keeper.Keeper,
-	authzKeeper authzkeeper.Keeper,
-	transferKeeper transferkeeper.Keeper,
-	channelKeeper channelkeeper.Keeper,
-) map[common.Address]vm.PrecompiledContract {
-	// Clone the mapping from the latest EVM fork.
-	precompiles := maps.Clone(vm.PrecompiledContractsBerlin)
-
-	// secp256r1 precompile as per EIP-7212
-	p256Precompile := &p256.Precompile{}
-
-	bech32Precompile, err := bech32.NewPrecompile(bech32PrecompileBaseGas)
-	if err != nil {
-		panic(fmt.Errorf("failed to instantiate bech32 precompile: %w", err))
-	}
-
-	stakingPrecompile, err := stakingprecompile.NewPrecompile(stakingKeeper, authzKeeper)
-	if err != nil {
-		panic(fmt.Errorf("failed to instantiate staking precompile: %w", err))
-	}
-
-	distributionPrecompile, err := distprecompile.NewPrecompile(
-		distributionKeeper,
-		stakingKeeper,
-		authzKeeper,
-	)
-	if err != nil {
-		panic(fmt.Errorf("failed to instantiate distribution precompile: %w", err))
-	}
-
-	ibcTransferPrecompile, err := ics20precompile.NewPrecompile(
-		stakingKeeper,
-		transferKeeper,
-		channelKeeper,
-		authzKeeper,
-	)
-	if err != nil {
-		panic(fmt.Errorf("failed to instantiate ICS20 precompile: %w", err))
-	}
-
-	bankPrecompile, err := bankprecompile.NewPrecompile(bankKeeper, erc20Keeper)
-	if err != nil {
-		panic(fmt.Errorf("failed to instantiate bank precompile: %w", err))
-	}
-
-	// Stateless precompiles
-	precompiles[bech32Precompile.Address()] = bech32Precompile
-	precompiles[p256Precompile.Address()] = p256Precompile
-
-	// Stateful precompiles
-	precompiles[stakingPrecompile.Address()] = stakingPrecompile
-	precompiles[distributionPrecompile.Address()] = distributionPrecompile
-	precompiles[ibcTransferPrecompile.Address()] = ibcTransferPrecompile
-	precompiles[bankPrecompile.Address()] = bankPrecompile
-	return precompiles
-}
 
 // WithStaticPrecompiles sets the available static precompiled contracts.
 func (k *Keeper) WithStaticPrecompiles(precompiles map[common.Address]vm.PrecompiledContract) *Keeper {
@@ -111,7 +37,7 @@ func (k *Keeper) GetStaticPrecompileInstance(params *types.Params, address commo
 		// If the precompile is within params but not found in the precompiles map it means we have memory
 		// corruption.
 		if !found {
-			return nil, false, fmt.Errorf("precompiled contract not stored in memory: %s", address)
+			panic(fmt.Errorf("precompiled contract not stored in memory: %s", address))
 		}
 		return precompile, true, nil
 	}

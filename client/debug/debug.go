@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package debug
 
 import (
@@ -8,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
-	qubetics "github.com/qubetics/qubetics-blockchain/v2/types"
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -16,6 +23,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	cosmosclientdebug "github.com/cosmos/cosmos-sdk/client/debug"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -32,10 +40,17 @@ func Cmd() *cobra.Command {
 		RunE:  client.ValidateCmd,
 	}
 
-	cmd.AddCommand(PubkeyCmd())
-	cmd.AddCommand(AddrCmd())
-	cmd.AddCommand(RawBytesCmd())
-	cmd.AddCommand(LegacyEIP712Cmd())
+	cmd.AddCommand(
+		// default Cosmos SDK debug commands
+		cosmosclientdebug.PrefixesCmd(),
+		cosmosclientdebug.PubkeyRawCmd(), // TODO: support eth_secp256k1 pubkeys for this one too?
+
+		// Cosmos EVM adjusted debug commands
+		PubkeyCmd(),
+		AddrCmd(),
+		RawBytesCmd(),
+		LegacyEIP712Cmd(),
+	)
 
 	return cmd
 }
@@ -79,8 +94,8 @@ func AddrCmd() *cobra.Command {
 		Short: "Convert an address between hex and bech32",
 		Long:  "Convert an address between hex encoding and bech32.",
 		Example: fmt.Sprintf(
-			`$ %s debug addr qubetics1qqqqhe5pnaq5qq39wqkn957aydnrm45sdn8583
-$ %s debug addr 0x00000Be6819f41400225702D32d3dd23663Dd690 --prefix qubetics`, version.AppName, version.AppName),
+			`$ %s debug addr cosmos1qqqqhe5pnaq5qq39wqkn957aydnrm45sdn8583
+$ %s debug addr 0x00000Be6819f41400225702D32d3dd23663Dd690 --prefix cosmosevmtypes`, version.AppName, version.AppName),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			addrString := args[0]
@@ -124,7 +139,7 @@ $ %s debug addr 0x00000Be6819f41400225702D32d3dd23663Dd690 --prefix qubetics`, v
 		},
 	}
 
-	cmd.Flags().String(flagPrefix, "", "Bech32 encoded account prefix, for example qubetics, qubeticsvaloper")
+	cmd.Flags().String(flagPrefix, "", "Bech32 encoded account prefix, for example cosmosevmtypes, cosmosvaloper")
 	return cmd
 }
 
@@ -159,7 +174,7 @@ func LegacyEIP712Cmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "legacy-eip712 [file]",
 		Short:   "Output types of legacy eip712 typed data according to the given transaction",
-		Example: fmt.Sprintf(`$ %s debug legacy-eip712 tx.json --chain-id qubeticsd_9000-1`, version.AppName),
+		Example: fmt.Sprintf(`$ %s debug legacy-eip712 tx.json --chain-id evmd_9000-1`, version.AppName),
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -177,7 +192,7 @@ func LegacyEIP712Cmd() *cobra.Command {
 				return errors.Wrap(err, "encode tx")
 			}
 
-			chainID, err := qubetics.ParseChainID(clientCtx.ChainID)
+			chainID, err := cosmosevmtypes.ParseChainID(clientCtx.ChainID)
 			if err != nil {
 				return errors.Wrap(err, "invalid chain ID passed as argument")
 			}

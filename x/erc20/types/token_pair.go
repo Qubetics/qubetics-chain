@@ -1,11 +1,18 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
-	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // NewTokenPairSTRv2 creates a new TokenPair instance in the context of the
@@ -53,7 +60,7 @@ func (tp TokenPair) Validate() error {
 		return err
 	}
 
-	return qubeticstypes.ValidateAddress(tp.Erc20Address)
+	return cosmosevmtypes.ValidateAddress(tp.Erc20Address)
 }
 
 // IsNativeCoin returns true if the owner of the ERC20 contract is the

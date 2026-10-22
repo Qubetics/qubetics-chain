@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package client
 
 import (
@@ -5,14 +12,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cometbft/cometbft/libs/cli"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"github.com/cometbft/cometbft/libs/cli"
-
-	"github.com/cosmos/cosmos-sdk/client/flags"
-
-	"github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 // InitConfig adds the chain-id, encoding and output flags to the persistent flag set.
@@ -26,7 +30,7 @@ func InitConfig(cmd *cobra.Command) error {
 	_, err = os.Stat(configFile)
 	if err != nil && !os.IsNotExist(err) {
 		// Immediately return if the error isn't related to the file not existing.
-		// See issue https://github.com/qubetics/ethermint/issues/539
+		// See issue https://github.com/evmos/ethermint/issues/539
 		return err
 	}
 	if err == nil {

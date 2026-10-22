@@ -1,10 +1,17 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Precompiles struct {
@@ -54,9 +61,13 @@ func (k *Keeper) GetPrecompilesCallHook(ctx sdktypes.Context) types.CallHook {
 			return err
 		}
 
+		// If the precompile instance is created, we have to update the EVM with
+		// only the recipient precompile and add it's address to the access list.
 		if found {
 			evm.WithPrecompiles(precompiles.Map, precompiles.Addresses)
+			evm.StateDB.AddAddressToAccessList(recipient)
 		}
+
 		return nil
 	}
 }

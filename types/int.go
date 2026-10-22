@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -18,7 +25,7 @@ func SafeInt64(value uint64) (int64, error) {
 		return 0, errorsmod.Wrapf(errortypes.ErrInvalidHeight, "uint64 value %v cannot exceed %v", value, int64(math.MaxInt64))
 	}
 
-	return int64(value), nil // #nosec G701 -- checked for int overflow already
+	return int64(value), nil // #nosec G115 -- checked for int overflow already
 }
 
 // SafeNewIntFromBigInt constructs Int from big.Int, return error if more than 256bits

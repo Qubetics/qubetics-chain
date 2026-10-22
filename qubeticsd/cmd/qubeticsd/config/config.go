@@ -1,58 +1,45 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package config
 
 import (
-	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/qubetics/qubetics-blockchain/v2/types"
+	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 const (
-	// Bech32Prefix defines the Bech32 prefix used for EthAccounts
-	Bech32Prefix = "qubetics"
+	// Bech32Prefix defines the Bech32 prefix used for accounts on the Qubetics chain.
+	Bech32Prefix = qubeticstypes.Bech32MainPrefix
 
-	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
-	Bech32PrefixAccAddr = Bech32Prefix
-	// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key
-	Bech32PrefixAccPub = Bech32Prefix + sdk.PrefixPublic
-	// Bech32PrefixValAddr defines the Bech32 prefix of a validator's operator address
-	Bech32PrefixValAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
-	// Bech32PrefixValPub defines the Bech32 prefix of a validator's operator public key
-	Bech32PrefixValPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
-	// Bech32PrefixConsAddr defines the Bech32 prefix of a consensus node address
-	Bech32PrefixConsAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
-	// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
-	Bech32PrefixConsPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
-)
-
-const (
 	// DisplayDenom defines the denomination displayed to users in client applications.
-	DisplayDenom = "qubetics"
-	// BaseDenom defines to the default denomination used in Qubetics (staking, EVM, governance, etc.)
-	BaseDenom = "tics"
+	DisplayDenom = qubeticstypes.DisplayDenom
+	// BaseDenom defines to the default denomination used on the Qubetics chain.
+	BaseDenom = qubeticstypes.AttoQubetics
+	// BaseDenomUnit defines the precision of the base denomination.
+	BaseDenomUnit = qubeticstypes.BaseDenomUnit
 )
 
-// SetBech32Prefixes sets the global prefixes to be used when serializing addresses and public keys to Bech32 strings.
+// SetBech32Prefixes sets the global prefixes used when serializing addresses and
+// public keys to Bech32 strings, including the dVPN provider and node prefixes.
 func SetBech32Prefixes(config *sdk.Config) {
-	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+	config.SetBech32PrefixForAccount(qubeticstypes.Bech32PrefixAccAddr, qubeticstypes.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(qubeticstypes.Bech32PrefixValAddr, qubeticstypes.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(qubeticstypes.Bech32PrefixConsAddr, qubeticstypes.Bech32PrefixConsPub)
+
+	qubeticsConfig := qubeticstypes.GetConfig()
+	qubeticsConfig.SetBech32PrefixForProvider(qubeticstypes.Bech32PrefixProvAddr, qubeticstypes.Bech32PrefixProvPub)
+	qubeticsConfig.SetBech32PrefixForNode(qubeticstypes.Bech32PrefixNodeAddr, qubeticstypes.Bech32PrefixNodePub)
 }
 
-// SetBip44CoinType sets the global coin type to be used in hierarchical deterministic wallets.
+// SetBip44CoinType sets the Ethereum coin type (60) so keys derive the same
+// addresses as Ethereum wallets.
 func SetBip44CoinType(config *sdk.Config) {
-	config.SetCoinType(types.Bip44CoinType)
-	config.SetPurpose(sdk.Purpose)                  // Shared
-	config.SetFullFundraiserPath(types.BIP44HDPath) //nolint: staticcheck
-}
-
-// RegisterDenoms registers the base and display denominations to the SDK.
-func RegisterDenoms() {
-	if err := sdk.RegisterDenom(DisplayDenom, math.LegacyOneDec()); err != nil {
-		panic(err)
-	}
-
-	if err := sdk.RegisterDenom(BaseDenom, math.LegacyNewDecWithPrec(1, types.BaseDenomUnit)); err != nil {
-		panic(err)
-	}
+	config.SetCoinType(qubeticstypes.Bip44CoinType)
+	config.SetPurpose(sdk.Purpose)                          // Shared
+	config.SetFullFundraiserPath(qubeticstypes.BIP44HDPath) //nolint: staticcheck
 }

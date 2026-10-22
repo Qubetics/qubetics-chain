@@ -1,13 +1,19 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
 	"errors"
 	"fmt"
 
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-
-	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
 // NewTransactionLogs creates a new NewTransactionLogs instance.
@@ -28,7 +34,7 @@ func NewTransactionLogsFromEth(hash common.Hash, ethlogs []*ethtypes.Log) Transa
 
 // Validate performs a basic validation of a GenesisAccount fields.
 func (tx TransactionLogs) Validate() error {
-	if qubeticstypes.IsEmptyHash(tx.Hash) {
+	if cosmosevmtypes.IsEmptyHash(tx.Hash) {
 		return fmt.Errorf("hash cannot be the empty %s", tx.Hash)
 	}
 
@@ -53,22 +59,22 @@ func (tx TransactionLogs) EthLogs() []*ethtypes.Log {
 
 // Validate performs a basic validation of an ethereum Log fields.
 func (log *Log) Validate() error {
-	if err := qubeticstypes.ValidateAddress(log.Address); err != nil {
+	if err := cosmosevmtypes.ValidateAddress(log.Address); err != nil {
 		return fmt.Errorf("invalid log address %w", err)
 	}
-	if qubeticstypes.IsEmptyHash(log.BlockHash) {
+	if cosmosevmtypes.IsEmptyHash(log.BlockHash) {
 		return fmt.Errorf("block hash cannot be the empty %s", log.BlockHash)
 	}
 	if log.BlockNumber == 0 {
 		return errors.New("block number cannot be zero")
 	}
-	if qubeticstypes.IsEmptyHash(log.TxHash) {
+	if cosmosevmtypes.IsEmptyHash(log.TxHash) {
 		return fmt.Errorf("tx hash cannot be the empty %s", log.TxHash)
 	}
 	return nil
 }
 
-// ToEthereum returns the Ethereum type Log from a Ethermint proto compatible Log.
+// ToEthereum returns the Ethereum type Log from a Cosmos EVM proto compatible Log.
 func (log *Log) ToEthereum() *ethtypes.Log {
 	topics := make([]common.Hash, len(log.Topics))
 	for i, topic := range log.Topics {
@@ -97,7 +103,7 @@ func NewLogsFromEth(ethlogs []*ethtypes.Log) []*Log {
 	return logs
 }
 
-// LogsToEthereum casts the Ethermint Logs to a slice of Ethereum Logs.
+// LogsToEthereum casts the Cosmos EVM logs to a slice of Ethereum Logs.
 func LogsToEthereum(logs []*Log) []*ethtypes.Log {
 	var ethLogs []*ethtypes.Log //nolint: prealloc
 	for i := range logs {

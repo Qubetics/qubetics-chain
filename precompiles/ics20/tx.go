@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package ics20
 
 import (
@@ -12,9 +19,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
-	"github.com/qubetics/qubetics-blockchain/v2/utils"
 )
 
 const (
@@ -57,7 +64,7 @@ func (p *Precompile) Transfer(
 		return nil, err
 	}
 
-	res, err := p.transferKeeper.Transfer(sdk.WrapSDKContext(ctx), msg)
+	res, err := p.transferKeeper.Transfer(ctx, msg)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +73,8 @@ func (p *Precompile) Transfer(
 		return nil, err
 	}
 
-	if contract.CallerAddress != origin && msg.Token.Denom == utils.BaseDenom {
+	evmDenom := evmtypes.GetEVMCoinDenom()
+	if contract.CallerAddress != origin && msg.Token.Denom == evmDenom {
 		// escrow address is also changed on this tx, and it is not a module account
 		// so we need to account for this on the UpdateDirties
 		escrowAccAddress := transfertypes.GetEscrowAddress(msg.SourcePort, msg.SourceChannel)

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package staking
 
 import (
@@ -49,11 +56,12 @@ func (p Precompile) Delegation(
 
 	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
-	res, err := queryServer.Delegation(sdk.WrapSDKContext(ctx), req)
+	res, err := queryServer.Delegation(ctx, req)
 	if err != nil {
 		// If there is no delegation found, return the response with zero values.
 		if strings.Contains(err.Error(), fmt.Sprintf(ErrNoDelegationFound, req.DelegatorAddr, req.ValidatorAddr)) {
-			return method.Outputs.Pack(big.NewInt(0), cmn.Coin{Denom: p.stakingKeeper.BondDenom(ctx), Amount: big.NewInt(0)})
+			bondDenom := p.stakingKeeper.BondDenom(ctx)
+			return method.Outputs.Pack(big.NewInt(0), cmn.Coin{Denom: bondDenom, Amount: big.NewInt(0)})
 		}
 
 		return nil, err
@@ -79,7 +87,7 @@ func (p Precompile) UnbondingDelegation(
 
 	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
-	res, err := queryServer.UnbondingDelegation(sdk.WrapSDKContext(ctx), req)
+	res, err := queryServer.UnbondingDelegation(ctx, req)
 	if err != nil {
 		// return empty unbonding delegation output if the unbonding delegation is not found
 		expError := fmt.Sprintf("unbonding delegation with delegator %s not found for validator %s", req.DelegatorAddr, req.ValidatorAddr)
@@ -108,7 +116,7 @@ func (p Precompile) Validator(
 
 	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
-	res, err := queryServer.Validator(sdk.WrapSDKContext(ctx), req)
+	res, err := queryServer.Validator(ctx, req)
 	if err != nil {
 		// return empty validator info if the validator is not found
 		expError := fmt.Sprintf("validator %s not found", req.ValidatorAddr)
@@ -137,7 +145,7 @@ func (p Precompile) Validators(
 
 	queryServer := stakingkeeper.Querier{Keeper: &p.stakingKeeper}
 
-	res, err := queryServer.Validators(sdk.WrapSDKContext(ctx), req)
+	res, err := queryServer.Validators(ctx, req)
 	if err != nil {
 		return nil, err
 	}

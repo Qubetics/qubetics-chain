@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package authorization
 
 import (
@@ -5,11 +12,11 @@ import (
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 const (
@@ -76,7 +83,7 @@ func EmitRevocationEvent(args cmn.EmitEventArgs) error {
 		Address:     args.ContractAddr,
 		Topics:      topics,
 		Data:        packed,
-		BlockNumber: uint64(args.Ctx.BlockHeight()),
+		BlockNumber: uint64(args.Ctx.BlockHeight()), //nolint:gosec // G115 // won't exceed uint64
 	})
 
 	return nil
@@ -117,7 +124,7 @@ func EmitIBCTransferAuthorizationEvent(
 		Address:     precompileAddr,
 		Topics:      topics,
 		Data:        packed,
-		BlockNumber: uint64(ctx.BlockHeight()),
+		BlockNumber: uint64(ctx.BlockHeight()), //nolint:gosec // G115 // won't exceed uint64
 	})
 
 	return nil

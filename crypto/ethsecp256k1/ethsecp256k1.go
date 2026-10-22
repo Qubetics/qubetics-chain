@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package ethsecp256k1
 
 import (
@@ -11,8 +18,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/qubetics/qubetics-blockchain/v2/ethereum/eip712"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -27,9 +34,9 @@ const (
 // Amino encoding names
 const (
 	// PrivKeyName defines the amino encoding name for the EthSecp256k1 private key
-	PrivKeyName = "ethermint/PrivKeyEthSecp256k1"
+	PrivKeyName = "os/PrivKeyEthSecp256k1"
 	// PubKeyName defines the amino encoding name for the EthSecp256k1 public key
-	PubKeyName = "ethermint/PubKeyEthSecp256k1"
+	PubKeyName = "os/PubKeyEthSecp256k1"
 )
 
 // ----------------------------------------------------------------------------

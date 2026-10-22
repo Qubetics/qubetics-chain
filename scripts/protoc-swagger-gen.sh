@@ -1,41 +1,121 @@
-#!/usr/bin/env bash
-SWAGGER_DIR=./swagger-proto
+#!/usr/bin/env sh
 
+# Generates the Swagger (OpenAPI v2) spec for the REST (gRPC gateway) API and
+# writes it to client/docs/swagger-ui/swagger.yaml.
+#
+# The spec combines:
+#   - the Cosmos SDK spec shipped with the Cosmos SDK module (pre-generated),
+#   - IBC and IBC rate-limiting query services (from their Go module protos),
+#   - the Cosmos EVM and Qubetics query services in ./proto.
+#
+# Run through the Makefile (make proto-swagger-gen), which copies the third-party
+# files into ./tmp-swagger-deps and runs this script in the proto-builder image.
 set -eo pipefail
 
-# prepare swagger generation
-mkdir -p "$SWAGGER_DIR/proto"
-printf "version: v1\ndirectories:\n  - proto\n  - third_party" > "$SWAGGER_DIR/buf.work.yaml"
-printf "version: v1\nname: buf.build/qubetics/qubetics\n" > "$SWAGGER_DIR/proto/buf.yaml"
-cp ./proto/buf.gen.swagger.yaml "$SWAGGER_DIR/proto/buf.gen.swagger.yaml"
+OUT=/workspace/tmp-swagger-gen
+TEMPLATE='{"version":"v1","plugins":[{"name":"swagger","out":"'"$OUT"'","opt":"logtostderr=true,fqn_for_swagger_name=true,simple_operation_ids=true"}]}'
 
-# copy existing proto files
-cp -r ./proto/qubetics "$SWAGGER_DIR/proto"
-cp -r ./proto/ethermint "$SWAGGER_DIR/proto"
+rm -rf "$OUT"
+mkdir -p "$OUT"
 
-# create temporary folder to store intermediate results from `buf generate`
-mkdir -p ./tmp-swagger-gen
+# generate swagger files for every proto file that defines a query service
+generate() {
+	local root=$1
+	shift
+	(
+		cd "$root"
+		for file in $(find "$@" -name '*.proto' | sort); do
+			if grep -qE '^service (Query|QueryService) ' "$file"; then
+				buf generate --template "$TEMPLATE" "$file"
+			fi
+		done
+	)
+}
 
-# step into swagger folder
-cd "$SWAGGER_DIR"
+generate /workspace/proto cosmos qubetics
+generate /workspace/tmp-swagger-deps/ibc-go/proto ibc
+generate /workspace/tmp-swagger-deps/ratelimit/proto ratelimit
 
-# create swagger files on an individual basis  w/ `buf build` and `buf generate` (needed for `swagger-combine`)
-proto_dirs=$(find ./proto ./third_party -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
-for dir in $proto_dirs; do
-  # generate swagger files (filter query files)
-  query_file=$(find "${dir}" -maxdepth 1 \( -name 'query.proto' -o -name 'service.proto' -o -name 'querier.proto'  \))
-  if [[ -n "$query_file" ]]; then
-    buf generate --template proto/buf.gen.swagger.yaml "$query_file"
-  fi
-done
+# Prefix operation IDs with their package (e.g. QubeticsNodeV3Params) so that
+# services sharing method names (Params, Nodes, ...) do not collide, then write
+# the swagger-combine configuration.
+node - "$OUT" /workspace/tmp-swagger-deps/cosmos-sdk/swagger.yaml /workspace/tmp-swagger-gen/config.json <<'JS'
+const fs = require("fs");
+const path = require("path");
+const [outDir, sdkSpec, configFile] = process.argv.slice(2);
 
-cd ..
+const walk = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]
+  );
 
-# combine swagger files
-# uses nodejs package `swagger-combine`.
-# all the individual swagger files need to be configured in `config.json` for merging
-swagger-combine ./client/docs/config.json -o ./client/docs/swagger-ui/swagger.json -f json --continueOnConflictingPaths true --includeDefinitions true
+const specs = walk(outDir).filter((f) => f.endsWith(".swagger.json")).sort();
+const apis = [{ url: sdkSpec }];
 
-# clean swagger files
-rm -rf ./tmp-swagger-gen
-rm -rf "$SWAGGER_DIR"
+for (const file of specs) {
+  const rel = path.relative(outDir, path.dirname(file));
+  const prefix = rel
+    .split(/[\/_-]/)
+    .filter(Boolean)
+    .map((p) => p[0].toUpperCase() + p.slice(1))
+    .join("");
+  const spec = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (!spec.paths || Object.keys(spec.paths).length === 0) continue;
+  for (const ops of Object.values(spec.paths)) {
+    for (const op of Object.values(ops)) {
+      if (op && op.operationId) op.operationId = prefix + op.operationId;
+    }
+  }
+  fs.writeFileSync(file, JSON.stringify(spec, null, 2));
+  apis.push({ url: file });
+}
+
+const config = {
+  swagger: "2.0",
+  info: {
+    title: "Qubetics - gRPC Gateway docs",
+    description: "A REST interface for state queries",
+    version: "1.0.0",
+  },
+  apis,
+};
+fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
+JS
+
+# combine the swagger files into a single spec
+swagger-combine "$OUT/config.json" -o "$OUT/combined.yaml" -f yaml --continueOnConflictingPaths true --includeDefinitions true
+
+# swagger-combine inlines $refs, which turns recursive types (e.g. the Cosmos SDK
+# tx ModeInfo, whose multisig variant contains a list of ModeInfo) into
+# self-referencing YAML aliases that Swagger UI cannot load ("does not specify a
+# valid version field"). Replace each recursive back-reference with a generic
+# object and write plain YAML without anchors/aliases.
+NODE_PATH="$(npm root -g)/swagger-combine/node_modules" node - "$OUT/combined.yaml" /workspace/client/docs/swagger-ui/swagger.yaml <<'JS'
+const fs = require("fs");
+const yaml = require("js-yaml");
+const [input, output] = process.argv.slice(2);
+
+const spec = yaml.load(fs.readFileSync(input, "utf8"));
+
+let cut = 0;
+const ancestors = new Set();
+const breakCycles = (node) => {
+  if (node === null || typeof node !== "object") return node;
+  if (ancestors.has(node)) {
+    cut++;
+    return { type: "object", description: "Recursive type; see the enclosing schema." };
+  }
+  ancestors.add(node);
+  const copy = Array.isArray(node) ? [] : {};
+  for (const [k, v] of Object.entries(node)) copy[k] = breakCycles(v);
+  ancestors.delete(node);
+  return copy;
+};
+
+const acyclic = breakCycles(spec);
+fs.writeFileSync(output, yaml.dump(acyclic, { noRefs: true, lineWidth: -1 }));
+console.log(`swagger.yaml written (${cut} recursive references replaced)`);
+JS
+
+# clean up the intermediate files
+rm -rf "$OUT"

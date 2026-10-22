@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package erc20
 
 import (
@@ -5,12 +12,12 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/x/authz"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/qubetics/qubetics-blockchain/v2/ibc"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 // Errors that have formatted information are defined here as a string.
@@ -20,6 +27,7 @@ const (
 	ErrInvalidReceiver           = "invalid to address: %s"
 	ErrNoAllowanceForToken       = "allowance for token %s does not exist"
 	ErrSubtractMoreThanAllowance = "subtracted value cannot be greater than existing allowance for denom %s: %s > %s"
+	ErrCannotReceiveFunds        = "cannot receive funds, received: %s"
 )
 
 var (

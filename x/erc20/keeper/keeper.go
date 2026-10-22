@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
@@ -9,9 +16,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
-
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
+	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
 )
 
 // Keeper of this module maintains collections of erc20.

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -5,15 +12,8 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
-)
-
-const (
-	// WQUBETICSContractMainnet is the WQUBETICS contract address for mainnet
-	WQUBETICSContractMainnet = "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517"
-	// WQUBETICSContractTestnet is the WQUBETICS contract address for testnet
-	WQUBETICSContractTestnet = "0xcc491f589b45d4a3c679016195b3fb87d7848210"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Parameter store key
@@ -21,10 +21,15 @@ var (
 	ParamStoreKeyEnableErc20        = []byte("EnableErc20")
 	ParamStoreKeyDynamicPrecompiles = []byte("DynamicPrecompiles")
 	ParamStoreKeyNativePrecompiles  = []byte("NativePrecompiles")
-	// DefaultNativePrecompiles defines the default precompiles for the wrapped native coin
-	// NOTE: If you modify this, make sure you modify it on the local_node genesis script as well
-	DefaultNativePrecompiles = []string{WQUBETICSContractMainnet}
-	// DefaultDynamicPrecompiles defines the default active dynamic precompiles
+)
+
+var (
+	// NOTE: We strongly recommend to use the canonical address for the ERC-20 representation
+	// of the chain's native denomination as defined by
+	// [ERC-7528](https://eips.ethereum.org/EIPS/eip-7528).
+	//
+	// 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
+	DefaultNativePrecompiles  []string
 	DefaultDynamicPrecompiles []string
 )
 

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package cli
 
 import (
@@ -12,21 +19,23 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
-// GetTxCmd returns the transaction commands for this module
-func GetTxCmd() *cobra.Command {
-	cmd := &cobra.Command{
+// NewTxCmd returns a root CLI command handler for evm module transaction commands
+func NewTxCmd() *cobra.Command {
+	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,
-		Short:                      fmt.Sprintf("%s transactions subcommands", types.ModuleName),
+		Short:                      "evm subcommands",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
 	}
-	cmd.AddCommand(NewRawTxCmd())
-	return cmd
+
+	txCmd.AddCommand(
+		NewRawTxCmd(),
+	)
+	return txCmd
 }
 
 // NewRawTxCmd command build cosmos transaction from raw ethereum transaction
@@ -55,12 +64,9 @@ func NewRawTxCmd() *cobra.Command {
 				return err
 			}
 
-			rsp, err := rpctypes.NewQueryClient(clientCtx).Params(cmd.Context(), &types.QueryParamsRequest{})
-			if err != nil {
-				return err
-			}
+			baseDenom := types.GetEVMCoinDenom()
 
-			tx, err := msg.BuildTx(clientCtx.TxConfig.NewTxBuilder(), rsp.Params.EvmDenom)
+			tx, err := msg.BuildTx(clientCtx.TxConfig.NewTxBuilder(), baseDenom)
 			if err != nil {
 				return err
 			}
@@ -96,7 +102,7 @@ func NewRawTxCmd() *cobra.Command {
 				return err
 			}
 
-			// broadcast to a Tendermint node
+			// broadcast to a CometBFT node
 			res, err := clientCtx.BroadcastTx(txBytes)
 			if err != nil {
 				return err

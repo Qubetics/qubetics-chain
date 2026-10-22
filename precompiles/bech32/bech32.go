@@ -1,21 +1,24 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package bech32
 
 import (
 	"embed"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var _ vm.PrecompiledContract = &Precompile{}
-
-const (
-	// PrecompileAddress defines the address of the bech32 precompile contract.
-	PrecompileAddress = "0x0000000000000000000000000000000000000400"
-)
 
 // Embed abi json file to the executable binary. Needed when importing as dependency.
 //
@@ -46,10 +49,9 @@ func NewPrecompile(baseGas uint64) (*Precompile, error) {
 	}, nil
 }
 
-// Address defines the address of the bech32 compile contract.
-// address: 0x0000000000000000000000000000000000000400
+// Address defines the address of the bech32 precompiled contract.
 func (Precompile) Address() common.Address {
-	return common.HexToAddress(PrecompileAddress)
+	return common.HexToAddress(evmtypes.Bech32PrecompileAddress)
 }
 
 // RequiredGas calculates the contract gas use.

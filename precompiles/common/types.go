@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package common
 
 import (
@@ -8,7 +15,6 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	qubeticsutils "github.com/qubetics/qubetics-blockchain/v2/utils"
 )
 
 var (
@@ -16,8 +22,6 @@ var (
 	TrueValue = []byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1}
 	// DefaultExpirationDuration is the default duration for an authorization to expire.
 	DefaultExpirationDuration = time.Hour * 24 * 365
-	// DefaultChainID is the standard chain id used for testing purposes
-	DefaultChainID = qubeticsutils.MainnetChainID + "-1"
 )
 
 // ICS20Allocation defines the spend limit for a particular port and channel.
@@ -93,7 +97,13 @@ func HexAddressFromBech32String(addr string) (res common.Address, err error) {
 		}
 		return common.BytesToAddress(valAddr.Bytes()), nil
 	}
-	return common.BytesToAddress(sdk.MustAccAddressFromBech32(addr)), nil
+
+	accAddr, err := sdk.AccAddressFromBech32(addr)
+	if err != nil {
+		return res, err
+	}
+
+	return common.BytesToAddress(accAddr), nil
 }
 
 // SafeAdd adds two integers and returns a boolean if an overflow occurs to avoid panic.

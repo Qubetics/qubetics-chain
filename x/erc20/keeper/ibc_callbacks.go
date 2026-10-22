@@ -1,21 +1,25 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
 	"strings"
 
 	errorsmod "cosmossdk.io/errors"
-
 	"github.com/armon/go-metrics"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ethereum/go-ethereum/common"
-
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
-
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/ibc"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
 )
@@ -23,7 +27,7 @@ import (
 // OnRecvPacket performs the ICS20 middleware receive callback for automatically
 // converting an IBC Coin to their ERC20 representation.
 // For the conversion to succeed, the IBC denomination must have previously been
-// registered via governance. Note that the native staking denomination (e.g. "tics"),
+// registered via governance. Note that the native staking denomination (e.g. "aatom"),
 // is excluded from the conversion.
 //
 // CONTRACT: This middleware MUST be executed transfer after the ICS20 OnRecvPacket
@@ -94,19 +98,14 @@ func (k Keeper) OnRecvPacket(
 	}
 
 	// check if the coin is a native staking token
-	if coin.Denom == evmParams.EvmDenom {
+	bondDenom := k.stakingKeeper.BondDenom(ctx)
+	if coin.Denom == bondDenom {
 		// no-op, received coin is the staking denomination
 		return ack
 	}
 
 	pairID := k.GetTokenPairID(ctx, coin.Denom)
 	pair, found := k.GetTokenPair(ctx, pairID)
-	ctx.Logger().Info(
-		"Token pair lookup result",
-		"pair_denom", pair.Denom,
-		"pair_erc20", pair.Erc20Address,
-		"found", found,
-	)
 	switch {
 	// Case 1. token pair is not registered and is a single hop IBC Coin
 	// by checking the prefix we ensure that only coins not native from this chain are evaluated.
@@ -116,22 +115,9 @@ func (k Keeper) OnRecvPacket(
 	case !found && strings.HasPrefix(coin.Denom, "ibc/") && ibc.IsBaseDenomFromSourceChain(data.Denom):
 		tokenPair, err := k.RegisterERC20Extension(ctx, coin.Denom)
 		if err != nil {
-			// return channeltypes.NewErrorAcknowledgement(err)
-			// LOG the error but DON'T fail the IBC transfer
-			ctx.Logger().Info(
-				"Failed to auto-register ERC20 token pair, IBC transfer succeeded but manual registration required",
-				"denom", coin.Denom,
-				"error", err.Error(),
-			)
-			// Return success ACK - tokens arrived, just not auto-converted
-			return ack
+			return channeltypes.NewErrorAcknowledgement(err)
 		}
-		ctx.Logger().Info(
-			"auto-register ERC20 token pair successful",
-			"SourceChannel", packet.SourceChannel,
-			"Erc20Address", tokenPair.Erc20Address,
-			"denomination", tokenPair.Denom,
-		)
+
 		ctx.EventManager().EmitEvents(
 			sdk.Events{
 				sdk.NewEvent(
@@ -234,7 +220,7 @@ func (k Keeper) ConvertCoinToERC20FromPacket(ctx sdk.Context, data transfertypes
 			return nil
 		}
 
-		// assume that all module accounts on Qubetics need to have their tokens in the
+		// assume that all module accounts on Cosmos EVM need to have their tokens in the
 		// IBC representation as opposed to ERC20
 		senderAcc := k.accountKeeper.GetAccount(ctx, sender)
 		if types.IsModuleAccount(senderAcc) {

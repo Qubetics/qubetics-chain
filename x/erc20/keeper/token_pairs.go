@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
@@ -47,10 +54,7 @@ func (k Keeper) IterateTokenPairs(ctx sdk.Context, cb func(tokenPair types.Token
 
 	for ; iterator.Valid(); iterator.Next() {
 		var tokenPair types.TokenPair
-		if err := k.cdc.Unmarshal(iterator.Value(), &tokenPair); err != nil {
-			k.Logger(ctx).Error("failed to unmarshal token pair during iteration", "error", err)
-			continue // Skip bad entries
-		}
+		k.cdc.MustUnmarshal(iterator.Value(), &tokenPair)
 
 		if cb(tokenPair) {
 			break
@@ -75,16 +79,13 @@ func (k Keeper) GetTokenPair(ctx sdk.Context, id []byte) (types.TokenPair, bool)
 	}
 
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixTokenPair)
+	var tokenPair types.TokenPair
 	bz := store.Get(id)
 	if len(bz) == 0 {
 		return types.TokenPair{}, false
 	}
 
-	var tokenPair types.TokenPair
-	if err := k.cdc.Unmarshal(bz, &tokenPair); err != nil {
-		k.Logger(ctx).Error("failed to unmarshal token pair", "error", err)
-		return types.TokenPair{}, false
-	}
+	k.cdc.MustUnmarshal(bz, &tokenPair)
 	return tokenPair, true
 }
 
@@ -92,11 +93,7 @@ func (k Keeper) GetTokenPair(ctx sdk.Context, id []byte) (types.TokenPair, bool)
 func (k Keeper) SetTokenPair(ctx sdk.Context, tokenPair types.TokenPair) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixTokenPair)
 	key := tokenPair.GetID()
-	bz, err := k.cdc.Marshal(&tokenPair)
-	if err != nil {
-		k.Logger(ctx).Error("failed to marshal token pair", "error", err)
-		return
-	}
+	bz := k.cdc.MustMarshal(&tokenPair)
 	store.Set(key, bz)
 }
 

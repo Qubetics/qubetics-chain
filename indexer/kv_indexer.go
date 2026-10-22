@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package indexer
 
 import (
@@ -7,14 +14,14 @@ import (
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
-	tmtypes "github.com/cometbft/cometbft/types"
+	cmttypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/ethereum/go-ethereum/common"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
-	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
@@ -26,7 +33,7 @@ const (
 	TxIndexKeyLength = 1 + 8 + 8
 )
 
-var _ qubeticstypes.EVMTxIndexer = &KVIndexer{}
+var _ cosmosevmtypes.EVMTxIndexer = &KVIndexer{}
 
 // KVIndexer implements a eth tx indexer on a KV db.
 type KVIndexer struct {
@@ -45,7 +52,7 @@ func NewKVIndexer(db dbm.DB, logger log.Logger, clientCtx client.Context) *KVInd
 // - Parses eth Tx infos from cosmos-sdk events for every TxResult
 // - Iterates over all the messages of the Tx
 // - Builds and stores a indexer.TxResult based on parsed events for every message
-func (kv *KVIndexer) IndexBlock(block *tmtypes.Block, txResults []*abci.ResponseDeliverTx) error {
+func (kv *KVIndexer) IndexBlock(block *cmttypes.Block, txResults []*abci.ResponseDeliverTx) error {
 	height := block.Header.Height
 
 	batch := kv.db.NewBatch()
@@ -80,10 +87,10 @@ func (kv *KVIndexer) IndexBlock(block *tmtypes.Block, txResults []*abci.Response
 			ethMsg := msg.(*evmtypes.MsgEthereumTx)
 			txHash := common.HexToHash(ethMsg.Hash)
 
-			txResult := qubeticstypes.TxResult{
+			txResult := cosmosevmtypes.TxResult{
 				Height:     height,
-				TxIndex:    uint32(txIndex),
-				MsgIndex:   uint32(msgIndex),
+				TxIndex:    uint32(txIndex),  //#nosec G115 -- int overflow is not a concern here
+				MsgIndex:   uint32(msgIndex), //#nosec G115 -- int overflow is not a concern here
 				EthTxIndex: ethTxIndex,
 			}
 			if result.Code != abci.CodeTypeOK {
@@ -130,7 +137,7 @@ func (kv *KVIndexer) FirstIndexedBlock() (int64, error) {
 }
 
 // GetByTxHash finds eth tx by eth tx hash
-func (kv *KVIndexer) GetByTxHash(hash common.Hash) (*qubeticstypes.TxResult, error) {
+func (kv *KVIndexer) GetByTxHash(hash common.Hash) (*cosmosevmtypes.TxResult, error) {
 	bz, err := kv.db.Get(TxHashKey(hash))
 	if err != nil {
 		return nil, errorsmod.Wrapf(err, "GetByTxHash %s", hash.Hex())
@@ -138,7 +145,7 @@ func (kv *KVIndexer) GetByTxHash(hash common.Hash) (*qubeticstypes.TxResult, err
 	if len(bz) == 0 {
 		return nil, fmt.Errorf("tx not found, hash: %s", hash.Hex())
 	}
-	var txKey qubeticstypes.TxResult
+	var txKey cosmosevmtypes.TxResult
 	if err := kv.clientCtx.Codec.Unmarshal(bz, &txKey); err != nil {
 		return nil, errorsmod.Wrapf(err, "GetByTxHash %s", hash.Hex())
 	}
@@ -146,7 +153,7 @@ func (kv *KVIndexer) GetByTxHash(hash common.Hash) (*qubeticstypes.TxResult, err
 }
 
 // GetByBlockAndIndex finds eth tx by block number and eth tx index
-func (kv *KVIndexer) GetByBlockAndIndex(blockNumber int64, txIndex int32) (*qubeticstypes.TxResult, error) {
+func (kv *KVIndexer) GetByBlockAndIndex(blockNumber int64, txIndex int32) (*cosmosevmtypes.TxResult, error) {
 	bz, err := kv.db.Get(TxIndexKey(blockNumber, txIndex))
 	if err != nil {
 		return nil, errorsmod.Wrapf(err, "GetByBlockAndIndex %d %d", blockNumber, txIndex)
@@ -164,8 +171,8 @@ func TxHashKey(hash common.Hash) []byte {
 
 // TxIndexKey returns the key for db entry: `(block number, tx index) -> tx hash`
 func TxIndexKey(blockNumber int64, txIndex int32) []byte {
-	bz1 := sdk.Uint64ToBigEndian(uint64(blockNumber))
-	bz2 := sdk.Uint64ToBigEndian(uint64(txIndex))
+	bz1 := sdk.Uint64ToBigEndian(uint64(blockNumber)) //nolint:gosec // G115 // block number won't exceed uint64
+	bz2 := sdk.Uint64ToBigEndian(uint64(txIndex))     //nolint:gosec // G115 // index won't exceed uint64
 	return append(append([]byte{KeyPrefixTxIndex}, bz1...), bz2...)
 }
 
@@ -202,14 +209,14 @@ func isEthTx(tx sdk.Tx) bool {
 		return false
 	}
 	opts := extTx.GetExtensionOptions()
-	if len(opts) != 1 || opts[0].GetTypeUrl() != "/ethermint.evm.v1.ExtensionOptionsEthereumTx" {
+	if len(opts) != 1 || opts[0].GetTypeUrl() != "/cosmos.evm.vm.v1.ExtensionOptionsEthereumTx" {
 		return false
 	}
 	return true
 }
 
 // saveTxResult index the txResult into the kv db batch
-func saveTxResult(codec codec.Codec, batch dbm.Batch, txHash common.Hash, txResult *qubeticstypes.TxResult) error {
+func saveTxResult(codec codec.Codec, batch dbm.Batch, txHash common.Hash, txResult *cosmosevmtypes.TxResult) error {
 	bz := codec.MustMarshal(txResult)
 	if err := batch.Set(TxHashKey(txHash), bz); err != nil {
 		return errorsmod.Wrap(err, "set tx-hash key")
@@ -225,5 +232,5 @@ func parseBlockNumberFromKey(key []byte) (int64, error) {
 		return 0, fmt.Errorf("wrong tx index key length, expect: %d, got: %d", TxIndexKeyLength, len(key))
 	}
 
-	return int64(sdk.BigEndianToUint64(key[1:9])), nil
+	return int64(sdk.BigEndianToUint64(key[1:9])), nil //#nosec G115 -- int overflow is not a concern here, block number is unlikely to exceed 9,223,372,036,854,775,807
 }

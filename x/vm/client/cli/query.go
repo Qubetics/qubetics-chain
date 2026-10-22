@@ -1,13 +1,18 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package cli
 
 import (
-	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-
+	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"github.com/spf13/cobra"
 )
 
 // GetQueryCmd returns the parent command for all x/bank CLi query commands.
@@ -23,7 +28,9 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetStorageCmd(),
 		GetCodeCmd(),
+		GetAccountCmd(),
 		GetParamsCmd(),
+		GetConfigCmd(),
 	)
 	return cmd
 }
@@ -105,6 +112,43 @@ func GetCodeCmd() *cobra.Command {
 	return cmd
 }
 
+// GetAccountCmd queries the account of a given address
+func GetAccountCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "account ADDRESS",
+		Short: "Gets account info from an address",
+		Long:  "Gets account info from an address. If the height is not provided, it will use the latest height from context.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			address, err := accountToHex(args[0])
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryAccountRequest{
+				Address: address,
+			}
+
+			res, err := queryClient.Account(rpctypes.ContextWithHeight(clientCtx.Height), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
 // GetParamsCmd queries the fee market params
 func GetParamsCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -121,6 +165,34 @@ func GetParamsCmd() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.Params(cmd.Context(), &types.QueryParamsRequest{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetConfigCmd queries the evm configuration
+func GetConfigCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "config",
+		Short: "Get the evm config",
+		Long:  "Get the evm configuration values.",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Config(cmd.Context(), &types.QueryConfigRequest{})
 			if err != nil {
 				return err
 			}

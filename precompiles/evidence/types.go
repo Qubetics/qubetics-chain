@@ -1,0 +1,90 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
+package evidence
+
+import (
+	"fmt"
+	"time"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/query"
+	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
+	"github.com/ethereum/go-ethereum/common"
+	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
+)
+
+const (
+	// SubmitEvidenceMethod defines the ABI method name for the evidence SubmitEvidence
+	// transaction.
+	SubmitEvidenceMethod = "submitEvidence"
+	// EvidenceMethod defines the ABI method name for the Evidence query.
+	EvidenceMethod = "evidence"
+	// GetAllEvidenceMethod defines the ABI method name for the GetAllEvidence query.
+	GetAllEvidenceMethod = "getAllEvidence"
+)
+
+// EventSubmitEvidence defines the event data for the SubmitEvidence transaction.
+type EventSubmitEvidence struct {
+	Submitter common.Address
+	Hash      []byte
+}
+
+// SingleEvidenceOutput defines the output for the Evidence query.
+type SingleEvidenceOutput struct {
+	Evidence EquivocationData
+}
+
+// AllEvidenceOutput defines the output for the GetAllEvidence query.
+type AllEvidenceOutput struct {
+	Evidence     []EquivocationData
+	PageResponse query.PageResponse
+}
+
+// EquivocationData represents the Solidity Equivocation struct
+type EquivocationData struct {
+	Height           int64  `abi:"height"`
+	Time             uint64 `abi:"time"`
+	Power            int64  `abi:"power"`
+	ConsensusAddress string `abi:"consensusAddress"`
+}
+
+// ToEquivocation converts the EquivocationData to a types.Equivocation
+func (e EquivocationData) ToEquivocation() *evidencetypes.Equivocation {
+	return &evidencetypes.Equivocation{
+		Height:           e.Height,
+		Time:             time.Unix(int64(e.Time), 0).UTC(), //nolint:gosec // G115
+		Power:            e.Power,
+		ConsensusAddress: e.ConsensusAddress,
+	}
+}
+
+// NewMsgSubmitEvidence creates a new MsgSubmitEvidence instance.
+func NewMsgSubmitEvidence(origin common.Address, args []interface{}) (*evidencetypes.MsgSubmitEvidence, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf(cmn.ErrInvalidNumberOfArgs, 1, len(args))
+	}
+
+	equivocation, ok := args[0].(EquivocationData)
+	if !ok {
+		return nil, fmt.Errorf("invalid equivocation evidence")
+	}
+
+	// Convert the EquivocationData to a types.Equivocation
+	evidence := equivocation.ToEquivocation()
+
+	// Create the MsgSubmitEvidence using the SDK msg builder
+	msg, err := evidencetypes.NewMsgSubmitEvidence(
+		sdk.AccAddress(origin.Bytes()),
+		evidence,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create evidence message: %w", err)
+	}
+
+	return msg, nil
+}

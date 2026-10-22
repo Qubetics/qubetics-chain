@@ -1,20 +1,23 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package distribution
 
 import (
 	"fmt"
 	"math/big"
 
-	"github.com/qubetics/qubetics-blockchain/v2/utils"
-
 	"cosmossdk.io/math"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
-	"github.com/qubetics/qubetics-blockchain/v2/qubeticsd/cmd/qubeticsd/config"
 )
 
 // EventSetWithdrawAddress defines the event data for the SetWithdrawAddress transaction.
@@ -83,7 +86,7 @@ func NewMsgSetWithdrawAddress(args []interface{}) (*distributiontypes.MsgSetWith
 	// If the withdrawer address is a hex address, convert it to a bech32 address.
 	if common.IsHexAddress(withdrawerAddress) {
 		var err error
-		withdrawerAddress, err = sdk.Bech32ifyAddressBytes(config.Bech32Prefix, common.HexToAddress(withdrawerAddress).Bytes())
+		withdrawerAddress, err = sdk.Bech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), common.HexToAddress(withdrawerAddress).Bytes())
 		if err != nil {
 			return nil, common.Address{}, err
 		}
@@ -92,10 +95,6 @@ func NewMsgSetWithdrawAddress(args []interface{}) (*distributiontypes.MsgSetWith
 	msg := &distributiontypes.MsgSetWithdrawAddress{
 		DelegatorAddress: sdk.AccAddress(delegatorAddress.Bytes()).String(),
 		WithdrawAddress:  withdrawerAddress,
-	}
-
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
 	}
 
 	return msg, delegatorAddress, nil
@@ -119,10 +118,6 @@ func NewMsgWithdrawDelegatorReward(args []interface{}) (*distributiontypes.MsgWi
 		ValidatorAddress: validatorAddress,
 	}
 
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
-	}
-
 	return msg, delegatorAddress, nil
 }
 
@@ -138,10 +133,6 @@ func NewMsgWithdrawValidatorCommission(args []interface{}) (*distributiontypes.M
 		ValidatorAddress: validatorAddress,
 	}
 
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
-	}
-
 	validatorHexAddr, err := cmn.HexAddressFromBech32String(msg.ValidatorAddress)
 	if err != nil {
 		return nil, common.Address{}, err
@@ -151,7 +142,7 @@ func NewMsgWithdrawValidatorCommission(args []interface{}) (*distributiontypes.M
 }
 
 // NewMsgFundCommunityPool creates a new NewMsgFundCommunityPool message.
-func NewMsgFundCommunityPool(args []interface{}) (*distributiontypes.MsgFundCommunityPool, common.Address, error) {
+func NewMsgFundCommunityPool(denom string, args []interface{}) (*distributiontypes.MsgFundCommunityPool, common.Address, error) {
 	if len(args) != 2 {
 		return nil, common.Address{}, fmt.Errorf(cmn.ErrInvalidNumberOfArgs, 2, len(args))
 	}
@@ -168,11 +159,7 @@ func NewMsgFundCommunityPool(args []interface{}) (*distributiontypes.MsgFundComm
 
 	msg := &distributiontypes.MsgFundCommunityPool{
 		Depositor: sdk.AccAddress(depositorAddress.Bytes()).String(),
-		Amount:    sdk.Coins{sdk.Coin{Denom: utils.BaseDenom, Amount: math.NewIntFromBigInt(amount)}},
-	}
-
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, common.Address{}, err
+		Amount:    sdk.Coins{sdk.Coin{Denom: denom, Amount: math.NewIntFromBigInt(amount)}},
 	}
 
 	return msg, depositorAddress, nil

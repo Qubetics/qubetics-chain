@@ -1,3 +1,15 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
+//
+// The bank package contains the implementation of the x/bank module precompile.
+// The precompiles returns all bank's information in the original decimals
+// representation stored in the module.
+
 package bank
 
 import (
@@ -6,18 +18,17 @@ import (
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	erc20keeper "github.com/qubetics/qubetics-blockchain/v2/x/erc20/keeper"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 const (
-	// PrecompileAddress defines the bank precompile address in Hex format
-	PrecompileAddress string = "0x0000000000000000000000000000000000000804"
-
-	// GasBalanceOf defines the gas cost for a single ERC-20 balanceOf query
-	GasBalanceOf = 2_851
+	// GasBalances defines the gas cost for a single ERC-20 balanceOf query
+	GasBalances = 2_851
 
 	// GasTotalSupply defines the gas cost for a single ERC-20 totalSupply query
 	GasTotalSupply = 2_477
@@ -40,7 +51,7 @@ type Precompile struct {
 	erc20Keeper erc20keeper.Keeper
 }
 
-// NewPrecompile creates a new bank Precompile instance as a
+// NewPrecompile creates a new bank Precompile instance implementing the
 // PrecompiledContract interface.
 func NewPrecompile(
 	bankKeeper bankkeeper.Keeper,
@@ -62,8 +73,10 @@ func NewPrecompile(
 		bankKeeper:  bankKeeper,
 		erc20Keeper: erc20Keeper,
 	}
+
 	// SetAddress defines the address of the bank compile contract.
-	p.SetAddress(common.HexToAddress(PrecompileAddress))
+	p.SetAddress(common.HexToAddress(evmtypes.BankPrecompileAddress))
+
 	return p, nil
 }
 
@@ -82,11 +95,9 @@ func (p Precompile) RequiredGas(input []byte) uint64 {
 		return 0
 	}
 
-	// NOTE: Charge the amount of gas required for a single ERC-20
-	// balanceOf or totalSupply query
 	switch method.Name {
 	case BalancesMethod:
-		return GasBalanceOf
+		return GasBalances
 	case TotalSupplyMethod:
 		return GasTotalSupply
 	case SupplyOfMethod:
@@ -138,6 +149,6 @@ func (p Precompile) Run(evm *vm.EVM, contract *vm.Contract, readOnly bool) (bz [
 
 // IsTransaction checks if the given method name corresponds to a transaction or query.
 // It returns false since all bank methods are queries.
-func (Precompile) IsTransaction(_ string) bool {
+func (Precompile) IsTransaction(_ *abi.Method) bool {
 	return false
 }

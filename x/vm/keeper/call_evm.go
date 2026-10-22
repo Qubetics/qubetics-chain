@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
@@ -7,15 +14,15 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/qubetics/qubetics-blockchain/v2/server/config"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/qubetics/qubetics-blockchain/v2/server/config"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
-// CallEVM performs a smart contract method call using given args
+// CallEVM performs a smart contract method call using given args.
 func (k Keeper) CallEVM(
 	ctx sdk.Context,
 	abi abi.ABI,
@@ -39,7 +46,7 @@ func (k Keeper) CallEVM(
 	return resp, nil
 }
 
-// CallEVMWithData performs a smart contract method call using contract data
+// CallEVMWithData performs a smart contract method call using contract data.
 func (k Keeper) CallEVMWithData(
 	ctx sdk.Context,
 	from common.Address,
@@ -63,7 +70,7 @@ func (k Keeper) CallEVMWithData(
 			return nil, errorsmod.Wrapf(errortypes.ErrJSONMarshal, "failed to marshal tx args: %s", err.Error())
 		}
 
-		gasRes, err := k.EstimateGasInternal(sdk.WrapSDKContext(ctx), &types.EthCallRequest{
+		gasRes, err := k.EstimateGasInternal(ctx, &types.EthCallRequest{
 			Args:   args,
 			GasCap: config.DefaultGasCap,
 		}, types.Internal)

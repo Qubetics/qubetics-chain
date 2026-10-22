@@ -1,19 +1,15 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
 	"fmt"
-
-	"github.com/qubetics/qubetics-blockchain/v2/utils"
 )
-
-var DefaultTokenPairs = []TokenPair{
-	{
-		Erc20Address:  WQUBETICSContractMainnet,
-		Denom:         utils.BaseDenom,
-		Enabled:       true,
-		ContractOwner: OWNER_MODULE,
-	},
-}
 
 // NewGenesisState creates a new genesis state.
 func NewGenesisState(params Params, pairs []TokenPair) GenesisState {
@@ -28,7 +24,7 @@ func NewGenesisState(params Params, pairs []TokenPair) GenesisState {
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:     DefaultParams(),
-		TokenPairs: DefaultTokenPairs,
+		TokenPairs: []TokenPair{},
 	}
 }
 

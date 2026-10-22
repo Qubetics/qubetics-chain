@@ -1,0 +1,15 @@
+Qubetics Chain
+
+This product includes software from Cosmos EVM
+(https://github.com/cosmos/evm), version v0.1.0,
+licensed under the Apache License, Version 2.0.
+
+The Cosmos EVM code was imported unmodified (apart from the Go module path)
+and then backported from Cosmos SDK v0.50 to Cosmos SDK v0.47.12 so that it
+can run alongside the Qubetics dVPN modules. The backport changes are
+recorded in this repository's git history.
+
+Cosmos EVM's EVM implementation includes code derived from go-ethereum
+(https://github.com/ethereum/go-ethereum), licensed under the GNU Lesser
+General Public License v3.0. Files carrying a go-ethereum copyright notice
+remain under that license.

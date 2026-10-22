@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package ics20
 
 import (
@@ -6,15 +13,16 @@ import (
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	channelkeeper "github.com/cosmos/ibc-go/v7/modules/core/04-channel/keeper"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
-
-	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	evmkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vm/keeper"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // PrecompileAddress of the ICS-20 EVM extension in hex format.
@@ -32,6 +40,7 @@ type Precompile struct {
 	stakingKeeper  stakingkeeper.Keeper
 	transferKeeper transferkeeper.Keeper
 	channelKeeper  channelkeeper.Keeper
+	evmKeeper      *evmkeeper.Keeper
 }
 
 // NewPrecompile creates a new ICS-20 Precompile instance as a
@@ -41,6 +50,7 @@ func NewPrecompile(
 	transferKeeper transferkeeper.Keeper,
 	channelKeeper channelkeeper.Keeper,
 	authzKeeper authzkeeper.Keeper,
+	evmKeeper *evmkeeper.Keeper,
 ) (*Precompile, error) {
 	newAbi, err := cmn.LoadABI(f, "abi.json")
 	if err != nil {
@@ -53,15 +63,17 @@ func NewPrecompile(
 			AuthzKeeper:          authzKeeper,
 			KvGasConfig:          storetypes.KVGasConfig(),
 			TransientKVGasConfig: storetypes.TransientGasConfig(),
-			ApprovalExpiration:   cmn.DefaultExpirationDuration, // should be configurable in the qubetics.
+			ApprovalExpiration:   cmn.DefaultExpirationDuration, // should be configurable in the future.
 		},
 		transferKeeper: transferKeeper,
 		channelKeeper:  channelKeeper,
 		stakingKeeper:  stakingKeeper,
+		evmKeeper:      evmKeeper,
 	}
+
 	// SetAddress defines the address of the ICS-20 compile contract.
-	// address: 0x0000000000000000000000000000000000000802
-	p.SetAddress(common.HexToAddress(PrecompileAddress))
+	p.SetAddress(common.HexToAddress(evmtypes.ICS20PrecompileAddress))
+
 	return p, nil
 }
 
@@ -80,7 +92,7 @@ func (p Precompile) RequiredGas(input []byte) uint64 {
 		return 0
 	}
 
-	return p.Precompile.RequiredGas(input, p.IsTransaction(method.Name))
+	return p.Precompile.RequiredGas(input, p.IsTransaction(method))
 }
 
 // Run executes the precompiled contract IBC transfer methods defined in the ABI.
@@ -148,8 +160,8 @@ func (p Precompile) Run(evm *vm.EVM, contract *vm.Contract, readOnly bool) (bz [
 //   - Revoke
 //   - IncreaseAllowance
 //   - DecreaseAllowance
-func (Precompile) IsTransaction(method string) bool {
-	switch method {
+func (Precompile) IsTransaction(method *abi.Method) bool {
+	switch method.Name {
 	case TransferMethod,
 		authorization.ApproveMethod,
 		authorization.RevokeMethod,

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package cosmos
 
 import (
@@ -28,7 +35,7 @@ func NewAuthzLimiterDecorator(disabledMsgTypes ...string) AuthzLimiterDecorator 
 
 func (ald AuthzLimiterDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
 	if err := ald.checkDisabledMsgs(tx.GetMsgs(), false, 1); err != nil {
-		return ctx, errorsmod.Wrapf(errortypes.ErrUnauthorized, err.Error())
+		return ctx, errorsmod.Wrapf(errortypes.ErrUnauthorized, "%s", err.Error())
 	}
 	return next(ctx, tx, simulate)
 }
@@ -42,7 +49,7 @@ func (ald AuthzLimiterDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate
 // maxNestedMsgs threshold. If there are more than that limit, it returns an error
 func (ald AuthzLimiterDecorator) checkDisabledMsgs(msgs []sdk.Msg, isAuthzInnerMsg bool, nestedLvl int) error {
 	if nestedLvl >= maxNestedMsgs {
-		return fmt.Errorf("found more nested msgs than permited. Limit is : %d", maxNestedMsgs)
+		return fmt.Errorf("found more nested msgs than permitted; got: %d, expected: <%d", nestedLvl, maxNestedMsgs)
 	}
 	for _, msg := range msgs {
 		switch msg := msg.(type) {

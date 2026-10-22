@@ -1,0 +1,41 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
+syntax = "proto3";
+package cosmos.evm.erc20.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/evm/erc20/v1/erc20.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types";
+
+// GenesisState defines the module's genesis state.
+message GenesisState {
+  // params are the erc20 module parameters at genesis
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  // token_pairs is a slice of the registered token pairs at genesis
+  repeated TokenPair token_pairs = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+// Params defines the erc20 module params
+message Params {
+  // enable_erc20 is the parameter to enable the conversion of Cosmos coins <-->
+  // ERC20 tokens.
+  bool enable_erc20 = 1;
+  // enable_evm_hook is now depecrated
+  reserved 2;
+  // native_precompiles defines the slice of hex addresses of the
+  // active precompiles that are used to interact with native staking coins as
+  // ERC20s
+  repeated string native_precompiles = 3;
+  // dynamic_precompiles defines the slice of hex addresses of the
+  // active precompiles that are used to interact with Bank coins as ERC20s
+  repeated string dynamic_precompiles = 4;
+}

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
@@ -8,7 +15,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-
 	"github.com/qubetics/qubetics-blockchain/v2/x/feemarket/types"
 )
 
@@ -67,22 +73,13 @@ func (k Keeper) SetBlockGasWanted(ctx sdk.Context, gas uint64) {
 // GetBlockGasWanted returns the last block gas wanted value from the store.
 func (k Keeper) GetBlockGasWanted(ctx sdk.Context) uint64 {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.KeyPrefixBlockGasWanted)
-	if len(bz) == 0 {
-		return 0
-	}
-
-	return sdk.BigEndianToUint64(bz)
+	return sdk.BigEndianToUint64(store.Get(types.KeyPrefixBlockGasWanted))
 }
 
 // GetTransientGasWanted returns the gas wanted in the current block from transient store.
 func (k Keeper) GetTransientGasWanted(ctx sdk.Context) uint64 {
 	store := ctx.TransientStore(k.transientKey)
-	bz := store.Get(types.KeyPrefixTransientBlockGasWanted)
-	if len(bz) == 0 {
-		return 0
-	}
-	return sdk.BigEndianToUint64(bz)
+	return sdk.BigEndianToUint64(store.Get(types.KeyPrefixTransientBlockGasWanted))
 }
 
 // SetTransientBlockGasWanted sets the block gas wanted to the transient store.

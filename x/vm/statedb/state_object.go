@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package statedb
 
 import (
@@ -5,12 +12,11 @@ import (
 	"math/big"
 	"sort"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
-
-var emptyCodeHash = crypto.Keccak256(nil)
 
 // Account is the Ethereum consensus representation of accounts.
 // These objects are stored in the storage of auth module.
@@ -24,13 +30,13 @@ type Account struct {
 func NewEmptyAccount() *Account {
 	return &Account{
 		Balance:  new(big.Int),
-		CodeHash: emptyCodeHash,
+		CodeHash: types.EmptyCodeHash,
 	}
 }
 
 // IsContract returns if the account contains contract code.
 func (acct Account) IsContract() bool {
-	return !bytes.Equal(acct.CodeHash, emptyCodeHash)
+	return !types.IsEmptyCodeHash(acct.CodeHash)
 }
 
 // Storage represents in-memory cache/buffer of contract storage.
@@ -71,9 +77,11 @@ func newObject(db *StateDB, address common.Address, account Account) *stateObjec
 	if account.Balance == nil {
 		account.Balance = new(big.Int)
 	}
+
 	if account.CodeHash == nil {
-		account.CodeHash = emptyCodeHash
+		account.CodeHash = types.EmptyCodeHash
 	}
+
 	return &stateObject{
 		db:            db,
 		address:       address,
@@ -85,7 +93,9 @@ func newObject(db *StateDB, address common.Address, account Account) *stateObjec
 
 // empty returns whether the account is considered empty.
 func (s *stateObject) empty() bool {
-	return s.account.Nonce == 0 && s.account.Balance.Sign() == 0 && bytes.Equal(s.account.CodeHash, emptyCodeHash)
+	return s.account.Nonce == 0 &&
+		s.account.Balance.Sign() == 0 &&
+		types.IsEmptyCodeHash(s.account.CodeHash)
 }
 
 func (s *stateObject) markSuicided() {
@@ -95,6 +105,7 @@ func (s *stateObject) markSuicided() {
 // AddBalance adds amount to s's balance.
 // It is used to add funds to the destination account of a transfer.
 func (s *stateObject) AddBalance(amount *big.Int) {
+	amount = types.AdjustExtraDecimalsBigInt(amount)
 	if amount.Sign() == 0 {
 		return
 	}
@@ -104,6 +115,7 @@ func (s *stateObject) AddBalance(amount *big.Int) {
 // SubBalance removes amount from s's balance.
 // It is used to remove funds from the origin account of a transfer.
 func (s *stateObject) SubBalance(amount *big.Int) {
+	amount = types.AdjustExtraDecimalsBigInt(amount)
 	if amount.Sign() == 0 {
 		return
 	}
@@ -122,7 +134,7 @@ func (s *stateObject) SetBalance(amount *big.Int) {
 // AddPrecompileFn appends to the journal an entry
 // with a snapshot of the multi-store and events
 // previous to the precompile call
-func (s *stateObject) AddPrecompileFn(cms sdk.CacheMultiStore, events sdk.Events) {
+func (s *stateObject) AddPrecompileFn(cms storetypes.CacheMultiStore, events sdk.Events) {
 	s.db.journal.append(precompileCallChange{
 		multiStore: cms,
 		events:     events,
@@ -147,11 +159,14 @@ func (s *stateObject) Code() []byte {
 	if s.code != nil {
 		return s.code
 	}
-	if bytes.Equal(s.CodeHash(), emptyCodeHash) {
+
+	if types.IsEmptyCodeHash(s.CodeHash()) {
 		return nil
 	}
+
 	code := s.db.keeper.GetCode(s.db.ctx, common.BytesToHash(s.CodeHash()))
 	s.code = code
+
 	return code
 }
 

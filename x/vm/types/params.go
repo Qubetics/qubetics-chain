@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -6,40 +13,27 @@ import (
 	"slices"
 
 	errorsmod "cosmossdk.io/errors"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/qubetics/qubetics-blockchain/v2/precompiles/p256"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
-	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 var (
-	// DefaultEVMDenom defines the default EVM denomination on Qubetics
-	DefaultEVMDenom = utils.BaseDenom
 	// DefaultAllowUnprotectedTxs rejects all unprotected txs (i.e false)
 	DefaultAllowUnprotectedTxs = false
-	// DefaultStaticPrecompiles defines the default active precompiles
-	DefaultStaticPrecompiles = []string{
-		p256.PrecompileAddress,                       // P256 precompile
-		"0x0000000000000000000000000000000000000400", // Bech32 precompile
-		"0x0000000000000000000000000000000000000800", // Staking precompile
-		"0x0000000000000000000000000000000000000801", // Distribution precompile
-		"0x0000000000000000000000000000000000000802", // ICS20 transfer precompile
-		"0x0000000000000000000000000000000000000804", // Bank precompile
-	}
-	// DefaultExtraEIPs defines the default extra EIPs to be included
+	// DefaultStaticPrecompiles defines the default active precompiles.
+	DefaultStaticPrecompiles []string
+	// DefaultExtraEIPs defines the default extra EIPs to be included.
 	// On v15, EIP 3855 was enabled
-	DefaultExtraEIPs   = []string{"ethereum_3855"}
-	DefaultEVMChannels = []string{
-		"channel-10", // Injective
-		"channel-31", // Cronos
-		"channel-83", // Kava
+	DefaultExtraEIPs = []string{
+		"ethereum_3855", // NOTE: we suggest to enable EIP-3855 on all chains to support new Solidity versions >=v0.8.20
 	}
+	// DefaultEVMChannels defines a list of IBC channels that connect to EVM chains like injective or cronos.
+	DefaultEVMChannels              []string
 	DefaultCreateAllowlistAddresses []string
 	DefaultCallAllowlistAddresses   []string
 	DefaultAccessControl            = AccessControl{
@@ -49,26 +43,22 @@ var (
 		},
 		Call: AccessControlType{
 			AccessType:        AccessTypePermissionless,
-			AccessControlList: DefaultCreateAllowlistAddresses,
+			AccessControlList: DefaultCallAllowlistAddresses,
 		},
 	}
 )
 
 // NewParams creates a new Params instance
 func NewParams(
-	evmDenom string,
 	allowUnprotectedTxs bool,
-	config ChainConfig,
 	extraEIPs []string,
 	activeStaticPrecompiles,
 	evmChannels []string,
 	accessControl AccessControl,
 ) Params {
 	return Params{
-		EvmDenom:                evmDenom,
 		AllowUnprotectedTxs:     allowUnprotectedTxs,
 		ExtraEIPs:               extraEIPs,
-		ChainConfig:             config,
 		ActiveStaticPrecompiles: activeStaticPrecompiles,
 		EVMChannels:             evmChannels,
 		AccessControl:           accessControl,
@@ -78,8 +68,6 @@ func NewParams(
 // DefaultParams returns default evm parameters
 func DefaultParams() Params {
 	return Params{
-		EvmDenom:                DefaultEVMDenom,
-		ChainConfig:             DefaultChainConfig(),
 		ExtraEIPs:               DefaultExtraEIPs,
 		AllowUnprotectedTxs:     DefaultAllowUnprotectedTxs,
 		ActiveStaticPrecompiles: DefaultStaticPrecompiles,
@@ -108,19 +96,11 @@ func validateChannels(i interface{}) error {
 
 // Validate performs basic validation on evm parameters.
 func (p Params) Validate() error {
-	if err := validateEVMDenom(p.EvmDenom); err != nil {
-		return err
-	}
-
 	if err := validateEIPs(p.ExtraEIPs); err != nil {
 		return err
 	}
 
 	if err := validateBool(p.AllowUnprotectedTxs); err != nil {
-		return err
-	}
-
-	if err := validateChainConfig(p.ChainConfig); err != nil {
 		return err
 	}
 
@@ -209,15 +189,6 @@ func validateAllowlistAddresses(i interface{}) error {
 	return nil
 }
 
-func validateEVMDenom(i interface{}) error {
-	denom, ok := i.(string)
-	if !ok {
-		return fmt.Errorf("invalid parameter EVM denom type: %T", i)
-	}
-
-	return sdk.ValidateDenom(denom)
-}
-
 func validateBool(i interface{}) error {
 	_, ok := i.(bool)
 	if !ok {
@@ -251,15 +222,6 @@ func validateEIPs(i interface{}) error {
 	}
 
 	return nil
-}
-
-func validateChainConfig(i interface{}) error {
-	cfg, ok := i.(ChainConfig)
-	if !ok {
-		return fmt.Errorf("invalid chain config type: %T", i)
-	}
-
-	return cfg.Validate()
 }
 
 // ValidatePrecompiles checks if the precompile addresses are valid and unique.

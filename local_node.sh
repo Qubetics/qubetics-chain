@@ -7,24 +7,16 @@ MONIKER="localtestnet"
 # The keyring test does not require private key to steal tokens from you
 KEYRING="test"
 KEYALGO="eth_secp256k1"
+
 LOGLEVEL="info"
 # Set dedicated home directory for the qubeticsd instance
-HOMEDIR="/data/.tmp-qubeticsd"
-# to trace evm
-#TRACE="--trace"
-TRACE=""
+HOMEDIR="$HOME/.qubeticsd"
 
-
-export DAEMON_NAME="qubeticsd"
-export DAEMON_HOME="/data/.tmp-qubeticsd"
-
-# feemarket params basefee
-BASEFEE=100000000000
+BASEFEE=10000000
 
 # Path variables
 CONFIG=$HOMEDIR/config/config.toml
 APP_TOML=$HOMEDIR/config/app.toml
-CLIENT=$HOMEDIR/config/client.toml
 GENESIS=$HOMEDIR/config/genesis.json
 TMP_GENESIS=$HOMEDIR/config/tmp_genesis.json
 
@@ -40,6 +32,7 @@ set -e
 # Parse input flags
 install=true
 overwrite=""
+BUILD_FOR_DEBUG=false
 
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -59,6 +52,11 @@ while [[ $# -gt 0 ]]; do
 		install=false
 		shift # Move past the flag
 		;;
+	--remote-debugging)
+		echo "Flag --remote-debugging passed -> Building with remote debugging options."
+		BUILD_FOR_DEBUG=true
+		shift # Move past the flag
+		;;
 	*)
 		echo "Unknown flag passed: $key -> Exiting script!"
 		exit 1
@@ -67,8 +65,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $install == true ]]; then
-	# (Re-)install daemon
-	make install
+	if [[ $BUILD_FOR_DEBUG == true ]]; then
+		# for remote debugging the optimization should be disabled and the debug info should not be stripped
+		make install COSMOS_BUILD_OPTIONS=nooptimization,nostrip
+	else
+		make install
+	fi
 fi
 
 # User prompt if neither -y nor -n was passed as a flag
@@ -89,26 +91,26 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 	rm -rf "$HOMEDIR"
 
 	# Set client config
-	qubeticsd config keyring-backend "$KEYRING" --home "$HOMEDIR"
 	qubeticsd config chain-id "$CHAINID" --home "$HOMEDIR"
+	qubeticsd config keyring-backend "$KEYRING" --home "$HOMEDIR"
 
-	# myKey address 0x7cb61d4117ae31a12e393a1cfa3bac666481d02e | qubetics10jmp6sgh4cc6zt3e8gw05wavvejgr5pwggzvrn
+	# myKey address 0x7cb61d4117ae31a12e393a1cfa3bac666481d02e | os10jmp6sgh4cc6zt3e8gw05wavvejgr5pwjnpcky
 	VAL_KEY="mykey"
 	VAL_MNEMONIC="gesture inject test cycle original hollow east ridge hen combine junk child bacon zero hope comfort vacuum milk pitch cage oppose unhappy lunar seat"
 
-	# dev0 address 0xc6fe5d33615a1c52c08018c47e8bc53646a0e101 | qubetics1cml96vmptgw99syqrrz8az79xer2pcgpawzefy
+	# dev0 address 0xc6fe5d33615a1c52c08018c47e8bc53646a0e101 | os1cml96vmptgw99syqrrz8az79xer2pcgp84pdun
 	USER1_KEY="dev0"
 	USER1_MNEMONIC="copper push brief egg scan entry inform record adjust fossil boss egg comic alien upon aspect dry avoid interest fury window hint race symptom"
 
-	# dev1 address 0x963ebdf2e1f8db8707d05fc75bfeffba1b5bac17 | qubetics1jcltmuhplrdcwp7stlr4hlhlhgd4htqhtxa39h
+	# dev1 address 0x963ebdf2e1f8db8707d05fc75bfeffba1b5bac17 | os1jcltmuhplrdcwp7stlr4hlhlhgd4htqh3a79sq
 	USER2_KEY="dev1"
 	USER2_MNEMONIC="maximum display century economy unlock van census kite error heart snow filter midnight usage egg venture cash kick motor survey drastic edge muffin visual"
 
-	# dev2 address 0x40a0cb1C63e026A81B55EE1308586E21eec1eFa9 | qubetics1gzsvk8rruqn2sx64acfsskrwy8hvrmaf6d7kvs
+	# dev2 address 0x40a0cb1C63e026A81B55EE1308586E21eec1eFa9 | os1gzsvk8rruqn2sx64acfsskrwy8hvrmafqkaze8
 	USER3_KEY="dev2"
 	USER3_MNEMONIC="will wear settle write dance topic tape sea glory hotel oppose rebel client problem era video gossip glide during yard balance cancel file rose"
 
-	# dev3 address 0x498B5AeC5D439b733dC2F58AB489783A23FB26dA | qubetics1fx944mzagwdhx0wz7k9tfztc8g3lkfk6ectc0g
+	# dev3 address 0x498B5AeC5D439b733dC2F58AB489783A23FB26dA | os1fx944mzagwdhx0wz7k9tfztc8g3lkfk6rrgv6l
 	USER4_KEY="dev3"
 	USER4_MNEMONIC="doll midnight silk carpet brush boring pluck office gown inquiry duck chief aim exit gain never tennis crime fragile ship cloud surface exotic patch"
 
@@ -119,159 +121,94 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 	echo "$USER3_MNEMONIC" | qubeticsd keys add "$USER3_KEY" --recover --keyring-backend "$KEYRING" --algo "$KEYALGO" --home "$HOMEDIR"
 	echo "$USER4_MNEMONIC" | qubeticsd keys add "$USER4_KEY" --recover --keyring-backend "$KEYRING" --algo "$KEYALGO" --home "$HOMEDIR"
 
-	# Set moniker and chain-id for Qubetics (Moniker can be anything, chain-id must be an integer)
+	# Set moniker and chain-id for the example chain (Moniker can be anything, chain-id must be an integer)
 	qubeticsd init $MONIKER -o --chain-id "$CHAINID" --home "$HOMEDIR"
 
-	# Change parameter token denominations to tics
+	# Change parameter token denominations to desired value
 	jq '.app_state["staking"]["params"]["bond_denom"]="tics"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 	jq '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="tics"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	# When upgrade to cosmos-sdk v0.47, use gov.params to edit the deposit params
 	jq '.app_state["gov"]["params"]["min_deposit"][0]["denom"]="tics"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	jq '.app_state["distribution"]["params"]["community_tax"]="0.000000000000000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 	jq '.app_state["evm"]["params"]["evm_denom"]="tics"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	jq '.app_state["inflation"]["params"]["mint_denom"]="tics"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	 jq '.app_state["mint"]["params"]["mint_denom"]="tics"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	jq '.app_state["mint"]["params"]["mint_denom"]="tics"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+
+	# Enable precompiles in EVM params
+	jq '.app_state["evm"]["params"]["active_static_precompiles"]=["0x0000000000000000000000000000000000000100","0x0000000000000000000000000000000000000400","0x0000000000000000000000000000000000000800","0x0000000000000000000000000000000000000801","0x0000000000000000000000000000000000000802","0x0000000000000000000000000000000000000803","0x0000000000000000000000000000000000000804","0x0000000000000000000000000000000000000805"]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+
+	# Enable native denomination as a token pair for STRv2
+	jq '.app_state.erc20.params.native_precompiles=["0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	jq '.app_state.erc20.token_pairs=[{contract_owner:1,erc20_address:"0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",denom:"tics",enabled:true}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 	# Set gas limit in genesis
 	jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
-	# Set base fee in genesis
-	# jq '.app_state["feemarket"]["params"]["base_fee"]="'${BASEFEE}'"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-
-
-
-    jq '.consensus_params["block"]["max_bytes"]="8388608"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    jq '.app_state["mint"]["params"]["blocks_per_year"]="5256000"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    jq '.app_state["mint"]["minter"]["inflation"]="0.000000000000000000"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    jq '.app_state["mint"]["params"]["inflation_rate_change"]="0.000000000000000000"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    jq '.app_state["mint"]["params"]["inflation_max"]="0.000000000000000000"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    jq '.app_state["mint"]["params"]["inflation_min"]="0.000000000000000000"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    jq '.app_state["feemarket"]["params"]["base_fee"]="30000000000000"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-
-
-    # jq '.app_state["feemarket"]["params"]["no_base_fee"]=true' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    # jq '.app_state["feemarket"]["params"]["base_fee"]="0"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-    # jq '.app_state["feemarket"]["params"]["min_gas_price"]="0"' >"$TMP_GENESIS" "$GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-
 	if [[ $1 == "pending" ]]; then
 		if [[ "$OSTYPE" == "darwin"* ]]; then
-			# sed -i '' 's/timeout_propose = "3s"/timeout_propose = "30s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_propose_delta = "500ms"/timeout_propose_delta = "5s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_prevote = "1s"/timeout_prevote = "10s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_prevote_delta = "500ms"/timeout_prevote_delta = "5s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_precommit = "1s"/timeout_precommit = "10s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_precommit_delta = "500ms"/timeout_precommit_delta = "5s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_commit = "5s"/timeout_commit = "150s"/g' "$CONFIG"
-			# sed -i '' 's/timeout_broadcast_tx_commit = "10s"/timeout_broadcast_tx_commit = "150s"/g' "$CONFIG"
-			 sed -i '' 's/minimum-gas-prices = "0tics"/minimum-gas-prices = "0.7tics"/g' "$APP_TOML"
-			   sed -i '' 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' "$APP_TOML"
-	sed -i '' 's/localhost/0.0.0.0/g' "$APP_TOML"
-    sed -i '' 's/localhost/0.0.0.0/g' "$CONFIG"
-    sed -i '' 's/:26660/0.0.0.0:26660/g' "$CONFIG"
-    sed -i '' 's/localhost/0.0.0.0/g' "$CLIENT"
-    sed -i '' 's/127.0.0.1/0.0.0.0/g' "$APP_TOML"
-    sed -i '' 's/127.0.0.1/0.0.0.0/g' "$CONFIG"
-    sed -i '' 's/127.0.0.1/0.0.0.0/g' "$CLIENT"
-    sed -i '' 's/\[\]/["*"]/g' "$CONFIG"
-	sed -i '' 's/\["\*",\]/["*"]/g' "$CONFIG"
+			sed -i '' 's/timeout_propose = "3s"/timeout_propose = "30s"/g' "$CONFIG"
+			sed -i '' 's/timeout_propose_delta = "500ms"/timeout_propose_delta = "5s"/g' "$CONFIG"
+			sed -i '' 's/timeout_prevote = "1s"/timeout_prevote = "10s"/g' "$CONFIG"
+			sed -i '' 's/timeout_prevote_delta = "500ms"/timeout_prevote_delta = "5s"/g' "$CONFIG"
+			sed -i '' 's/timeout_precommit = "1s"/timeout_precommit = "10s"/g' "$CONFIG"
+			sed -i '' 's/timeout_precommit_delta = "500ms"/timeout_precommit_delta = "5s"/g' "$CONFIG"
+			sed -i '' 's/timeout_commit = "5s"/timeout_commit = "150s"/g' "$CONFIG"
+			sed -i '' 's/timeout_broadcast_tx_commit = "10s"/timeout_broadcast_tx_commit = "150s"/g' "$CONFIG"
 		else
-			# sed -i 's/timeout_propose = "3s"/timeout_propose = "30s"/g' "$CONFIG"
-			# sed -i 's/timeout_propose_delta = "500ms"/timeout_propose_delta = "5s"/g' "$CONFIG"
-			# sed -i 's/timeout_prevote = "1s"/timeout_prevote = "10s"/g' "$CONFIG"
-			# sed -i 's/timeout_prevote_delta = "500ms"/timeout_prevote_delta = "5s"/g' "$CONFIG"
-			# sed -i 's/timeout_precommit = "1s"/timeout_precommit = "10s"/g' "$CONFIG"
-			# sed -i 's/timeout_precommit_delta = "500ms"/timeout_precommit_delta = "5s"/g' "$CONFIG"
-			# sed -i 's/timeout_commit = "5s"/timeout_commit = "150s"/g' "$CONFIG"
-			# sed -i 's/timeout_broadcast_tx_commit = "10s"/timeout_broadcast_tx_commit = "150s"/g' "$CONFIG"
-			 sed -i 's/minimum-gas-prices = "0tics"/minimum-gas-prices = "0.7tics"/g' "$APP_TOML"
-			   sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' "$APP_TOML"
-    sed -i 's/enable-unsafe-cors = false/enable-unsafe-cors = true/g' "$APP_TOML"
-	sed -i 's/localhost/0.0.0.0/g' "$APP_TOML"
-    sed -i 's/localhost/0.0.0.0/g' "$CONFIG"
-    sed -i 's/:26660/0.0.0.0:26660/g' "$CONFIG"
-    sed -i 's/localhost/0.0.0.0/g' "$CLIENT"
-    sed -i 's/127.0.0.1/0.0.0.0/g' "$APP_TOML"
-    sed -i 's/127.0.0.1/0.0.0.0/g' "$CONFIG"
-    sed -i 's/127.0.0.1/0.0.0.0/g' "$CLIENT"
-    sed -i 's/\[\]/["*"]/g' "$CONFIG"
-	sed -i 's/\["\*",\]/["*"]/g' "$CONFIG"
+			sed -i 's/timeout_propose = "3s"/timeout_propose = "30s"/g' "$CONFIG"
+			sed -i 's/timeout_propose_delta = "500ms"/timeout_propose_delta = "5s"/g' "$CONFIG"
+			sed -i 's/timeout_prevote = "1s"/timeout_prevote = "10s"/g' "$CONFIG"
+			sed -i 's/timeout_prevote_delta = "500ms"/timeout_prevote_delta = "5s"/g' "$CONFIG"
+			sed -i 's/timeout_precommit = "1s"/timeout_precommit = "10s"/g' "$CONFIG"
+			sed -i 's/timeout_precommit_delta = "500ms"/timeout_precommit_delta = "5s"/g' "$CONFIG"
+			sed -i 's/timeout_commit = "5s"/timeout_commit = "150s"/g' "$CONFIG"
+			sed -i 's/timeout_broadcast_tx_commit = "10s"/timeout_broadcast_tx_commit = "150s"/g' "$CONFIG"
 		fi
 	fi
 
-	# enable prometheus metrics and all APIs for dev node
+	# enable prometheus metrics, all APIs and the Swagger UI for dev node
 	if [[ "$OSTYPE" == "darwin"* ]]; then
 		sed -i '' 's/prometheus = false/prometheus = true/' "$CONFIG"
 		sed -i '' 's/prometheus-retention-time = 0/prometheus-retention-time  = 1000000000000/g' "$APP_TOML"
 		sed -i '' 's/enabled = false/enabled = true/g' "$APP_TOML"
 		sed -i '' 's/enable = false/enable = true/g' "$APP_TOML"
 		sed -i '' 's/swagger = false/swagger = true/g' "$APP_TOML"
-		 sed -i '' 's/minimum-gas-prices = "0tics"/minimum-gas-prices = "0.7tics"/g' "$APP_TOML"
-		   sed -i '' 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' "$APP_TOML"
-    sed -i '' 's/enable-unsafe-cors = false/enable-unsafe-cors = true/g' "$APP_TOML"
-	sed -i '' 's/localhost/0.0.0.0/g' "$APP_TOML"
-    sed -i '' 's/localhost/0.0.0.0/g' "$CONFIG"
-    sed -i '' 's/:26660/0.0.0.0:26660/g' "$CONFIG"
-    sed -i '' 's/localhost/0.0.0.0/g' "$CLIENT"
-    sed -i '' 's/127.0.0.1/0.0.0.0/g' "$APP_TOML"
-    sed -i '' 's/127.0.0.1/0.0.0.0/g' "$CONFIG"
-    sed -i '' 's/127.0.0.1/0.0.0.0/g' "$CLIENT"
-    sed -i '' 's/\[\]/["*"]/g' "$CONFIG"
-	sed -i '' 's/\["\*",\]/["*"]/g' "$CONFIG"
-		# Don't enable memiavl by default
-		grep -q -F '[memiavl]' "$APP_TOML" && sed -i '' '/\[memiavl\]/,/^\[/ s/enable = true/enable = false/' "$APP_TOML"
 	else
 		sed -i 's/prometheus = false/prometheus = true/' "$CONFIG"
 		sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000000000"/g' "$APP_TOML"
 		sed -i 's/enabled = false/enabled = true/g' "$APP_TOML"
 		sed -i 's/enable = false/enable = true/g' "$APP_TOML"
 		sed -i 's/swagger = false/swagger = true/g' "$APP_TOML"
-		sed -i 's/minimum-gas-prices = "0tics"/minimum-gas-prices = "0.7tics"/g' "$APP_TOML"
-		  sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' "$APP_TOML"
-    sed -i 's/enable-unsafe-cors = false/enable-unsafe-cors = true/g' "$APP_TOML"
-	sed -i 's/localhost/0.0.0.0/g' "$APP_TOML"
-    sed -i 's/localhost/0.0.0.0/g' "$CONFIG"
-    sed -i 's/:26660/0.0.0.0:26660/g' "$CONFIG"
-    sed -i 's/localhost/0.0.0.0/g' "$CLIENT"
-    sed -i 's/127.0.0.1/0.0.0.0/g' "$APP_TOML"
-    sed -i 's/127.0.0.1/0.0.0.0/g' "$CONFIG"
-    sed -i 's/127.0.0.1/0.0.0.0/g' "$CLIENT"
-    sed -i 's/\[\]/["*"]/g' "$CONFIG"
-	sed -i 's/\["\*",\]/["*"]/g' "$CONFIG"
-		# Don't enable memiavl by default
-		grep -q -F '[memiavl]' "$APP_TOML" && sed -i '/\[memiavl\]/,/^\[/ s/enable = true/enable = false/' "$APP_TOML"
 	fi
 
 	# Change proposal periods to pass within a reasonable time for local testing
 	sed -i.bak 's/"max_deposit_period": "172800s"/"max_deposit_period": "30s"/g' "$GENESIS"
 	sed -i.bak 's/"voting_period": "172800s"/"voting_period": "30s"/g' "$GENESIS"
+	sed -i.bak 's/"expedited_voting_period": "86400s"/"expedited_voting_period": "15s"/g' "$GENESIS"
 
 	# set custom pruning settings
 	sed -i.bak 's/pruning = "default"/pruning = "custom"/g' "$APP_TOML"
 	sed -i.bak 's/pruning-keep-recent = "0"/pruning-keep-recent = "2"/g' "$APP_TOML"
 	sed -i.bak 's/pruning-interval = "0"/pruning-interval = "10"/g' "$APP_TOML"
 
-
 	# Allocate genesis accounts (cosmos formatted addresses)
-	qubeticsd add-genesis-account "$(qubeticsd keys show "$VAL_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1067737016860000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER1_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER2_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER3_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
-	# qubeticsd add-genesis-account "$(qubeticsd keys show "$USER4_KEY" -a --keyring-backend "$KEYRING" --home "$HOMEDIR")" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	qubeticsd genesis add-genesis-account "$VAL_KEY" 100000000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	qubeticsd genesis add-genesis-account "$USER1_KEY" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	qubeticsd genesis add-genesis-account "$USER2_KEY" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	qubeticsd genesis add-genesis-account "$USER3_KEY" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
+	qubeticsd genesis add-genesis-account "$USER4_KEY" 1000000000000000000000tics --keyring-backend "$KEYRING" --home "$HOMEDIR"
 
-	# Sign genesis transaction
-	qubeticsd gentx "$VAL_KEY" 26000000000000000000000tics --gas-prices ${BASEFEE}tics --keyring-backend "$KEYRING" --chain-id "$CHAINID" --home "$HOMEDIR"
+	# Sign genesis transaction (the Qubetics SDK requires a minimum self-delegation of 25,000 QUBETICS)
+	qubeticsd genesis gentx "$VAL_KEY" 26000000000000000000000tics --gas-prices ${BASEFEE}tics --keyring-backend "$KEYRING" --chain-id "$CHAINID" --home "$HOMEDIR"
 	## In case you want to create multiple validators at genesis
 	## 1. Back to `qubeticsd keys add` step, init more keys
 	## 2. Back to `qubeticsd add-genesis-account` step, add balance for those
-	## 3. Clone this ~/.qubeticsd home directory into some others, let's say `~/.clonedqubeticsd`
+	## 3. Clone this ~/.qubeticsd home directory into some others, let's say `~/.clonedOsd`
 	## 4. Run `gentx` in each of those folders
-	## 5. Copy the `gentx-*` folders under `~/.clonedqubeticsd/config/gentx/` folders into the original `~/.qubeticsd/config/gentx`
+	## 5. Copy the `gentx-*` folders under `~/.clonedOsd/config/gentx/` folders into the original `~/.qubeticsd/config/gentx`
 
 	# Collect genesis tx
-	qubeticsd collect-gentxs --home "$HOMEDIR"
+	qubeticsd genesis collect-gentxs --home "$HOMEDIR"
 
 	# Run this to ensure everything worked and that the genesis file is setup correctly
-	qubeticsd validate-genesis --home "$HOMEDIR"
+	qubeticsd genesis validate-genesis --home "$HOMEDIR"
 
 	if [[ $1 == "pending" ]]; then
 		echo "pending mode is on, please wait for the first block committed."
@@ -279,15 +216,9 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 fi
 
 # Start the node
-qubeticsd start \
-	--metrics "$TRACE" \
+qubeticsd start "$TRACE" \
 	--log_level $LOGLEVEL \
 	--minimum-gas-prices=0.0001tics \
-	--json-rpc.api eth,txpool,personal,net,debug,web3 \
 	--home "$HOMEDIR" \
+	--json-rpc.api eth,txpool,personal,net,debug,web3 \
 	--chain-id "$CHAINID"
-
-
-# cosmovisor init $(which qubeticsd)
-
-# cosmovisor run start --home /data/.tmp-qubeticsd

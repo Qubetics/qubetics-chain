@@ -1,0 +1,26 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
+syntax = "proto3";
+package cosmos.evm.types.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/qubetics/qubetics-blockchain/v2/types";
+
+// ExtensionOptionDynamicFeeTx is an extension option that specifies the
+// maxPrioPrice for cosmos tx
+message ExtensionOptionDynamicFeeTx {
+  // max_priority_price is the same as `max_priority_fee_per_gas` in eip-1559
+  // spec
+  string max_priority_price = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

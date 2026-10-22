@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package staking
 
 import (
@@ -36,7 +43,8 @@ func (p Precompile) Approve(
 	method *abi.Method,
 	args []interface{},
 ) ([]byte, error) {
-	grantee, coin, typeURLs, err := authorization.CheckApprovalArgs(args, p.stakingKeeper.BondDenom(ctx))
+	bondDenom := p.stakingKeeper.BondDenom(ctx)
+	grantee, coin, typeURLs, err := authorization.CheckApprovalArgs(args, bondDenom)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +128,8 @@ func (p Precompile) DecreaseAllowance(
 	method *abi.Method,
 	args []interface{},
 ) ([]byte, error) {
-	grantee, coin, typeUrls, err := authorization.CheckApprovalArgs(args, p.stakingKeeper.BondDenom(ctx))
+	bondDenom := p.stakingKeeper.BondDenom(ctx)
+	grantee, coin, typeUrls, err := authorization.CheckApprovalArgs(args, bondDenom)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +172,8 @@ func (p Precompile) IncreaseAllowance(
 	method *abi.Method,
 	args []interface{},
 ) ([]byte, error) {
-	grantee, coin, typeUrls, err := authorization.CheckApprovalArgs(args, p.stakingKeeper.BondDenom(ctx))
+	bondDenom := p.stakingKeeper.BondDenom(ctx)
+	grantee, coin, typeUrls, err := authorization.CheckApprovalArgs(args, bondDenom)
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +248,7 @@ func (p Precompile) createStakingAuthz(
 			return
 		},
 	)
+
 	stakingAuthz, err := stakingtypes.NewStakeAuthorization(validators, nil, authzType, coin)
 	if err != nil {
 		return err

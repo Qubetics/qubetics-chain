@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
@@ -5,17 +12,12 @@ import (
 	"slices"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/utils"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
-
-// WhitelistedChains contains the list of chain IDs that are allowed to register ERC20 precompiles.
-var WhitelistedChains = []string{
-	"trusted-chain-1", // Example trusted chain ID
-	"trusted-chain-2", // Another trusted chain ID
-	"qubetics_9087-1",
-}
 
 // RegisterERC20Extension creates and adds an ERC20 precompile interface for an IBC Coin.
 //
@@ -24,35 +26,71 @@ var WhitelistedChains = []string{
 //
 // CONTRACT: This must ONLY be called if there is no existing token pair for the given denom.
 func (k Keeper) RegisterERC20Extension(ctx sdk.Context, denom string) (*types.TokenPair, error) {
-
-	// ------------------------------------Removed whitelisted check------------------------------------------------
-	// Check if the source chain is whitelisted
-	// sourceChainID := ctx.ChainID() // Get the chain ID of the current chain
-	// if !isChainWhitelisted(sourceChainID) {
-	// 	return nil, fmt.Errorf("chain %s is not whitelisted for ERC20 precompile creation", sourceChainID)
-	// }
-	// -------------------------------------------------------------------------------------------------------------
-
 	pair, err := k.CreateNewTokenPair(ctx, denom)
 	if err != nil {
 		return nil, err
 	}
+
 	// Add to existing EVM extensions
 	err = k.EnableDynamicPrecompiles(ctx, pair.GetERC20Contract())
 	if err != nil {
 		return nil, err
 	}
+
 	return &pair, err
 }
 
-// isChainWhitelisted checks if the chain is in the list of whitelisted chains.
-func isChainWhitelisted(chainID string) bool {
-	for _, whitelistedChain := range WhitelistedChains {
-		if chainID == whitelistedChain {
-			return true
-		}
+// RegisterERC20CodeHash sets the codehash for the erc20 precompile account
+// if the bytecode for the erc20 codehash does not exists, it stores it.
+func (k Keeper) RegisterERC20CodeHash(ctx sdk.Context, erc20Addr common.Address) error {
+	var (
+		// bytecode and codeHash is the same for all IBC coins
+		// cause they're all using the same contract
+		bytecode = common.FromHex(types.Erc20Bytecode)
+		codeHash = crypto.Keccak256(bytecode)
+	)
+	// check if code was already stored
+	code := k.evmKeeper.GetCode(ctx, common.Hash(codeHash))
+	if len(code) == 0 {
+		k.evmKeeper.SetCode(ctx, codeHash, bytecode)
 	}
-	return false
+
+	var (
+		nonce   uint64
+		balance = common.Big0
+	)
+	// keep balance and nonce if account exists
+	if acc := k.evmKeeper.GetAccount(ctx, erc20Addr); acc != nil {
+		nonce = acc.Nonce
+		balance = acc.Balance
+	}
+
+	return k.evmKeeper.SetAccount(ctx, erc20Addr, statedb.Account{
+		CodeHash: codeHash,
+		Nonce:    nonce,
+		Balance:  balance,
+	})
+}
+
+// UnRegisterERC20CodeHash sets the codehash for the account to an empty one
+func (k Keeper) UnRegisterERC20CodeHash(ctx sdk.Context, erc20Addr common.Address) error {
+	emptyCodeHash := crypto.Keccak256(nil)
+
+	var (
+		nonce   uint64
+		balance = common.Big0
+	)
+	// keep balance and nonce if account exists
+	if acc := k.evmKeeper.GetAccount(ctx, erc20Addr); acc != nil {
+		nonce = acc.Nonce
+		balance = acc.Balance
+	}
+
+	return k.evmKeeper.SetAccount(ctx, erc20Addr, statedb.Account{
+		CodeHash: emptyCodeHash,
+		Nonce:    nonce,
+		Balance:  balance,
+	})
 }
 
 // EnableDynamicPrecompiles appends the addresses of the given Precompiles to the list
@@ -75,7 +113,7 @@ func (k Keeper) EnableDynamicPrecompiles(ctx sdk.Context, addresses ...common.Ad
 }
 
 // appendPrecompiles append addresses to the existingPrecompiles and sort the resulting slice.
-// The function returns an error if the two sets are overlapping.
+// The function returns an error is the two sets are overlapping.
 func appendPrecompiles(existingPrecompiles []string, addresses ...common.Address) ([]string, error) {
 	// check for duplicates
 	hexAddresses := make([]string, len(addresses))

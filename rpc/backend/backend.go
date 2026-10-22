@@ -1,11 +1,20 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package backend
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"time"
 
-	"cosmossdk.io/math"
+	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
+
 	"github.com/cometbft/cometbft/libs/log"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -20,23 +29,13 @@ import (
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/server/config"
-	qubeticstypes "github.com/qubetics/qubetics-blockchain/v2/types"
+	cosmosevmtypes "github.com/qubetics/qubetics-blockchain/v2/types"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // BackendI implements the Cosmos and EVM backend.
 type BackendI interface { //nolint: revive
-	CosmosBackend
 	EVMBackend
-}
-
-// CosmosBackend implements the functionality shared within cosmos namespaces
-// as defined by Wallet Connect V2: https://docs.walletconnect.com/2.0/json-rpc/cosmos.
-// Implemented by Backend.
-type CosmosBackend interface { // TODO: define
-	// GetAccounts()
-	// SignDirect()
-	// SignAmino()
 }
 
 // EVMBackend implements the functionality shared within ethereum namespaces
@@ -55,7 +54,7 @@ type EVMBackend interface {
 	RPCGasCap() uint64            // global gas cap for eth_call over rpc: DoS protection
 	RPCEVMTimeout() time.Duration // global timeout for eth_call over rpc: DoS protection
 	RPCTxFeeCap() float64         // RPCTxFeeCap is the global transaction fee(price * gaslimit) cap for send-transaction variants. The unit is ether.
-	RPCMinGasPrice() int64
+	RPCMinGasPrice() *big.Int
 
 	// Sign Tx
 	Sign(address common.Address, data hexutil.Bytes) (hexutil.Bytes, error)
@@ -69,7 +68,6 @@ type EVMBackend interface {
 	GetBlockTransactionCountByHash(hash common.Hash) *hexutil.Uint
 	GetBlockTransactionCountByNumber(blockNum rpctypes.BlockNumber) *hexutil.Uint
 	TendermintBlockByNumber(blockNum rpctypes.BlockNumber) (*tmrpctypes.ResultBlock, error)
-	TendermintBlockResultByNumber(height *int64) (*tmrpctypes.ResultBlockResults, error)
 	TendermintBlockByHash(blockHash common.Hash) (*tmrpctypes.ResultBlock, error)
 	BlockNumberFromTendermint(blockNrOrHash rpctypes.BlockNumberOrHash) (rpctypes.BlockNumber, error)
 	BlockNumberFromTendermintByHash(blockHash common.Hash) (*big.Int, error)
@@ -91,7 +89,7 @@ type EVMBackend interface {
 	// Chain Info
 	ChainID() (*hexutil.Big, error)
 	ChainConfig() *params.ChainConfig
-	GlobalMinGasPrice() (math.LegacyDec, error)
+	GlobalMinGasPrice() (*big.Int, error)
 	BaseFee(blockRes *tmrpctypes.ResultBlockResults) (*big.Int, error)
 	CurrentHeader() (*ethtypes.Header, error)
 	PendingTransactions() ([]*sdk.Tx, error)
@@ -101,10 +99,11 @@ type EVMBackend interface {
 
 	// Tx Info
 	GetTransactionByHash(txHash common.Hash) (*rpctypes.RPCTransaction, error)
-	GetTxByEthHash(txHash common.Hash) (*qubeticstypes.TxResult, error)
-	GetTxByTxIndex(height int64, txIndex uint) (*qubeticstypes.TxResult, error)
+	GetTxByEthHash(txHash common.Hash) (*cosmosevmtypes.TxResult, error)
+	GetTxByTxIndex(height int64, txIndex uint) (*cosmosevmtypes.TxResult, error)
 	GetTransactionByBlockAndIndex(block *tmrpctypes.ResultBlock, idx hexutil.Uint) (*rpctypes.RPCTransaction, error)
 	GetTransactionReceipt(hash common.Hash) (map[string]interface{}, error)
+	GetTransactionLogs(hash common.Hash) ([]*ethtypes.Log, error)
 	GetTransactionByBlockHashAndIndex(hash common.Hash, idx hexutil.Uint) (*rpctypes.RPCTransaction, error)
 	GetTransactionByBlockNumberAndIndex(blockNum rpctypes.BlockNumber, idx hexutil.Uint) (*rpctypes.RPCTransaction, error)
 
@@ -132,12 +131,13 @@ var _ BackendI = (*Backend)(nil)
 type Backend struct {
 	ctx                 context.Context
 	clientCtx           client.Context
+	rpcClient           tmrpcclient.SignClient
 	queryClient         *rpctypes.QueryClient // gRPC query client
 	logger              log.Logger
 	chainID             *big.Int
 	cfg                 config.Config
 	allowUnprotectedTxs bool
-	indexer             qubeticstypes.EVMTxIndexer
+	indexer             cosmosevmtypes.EVMTxIndexer
 }
 
 // NewBackend creates a new Backend instance for cosmos and ethereum namespaces
@@ -146,9 +146,9 @@ func NewBackend(
 	logger log.Logger,
 	clientCtx client.Context,
 	allowUnprotectedTxs bool,
-	indexer qubeticstypes.EVMTxIndexer,
+	indexer cosmosevmtypes.EVMTxIndexer,
 ) *Backend {
-	chainID, err := qubeticstypes.ParseChainID(clientCtx.ChainID)
+	chainID, err := cosmosevmtypes.ParseChainID(clientCtx.ChainID)
 	if err != nil {
 		panic(err)
 	}
@@ -158,9 +158,15 @@ func NewBackend(
 		panic(err)
 	}
 
+	rpcClient, ok := clientCtx.Client.(tmrpcclient.SignClient)
+	if !ok {
+		panic(fmt.Sprintf("invalid rpc client, expected: tmrpcclient.SignClient, got: %T", clientCtx.Client))
+	}
+
 	return &Backend{
 		ctx:                 context.Background(),
 		clientCtx:           clientCtx,
+		rpcClient:           rpcClient,
 		queryClient:         rpctypes.NewQueryClient(clientCtx),
 		logger:              logger.With("module", "backend"),
 		chainID:             chainID,

@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
@@ -74,7 +81,7 @@ func (g *infiniteGasMeterWithLimit) ConsumeGas(amount storetypes.Gas, descriptor
 // RefundGas will deduct the given amount from the gas consumed. If the amount is greater than the
 // gas consumed, the function will panic.
 //
-// Use case: This functionality enables refunding gas to the trasaction or block gas pools so that
+// Use case: This functionality enables refunding gas to the transaction or block gas pools so that
 // EVM-compatible chains can fully support the go-ethereum StateDb interface.
 // See https://github.com/cosmos/cosmos-sdk/pull/9403 for reference.
 func (g *infiniteGasMeterWithLimit) RefundGas(amount storetypes.Gas, descriptor string) {

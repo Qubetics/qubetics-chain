@@ -1,6 +1,14 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package authorization
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 	"slices"
@@ -11,9 +19,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 )
 
 const (
@@ -71,7 +79,7 @@ func CheckApprovalArgs(args []interface{}, denom string) (common.Address, *sdk.C
 		return common.Address{}, nil, nil, fmt.Errorf(ErrInvalidMethods, args[2])
 	}
 	if len(typeURLs) == 0 {
-		return common.Address{}, nil, nil, fmt.Errorf(ErrEmptyMethods)
+		return common.Address{}, nil, nil, errors.New(ErrEmptyMethods)
 	}
 	if slices.Contains(typeURLs, "") {
 		return common.Address{}, nil, nil, fmt.Errorf(ErrEmptyStringInMethods, typeURLs)
@@ -188,7 +196,7 @@ func validateMsgTypes(arg interface{}) ([]string, error) {
 		return nil, fmt.Errorf(ErrInvalidMethods, arg)
 	}
 	if len(typeURLs) == 0 {
-		return nil, fmt.Errorf(ErrEmptyMethods)
+		return nil, errors.New(ErrEmptyMethods)
 	}
 
 	if slices.Contains(typeURLs, "") {

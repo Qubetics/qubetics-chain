@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
@@ -5,6 +12,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var isTrue = []byte("0x01")
@@ -19,19 +27,71 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	return types.NewParams(enableErc20, nativePrecompiles, dynamicPrecompiles)
 }
 
-// SetParams sets the erc20 parameters to the param space.
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) error {
-	// and keep params equal between different executions
-	slices.Sort(params.DynamicPrecompiles)
-	slices.Sort(params.NativePrecompiles)
+// UpdateCodeHash takes in the updated parameters and
+// compares the new set of native and dynamic precompiles to the current
+// parameter set.
+//
+// If there is a diff, the ERC-20 code hash for all precompiles that are removed from the list
+// will be removed from the store. Meanwhile, for all newly added precompiles the code hash will be
+// registered.
+func (k Keeper) UpdateCodeHash(ctx sdk.Context, newParams types.Params) error {
+	oldNativePrecompiles := k.getNativePrecompiles(ctx)
+	oldDynamicPrecompiles := k.getDynamicPrecompiles(ctx)
 
-	if err := params.Validate(); err != nil {
+	if err := k.RegisterOrUnregisterERC20CodeHashes(ctx, oldDynamicPrecompiles, newParams.DynamicPrecompiles); err != nil {
 		return err
 	}
 
-	k.setERC20Enabled(ctx, params.EnableErc20)
-	k.setDynamicPrecompiles(ctx, params.DynamicPrecompiles)
-	k.setNativePrecompiles(ctx, params.NativePrecompiles)
+	return k.RegisterOrUnregisterERC20CodeHashes(ctx, oldNativePrecompiles, newParams.NativePrecompiles)
+}
+
+// RegisterOrUnregisterERC20CodeHashes takes two arrays of precompiles as its argument:
+//   - previously registered precompiles
+//   - new set of precompiles to be registered
+//
+// It then compares the two arrays and registers the code hash for all precompiles that are newly added
+// and unregisters the code hash for all precompiles that are removed from the list.
+func (k Keeper) RegisterOrUnregisterERC20CodeHashes(ctx sdk.Context, oldPrecompiles, newPrecompiles []string) error {
+	for _, precompile := range oldPrecompiles {
+		if slices.Contains(newPrecompiles, precompile) {
+			continue
+		}
+
+		if err := k.UnRegisterERC20CodeHash(ctx, common.HexToAddress(precompile)); err != nil {
+			return err
+		}
+	}
+
+	for _, precompile := range newPrecompiles {
+		if slices.Contains(oldPrecompiles, precompile) {
+			continue
+		}
+
+		if err := k.RegisterERC20CodeHash(ctx, common.HexToAddress(precompile)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// SetParams sets the erc20 parameters to the param space.
+func (k Keeper) SetParams(ctx sdk.Context, newParams types.Params) error {
+	// sort to keep params equal between different executions
+	slices.Sort(newParams.DynamicPrecompiles)
+	slices.Sort(newParams.NativePrecompiles)
+
+	if err := newParams.Validate(); err != nil {
+		return err
+	}
+
+	if err := k.UpdateCodeHash(ctx, newParams); err != nil {
+		return err
+	}
+
+	k.setERC20Enabled(ctx, newParams.EnableErc20)
+	k.setDynamicPrecompiles(ctx, newParams.DynamicPrecompiles)
+	k.setNativePrecompiles(ctx, newParams.NativePrecompiles)
 	return nil
 }
 

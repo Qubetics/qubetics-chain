@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package debug
 
 import (
@@ -12,22 +19,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
-
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
-
-	stderrors "github.com/pkg/errors"
-
-	"github.com/cosmos/cosmos-sdk/server"
-
 	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/rlp"
-
+	stderrors "github.com/pkg/errors"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // HandlerT keeps track of the cpu profiler and trace execution
@@ -111,7 +113,7 @@ func (a *API) BlockProfile(file string, nsec uint) error {
 	runtime.SetBlockProfileRate(1)
 	defer runtime.SetBlockProfileRate(0)
 
-	time.Sleep(time.Duration(nsec) * time.Second)
+	time.Sleep(time.Duration(nsec) * time.Second) //#nosec G115 -- int overflow is not a concern here
 	return writeProfile("block", file, a.logger)
 }
 
@@ -122,7 +124,7 @@ func (a *API) CpuProfile(file string, nsec uint) error { //nolint: golint, style
 	if err := a.StartCPUProfile(file); err != nil {
 		return err
 	}
-	time.Sleep(time.Duration(nsec) * time.Second)
+	time.Sleep(time.Duration(nsec) * time.Second) //#nosec G115 -- int overflow is not a concern here
 	return a.StopCPUProfile()
 }
 
@@ -141,7 +143,7 @@ func (a *API) GoTrace(file string, nsec uint) error {
 	if err := a.StartGoTrace(file); err != nil {
 		return err
 	}
-	time.Sleep(time.Duration(nsec) * time.Second)
+	time.Sleep(time.Duration(nsec) * time.Second) //#nosec G115 -- int overflow is not a concern here
 	return a.StopGoTrace()
 }
 
@@ -257,7 +259,7 @@ func (a *API) WriteMemProfile(file string) error {
 func (a *API) MutexProfile(file string, nsec uint) error {
 	a.logger.Debug("debug_mutexProfile", "file", file, "nsec", nsec)
 	runtime.SetMutexProfileFraction(1)
-	time.Sleep(time.Duration(nsec) * time.Second)
+	time.Sleep(time.Duration(nsec) * time.Second) //#nosec G115 -- int overflow is not a concern here
 	defer runtime.SetMutexProfileFraction(0)
 	return writeProfile("mutex", file, a.logger)
 }
@@ -289,7 +291,7 @@ func (a *API) SetGCPercent(v int) int {
 
 // GetHeaderRlp retrieves the RLP encoded for of a single header.
 func (a *API) GetHeaderRlp(number uint64) (hexutil.Bytes, error) {
-	header, err := a.backend.HeaderByNumber(rpctypes.BlockNumber(number))
+	header, err := a.backend.HeaderByNumber(rpctypes.BlockNumber(number)) //#nosec G115 -- int overflow is not a concern here -- block number is not likely to exceed int64 max value
 	if err != nil {
 		return nil, err
 	}
@@ -299,7 +301,7 @@ func (a *API) GetHeaderRlp(number uint64) (hexutil.Bytes, error) {
 
 // GetBlockRlp retrieves the RLP encoded for of a single block.
 func (a *API) GetBlockRlp(number uint64) (hexutil.Bytes, error) {
-	block, err := a.backend.EthBlockByNumber(rpctypes.BlockNumber(number))
+	block, err := a.backend.EthBlockByNumber(rpctypes.BlockNumber(number)) //#nosec G115 -- int overflow is not a concern here -- block number is not likely to exceed int64 max value
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +311,7 @@ func (a *API) GetBlockRlp(number uint64) (hexutil.Bytes, error) {
 
 // PrintBlock retrieves a block and returns its pretty printed form.
 func (a *API) PrintBlock(number uint64) (string, error) {
-	block, err := a.backend.EthBlockByNumber(rpctypes.BlockNumber(number))
+	block, err := a.backend.EthBlockByNumber(rpctypes.BlockNumber(number)) //#nosec G115 -- int overflow is not a concern here -- block number is not likely to exceed int64 max value
 	if err != nil {
 		return "", err
 	}
@@ -319,7 +321,7 @@ func (a *API) PrintBlock(number uint64) (string, error) {
 
 // SeedHash retrieves the seed hash of a block.
 func (a *API) SeedHash(number uint64) (string, error) {
-	_, err := a.backend.HeaderByNumber(rpctypes.BlockNumber(number))
+	_, err := a.backend.HeaderByNumber(rpctypes.BlockNumber(number)) //#nosec G115 -- int overflow is not a concern here -- block number is not likely to exceed int64 max value
 	if err != nil {
 		return "", err
 	}

@@ -1,18 +1,25 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package server
 
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
-	tmnode "github.com/cometbft/cometbft/node"
+	"github.com/cometbft/cometbft/node"
 	sm "github.com/cometbft/cometbft/state"
-	tmstore "github.com/cometbft/cometbft/store"
+	cmtstore "github.com/cometbft/cometbft/store"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/qubetics/qubetics-blockchain/v2/indexer"
+	"github.com/spf13/cobra"
 )
 
+// NewIndexTxCmd creates a new Cobra command to index historical Ethereum transactions.
 func NewIndexTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "index-eth-tx [backward|forward]",
@@ -48,13 +55,13 @@ func NewIndexTxCmd() *cobra.Command {
 			idxer := indexer.NewKVIndexer(idxDB, logger.With("module", "evmindex"), clientCtx)
 
 			// open local tendermint db, because the local rpc won't be available.
-			tmdb, err := tmnode.DefaultDBProvider(&tmnode.DBContext{ID: "blockstore", Config: cfg})
+			tmdb, err := node.DefaultDBProvider(&node.DBContext{ID: "blockstore", Config: cfg})
 			if err != nil {
 				return err
 			}
-			blockStore := tmstore.NewBlockStore(tmdb)
+			blockStore := cmtstore.NewBlockStore(tmdb)
 
-			stateDB, err := tmnode.DefaultDBProvider(&tmnode.DBContext{ID: "state", Config: cfg})
+			stateDB, err := node.DefaultDBProvider(&node.DBContext{ID: "state", Config: cfg})
 			if err != nil {
 				return err
 			}
@@ -67,6 +74,7 @@ func NewIndexTxCmd() *cobra.Command {
 				if blk == nil {
 					return fmt.Errorf("block not found %d", height)
 				}
+				// CometBFT v0.37 stores the DeliverTx results as ABCI responses.
 				resBlk, err := stateStore.LoadABCIResponses(height)
 				if err != nil {
 					return err

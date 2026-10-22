@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package backend
 
 import (
@@ -7,23 +14,20 @@ import (
 	"sort"
 	"strings"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cometbft/cometbft/proto/tendermint/crypto"
+	cmtrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/consensus/misc"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-
-	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
-	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
-
-	"github.com/cometbft/cometbft/proto/tendermint/crypto"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type txGasAndReward struct {
@@ -103,10 +107,10 @@ func (b *Backend) getAccountNonce(accAddr common.Address, pending bool, height i
 
 // output: targetOneFeeHistory
 func (b *Backend) processBlock(
-	tendermintBlock *tmrpctypes.ResultBlock,
+	tendermintBlock *cmtrpctypes.ResultBlock,
 	ethBlock *map[string]interface{},
 	rewardPercentiles []float64,
-	tendermintBlockResult *tmrpctypes.ResultBlockResults,
+	tendermintBlockResult *cmtrpctypes.ResultBlockResults,
 	targetOneFeeHistory *types.OneFeeHistory,
 ) error {
 	blockHeight := tendermintBlock.Block.Height
@@ -170,7 +174,7 @@ func (b *Backend) processBlock(
 			b.logger.Debug("failed to decode transaction in block", "height", blockHeight, "error", err.Error())
 			continue
 		}
-		txGasUsed := uint64(eachTendermintTxResult.GasUsed) // #nosec G701
+		txGasUsed := uint64(eachTendermintTxResult.GasUsed) // #nosec G115
 		for _, msg := range tx.GetMsgs() {
 			ethMsg, ok := msg.(*evmtypes.MsgEthereumTx)
 			if !ok {
@@ -197,7 +201,7 @@ func (b *Backend) processBlock(
 	sumGasUsed := sorter[0].gasUsed
 
 	for i, p := range rewardPercentiles {
-		thresholdGasUsed := uint64(blockGasUsed * p / 100) // #nosec G701
+		thresholdGasUsed := uint64(blockGasUsed * p / 100) // #nosec G115
 		for sumGasUsed < thresholdGasUsed && txIndex < ethTxCount-1 {
 			txIndex++
 			sumGasUsed += sorter[txIndex].gasUsed
@@ -252,12 +256,12 @@ func ParseTxLogsFromEvent(event abci.Event) ([]*ethtypes.Log, error) {
 			continue
 		}
 
-		var log evmtypes.Log
-		if err := json.Unmarshal([]byte(attr.Value), &log); err != nil {
+		var txLog evmtypes.Log
+		if err := json.Unmarshal([]byte(attr.Value), &txLog); err != nil {
 			return nil, err
 		}
 
-		logs = append(logs, &log)
+		logs = append(logs, &txLog)
 	}
 	return evmtypes.LogsToEthereum(logs), nil
 }
@@ -269,7 +273,7 @@ func ShouldIgnoreGasUsed(res *abci.ResponseDeliverTx) bool {
 }
 
 // GetLogsFromBlockResults returns the list of event logs from the tendermint block result response
-func GetLogsFromBlockResults(blockRes *tmrpctypes.ResultBlockResults) ([][]*ethtypes.Log, error) {
+func GetLogsFromBlockResults(blockRes *cmtrpctypes.ResultBlockResults) ([][]*ethtypes.Log, error) {
 	blockLogs := [][]*ethtypes.Log{}
 	for _, txResult := range blockRes.TxsResults {
 		logs, err := AllTxLogsFromEvents(txResult.Events)
@@ -297,4 +301,14 @@ func GetHexProofs(proof *crypto.ProofOps) []string {
 		proofs = append(proofs, proof)
 	}
 	return proofs
+}
+
+// BlockEvents returns the begin and end block events of a block.
+//
+// CometBFT v0.37 (used with Cosmos SDK v0.47) reports these as separate
+// lists, where CometBFT v0.38 merges them into FinalizeBlockEvents.
+func BlockEvents(blockRes *cmtrpctypes.ResultBlockResults) []abci.Event {
+	events := make([]abci.Event, 0, len(blockRes.BeginBlockEvents)+len(blockRes.EndBlockEvents))
+	events = append(events, blockRes.BeginBlockEvents...)
+	return append(events, blockRes.EndBlockEvents...)
 }

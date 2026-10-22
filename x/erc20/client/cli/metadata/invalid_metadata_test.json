@@ -4,18 +4,18 @@
       "description": 1,
       "denom_units": [
         {
-          "denom": "tics",
+          "denom": "aatom",
           "exponent": 0
         },
         {
-          "denom": "qubetics",
+          "denom": "atom",
           "exponent": 18
         }
       ],
-      "base": "tics",
-      "display": "tics",
-      "name": "tics",
-      "symbol": "QUBETICS"
+      "base": "aatom",
+      "display": "aatom",
+      "name": "aatom",
+      "symbol": "ATOM"
     }
   ]
 }

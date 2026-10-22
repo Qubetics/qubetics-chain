@@ -1,3 +1,12 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
+// SPDX-License-Identifier:LGPL-3.0-only
+
 package keeper
 
 import (
@@ -11,7 +20,7 @@ import (
 
 // RegisterERC20 creates a Cosmos coin and registers the token pair between the
 // coin and the ERC20
-func (k Keeper) RegisterERC20(
+func (k Keeper) registerERC20(
 	ctx sdk.Context,
 	contract common.Address,
 ) (*types.TokenPair, error) {
@@ -35,7 +44,7 @@ func (k Keeper) RegisterERC20(
 }
 
 // CreateCoinMetadata generates the metadata to represent the ERC20 token on
-// qubetics.
+// evmos.
 func (k Keeper) CreateCoinMetadata(
 	ctx sdk.Context,
 	contract common.Address,
@@ -89,7 +98,7 @@ func (k Keeper) CreateCoinMetadata(
 			metadata.DenomUnits,
 			&banktypes.DenomUnit{
 				Denom:    nameSanitized,
-				Exponent: uint32(erc20Data.Decimals),
+				Exponent: uint32(erc20Data.Decimals), //#nosec G115 -- int overflow is not a concern here
 			},
 		)
 		metadata.Display = nameSanitized
@@ -107,7 +116,7 @@ func (k Keeper) CreateCoinMetadata(
 }
 
 // ToggleConversion toggles conversion for a given token pair
-func (k Keeper) ToggleConversion(
+func (k Keeper) toggleConversion(
 	ctx sdk.Context,
 	token string,
 ) (types.TokenPair, error) {

@@ -1,22 +1,26 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package keeper
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strconv"
 
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-
-	tmbytes "github.com/cometbft/cometbft/libs/bytes"
-	tmtypes "github.com/cometbft/cometbft/types"
-
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	"github.com/armon/go-metrics"
+	cmttypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
@@ -61,38 +65,34 @@ func (k *Keeper) EthereumTx(goCtx context.Context, msg *types.MsgEthereumTx) (*t
 				labels,
 			)
 
-			// Corrected gas ratio: gas_used / gas_limit
-			gasUsed := math.LegacyNewDec(int64(response.GasUsed))
-			gasRatio, err := gasUsed.QuoInt64(int64(tx.Gas())).Float64()
+			// Observe which users define a gas limit >> gas used. Note, that
+			// gas_limit and gas_used are always > 0
+			gasLimit := math.LegacyNewDec(int64(tx.Gas()))                        //#nosec G115 -- int overflow is not a concern here -- tx gas is not going to exceed int64 max value
+			gasRatio, err := gasLimit.QuoInt64(int64(response.GasUsed)).Float64() //#nosec G115 -- int overflow is not a concern here -- gas used is not going to exceed int64 max value
 			if err == nil {
 				telemetry.SetGaugeWithLabels(
-					[]string{"tx", "msg", "ethereum_tx", "gas_used", "per", "gas_limit"},
+					[]string{"tx", "msg", "ethereum_tx", "gas_limit", "per", "gas_used"},
 					float32(gasRatio),
 					labels,
 				)
-
-				// Optionally, you can add a warning metric if the gas ratio is below a threshold.
-				if gasRatio < 0.1 {
-					telemetry.IncrCounterWithLabels(
-						[]string{"tx", "msg", "ethereum_tx", "warning", "low_gas_ratio"},
-						1,
-						labels,
-					)
-				}
 			}
 		}
 	}()
 
 	attrs := []sdk.Attribute{
 		sdk.NewAttribute(sdk.AttributeKeyAmount, tx.Value().String()),
+		// add event for ethereum transaction hash format
 		sdk.NewAttribute(types.AttributeKeyEthereumTxHash, response.Hash),
+		// add event for index of valid ethereum tx
 		sdk.NewAttribute(types.AttributeKeyTxIndex, strconv.FormatUint(txIndex, 10)),
+		// add event for eth tx gas used, we can't get it from cosmos tx result when it contains multiple eth tx msgs.
 		sdk.NewAttribute(types.AttributeKeyTxGasUsed, strconv.FormatUint(response.GasUsed, 10)),
 	}
 
 	if len(ctx.TxBytes()) > 0 {
-		hash := tmbytes.HexBytes(tmtypes.Tx(ctx.TxBytes()).Hash())
-		attrs = append(attrs, sdk.NewAttribute(types.AttributeKeyTxHash, hash.String()))
+		// add event for tendermint transaction hash format
+		hash := cmttypes.Tx(ctx.TxBytes()).Hash()
+		attrs = append(attrs, sdk.NewAttribute(types.AttributeKeyTxHash, hex.EncodeToString(hash)))
 	}
 
 	if to := tx.To(); to != nil {
@@ -112,6 +112,7 @@ func (k *Keeper) EthereumTx(goCtx context.Context, msg *types.MsgEthereumTx) (*t
 		txLogAttrs[i] = sdk.NewAttribute(types.AttributeKeyTxLog, string(value))
 	}
 
+	// emit events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeEthereumTx,

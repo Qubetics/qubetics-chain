@@ -1,18 +1,27 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package evm
 
 import (
 	"errors"
+	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/tx"
+	anteinterfaces "github.com/qubetics/qubetics-blockchain/v2/ante/interfaces"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
-// ValidateMsg validates an Ethereum specific message type and returns an error if invalid
-//
-// It checks the following requirements:
+// ValidateMsg validates an Ethereum specific message type and returns an error
+// if invalid. It checks the following requirements:
 // - nil MUST be passed as the from address
 // - If the transaction is a contract creation or call, the corresponding operation must be enabled in the EVM parameters
 func ValidateMsg(
@@ -40,8 +49,8 @@ func checkDisabledCreateCall(
 	blockCreate := permissions.Create.AccessType == evmtypes.AccessTypeRestricted
 	blockCall := permissions.Call.AccessType == evmtypes.AccessTypeRestricted
 
-	// return error if contract creation or call are disabled through governance
-	// and the transaction is trying to create a contract or call a contract
+	// return error if contract creation or call are disabled
+	// and the transaction is trying to create a contract or call a contract.
 	if blockCreate && to == nil {
 		return errorsmod.Wrap(evmtypes.ErrCreateDisabled, "failed to create new contract")
 	} else if blockCall && to != nil {
@@ -54,17 +63,16 @@ func checkDisabledCreateCall(
 //
 // FIXME: this shouldn't be required if the tx was an Ethereum transaction type.
 func ValidateTx(tx sdktypes.Tx) (*tx.Fee, error) {
-	err := tx.ValidateBasic()
 	// ErrNoSignatures is fine with eth tx
-	if err != nil && !errors.Is(err, errortypes.ErrNoSignatures) {
+	if err := tx.ValidateBasic(); err != nil && !errors.Is(err, errortypes.ErrNoSignatures) {
 		return nil, errorsmod.Wrap(err, "tx basic validation failed")
 	}
 
 	// For eth type cosmos tx, some fields should be verified as zero values,
 	// since we will only verify the signature against the hash of the MsgEthereumTx.Data
-	wrapperTx, ok := tx.(protoTxProvider)
+	wrapperTx, ok := tx.(anteinterfaces.ProtoTxProvider)
 	if !ok {
-		return nil, errorsmod.Wrapf(errortypes.ErrUnknownRequest, "invalid tx type %T, didn't implement interface protoTxProvider", tx)
+		return nil, errorsmod.Wrapf(errortypes.ErrUnknownRequest, "invalid tx type %T, didn't implement interface ProtoTxProvider", tx)
 	}
 
 	protoTx := wrapperTx.GetProtoTx()
@@ -95,13 +103,20 @@ func ValidateTx(tx sdktypes.Tx) (*tx.Fee, error) {
 	return authInfo.Fee, nil
 }
 
-func CheckTxFee(txFeeInfo *tx.Fee, txFee sdktypes.Coins, txGasLimit uint64) error {
+// CheckTxFee checks if the Amount and GasLimit fields of the txFeeInfo input
+// are equal to the txFee coins and the txGasLimit value.
+// The function expects txFeeInfo to contains coins in the original decimal
+// representation.
+func CheckTxFee(txFeeInfo *tx.Fee, txFee *big.Int, txGasLimit uint64) error {
 	if txFeeInfo == nil {
 		return nil
 	}
 
-	if !txFeeInfo.Amount.IsEqual(txFee) {
-		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "invalid AuthInfo Fee Amount (%s != %s)", txFeeInfo.Amount, txFee)
+	convertedAmount := sdkmath.NewIntFromBigInt(evmtypes.ConvertAmountFrom18DecimalsBigInt(txFee))
+
+	baseDenom := evmtypes.GetEVMCoinDenom()
+	if !txFeeInfo.Amount.AmountOf(baseDenom).Equal(convertedAmount) {
+		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "invalid AuthInfo Fee Amount (%s != %s)", txFeeInfo.Amount, convertedAmount)
 	}
 
 	if txFeeInfo.GasLimit != txGasLimit {

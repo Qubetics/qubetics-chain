@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package backend
 
 import (
@@ -10,14 +17,13 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
-	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
-	"github.com/qubetics/qubetics-blockchain/v2/types"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -36,14 +42,9 @@ func (b *Backend) Resend(args evmtypes.TransactionArgs, gasPrice *hexutil.Big, g
 
 	// The signer used should always be the 'latest' known one because we expect
 	// signers to be backwards-compatible with old transactions.
-	eip155ChainID, err := types.ParseChainID(b.clientCtx.ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
 	cfg := b.ChainConfig()
 	if cfg == nil {
-		cfg = evmtypes.DefaultChainConfig().EthereumConfig(eip155ChainID)
+		cfg = evmtypes.DefaultChainConfig(b.clientCtx.ChainID).EthereumConfig(nil)
 	}
 
 	signer := ethtypes.LatestSigner(cfg)
@@ -69,7 +70,7 @@ func (b *Backend) Resend(args evmtypes.TransactionArgs, gasPrice *hexutil.Big, g
 	}
 
 	for _, tx := range pending {
-		// FIXME does Resend api possible at all?  https://github.com/qubetics/ethermint/issues/905
+		// FIXME does Resend api possible at all?  https://github.com/evmos/ethermint/issues/905
 		p, err := evmtypes.UnwrapEthereumMsg(tx, common.Hash{})
 		if err != nil {
 			// not valid ethereum tx
@@ -126,14 +127,9 @@ func (b *Backend) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 
-	// Query params to use the EVM denomination
-	res, err := b.queryClient.QueryClient.Params(b.ctx, &evmtypes.QueryParamsRequest{})
-	if err != nil {
-		b.logger.Error("failed to query evm params", "error", err.Error())
-		return common.Hash{}, err
-	}
+	baseDenom := evmtypes.GetEVMCoinDenom()
 
-	cosmosTx, err := ethereumTx.BuildTx(b.clientCtx.TxConfig.NewTxBuilder(), res.Params.EvmDenom)
+	cosmosTx, err := ethereumTx.BuildTx(b.clientCtx.TxConfig.NewTxBuilder(), baseDenom)
 	if err != nil {
 		b.logger.Error("failed to build cosmos tx", "error", err.Error())
 		return common.Hash{}, err
@@ -321,6 +317,9 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 	if err != nil {
 		return 0, err
 	}
+	if err = handleRevertError(res.VmError, res.Ret); err != nil {
+		return 0, err
+	}
 	return hexutil.Uint64(res.Gas), nil
 }
 
@@ -370,17 +369,14 @@ func (b *Backend) DoCall(
 		return nil, err
 	}
 
-	if res.Failed() {
-		if res.VmError != vm.ErrExecutionReverted.Error() {
-			return nil, status.Error(codes.Internal, res.VmError)
-		}
-		return nil, evmtypes.NewExecErrorWithReason(res.Ret)
+	if err = handleRevertError(res.VmError, res.Ret); err != nil {
+		return nil, err
 	}
 
 	return res, nil
 }
 
-// GasPrice returns the current gas price based on Ethermint's gas price oracle.
+// GasPrice returns the current gas price based on Cosmos EVM' gas price oracle.
 func (b *Backend) GasPrice() (*hexutil.Big, error) {
 	var (
 		result *big.Int
@@ -399,7 +395,7 @@ func (b *Backend) GasPrice() (*hexutil.Big, error) {
 		}
 		result = result.Add(result, head.BaseFee)
 	} else {
-		result = big.NewInt(b.RPCMinGasPrice())
+		result = b.RPCMinGasPrice()
 	}
 
 	// return at least GlobalMinGasPrice from FeeMarket module
@@ -407,10 +403,23 @@ func (b *Backend) GasPrice() (*hexutil.Big, error) {
 	if err != nil {
 		return nil, err
 	}
-	minGasPriceInt := minGasPrice.TruncateInt().BigInt()
-	if result.Cmp(minGasPriceInt) < 0 {
-		result = minGasPriceInt
+	if result.Cmp(minGasPrice) < 0 {
+		result = minGasPrice
 	}
 
 	return (*hexutil.Big)(result), nil
+}
+
+// handleRevertError returns revert related error.
+func handleRevertError(vmError string, ret []byte) error {
+	if len(vmError) > 0 {
+		if vmError != vm.ErrExecutionReverted.Error() {
+			return status.Error(codes.Internal, vmError)
+		}
+		if len(ret) == 0 {
+			return errors.New(vmError)
+		}
+		return evmtypes.NewExecErrorWithReason(ret)
+	}
+	return nil
 }

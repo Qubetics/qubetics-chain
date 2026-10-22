@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package evm
 
 import (
@@ -6,17 +13,18 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
+	anteinterfaces "github.com/qubetics/qubetics-blockchain/v2/ante/interfaces"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
-	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 // CanTransfer checks if the sender is allowed to transfer funds according to the EVM block
 func CanTransfer(
 	ctx sdk.Context,
-	evmKeeper EVMKeeper,
+	evmKeeper anteinterfaces.EVMKeeper,
 	msg core.Message,
 	baseFee *big.Int,
 	ethCfg *params.ChainConfig,
@@ -31,16 +39,7 @@ func CanTransfer(
 		)
 	}
 
-	//  QBA-12: Reject transactions with a negative value to prevent underflows or malformed behavior
-	if msg.Value().Sign() < 0 {
-		return errorsmod.Wrapf(
-			errortypes.ErrInvalidRequest,
-			"transaction value must be non-negative: %s",
-			msg.Value().String(),
-		)
-	}
-
-	// Setup EVM configuration
+	// NOTE: pass in an empty coinbase address and nil tracer as we don't need them for the check below
 	cfg := &statedb.EVMConfig{
 		ChainConfig: ethCfg,
 		Params:      params,
@@ -48,11 +47,11 @@ func CanTransfer(
 		BaseFee:     baseFee,
 	}
 
-	// Create a new stateDB instance for the transaction
-	stateDB := statedb.New(ctx, evmKeeper, statedb.NewEmptyTxConfig(common.BytesToHash(ctx.HeaderHash().Bytes())))
+	stateDB := statedb.New(ctx, evmKeeper, statedb.NewEmptyTxConfig(common.BytesToHash(ctx.HeaderHash())))
 	evm := evmKeeper.NewEVM(ctx, msg, cfg, evmtypes.NewNoOpTracer(), stateDB)
 
-	// Check that the caller has enough balance to cover asset transfer for the topmost call
+	// check that caller has enough balance to cover asset transfer for **topmost** call
+	// NOTE: here the gas consumed is from the context with the infinite gas meter
 	if msg.Value().Sign() > 0 && !evm.Context.CanTransfer(stateDB, msg.From(), msg.Value()) {
 		return errorsmod.Wrapf(
 			errortypes.ErrInsufficientFunds,

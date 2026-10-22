@@ -1,24 +1,31 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package ics20
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 	"time"
-
-	"github.com/cosmos/cosmos-sdk/x/authz"
-	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
+	"github.com/cosmos/cosmos-sdk/x/authz"
+	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 const (
@@ -104,12 +111,12 @@ func NewMsgTransfer(method *abi.Method, args []interface{}) (*transfertypes.MsgT
 
 	sourcePort, ok := args[0].(string)
 	if !ok {
-		return nil, common.Address{}, fmt.Errorf(ErrInvalidSourcePort)
+		return nil, common.Address{}, errors.New(ErrInvalidSourcePort)
 	}
 
 	sourceChannel, ok := args[1].(string)
 	if !ok {
-		return nil, common.Address{}, fmt.Errorf(ErrInvalidSourceChannel)
+		return nil, common.Address{}, errors.New(ErrInvalidSourceChannel)
 	}
 
 	denom, ok := args[2].(string)
@@ -269,12 +276,12 @@ func checkAllowanceArgs(args []interface{}) (common.Address, string, string, str
 
 	sourcePort, ok := args[1].(string)
 	if !ok {
-		return common.Address{}, "", "", "", nil, fmt.Errorf(ErrInvalidSourcePort)
+		return common.Address{}, "", "", "", nil, errors.New(ErrInvalidSourcePort)
 	}
 
 	sourceChannel, ok := args[2].(string)
 	if !ok {
-		return common.Address{}, "", "", "", nil, fmt.Errorf(ErrInvalidSourceChannel)
+		return common.Address{}, "", "", "", nil, errors.New(ErrInvalidSourceChannel)
 	}
 
 	denom, ok := args[3].(string)

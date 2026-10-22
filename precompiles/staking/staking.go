@@ -1,21 +1,26 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package staking
 
 import (
 	"embed"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/cometbft/cometbft/libs/log"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
-
-	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
 var _ vm.PrecompiledContract = &Precompile{}
@@ -24,9 +29,6 @@ var _ vm.PrecompiledContract = &Precompile{}
 //
 //go:embed abi.json
 var f embed.FS
-
-// PrecompileAddress defines the contract address of the staking precompile.
-const PrecompileAddress = "0x0000000000000000000000000000000000000800"
 
 // Precompile defines the precompiled contract for staking.
 type Precompile struct {
@@ -57,13 +59,13 @@ func NewPrecompile(
 			AuthzKeeper:          authzKeeper,
 			KvGasConfig:          storetypes.KVGasConfig(),
 			TransientKVGasConfig: storetypes.TransientGasConfig(),
-			ApprovalExpiration:   cmn.DefaultExpirationDuration, // should be configurable in the qubetics.
+			ApprovalExpiration:   cmn.DefaultExpirationDuration, // should be configurable in the future.
 		},
 		stakingKeeper: stakingKeeper,
 	}
-	// SetAddress defines the address of the staking compile contract.
-	// address: 0x0000000000000000000000000000000000000800
-	p.SetAddress(common.HexToAddress(PrecompileAddress))
+	// SetAddress defines the address of the staking precompiled contract.
+	p.SetAddress(common.HexToAddress(evmtypes.StakingPrecompileAddress))
+
 	return p, nil
 }
 
@@ -82,7 +84,7 @@ func (p Precompile) RequiredGas(input []byte) uint64 {
 		return 0
 	}
 
-	return p.Precompile.RequiredGas(input, p.IsTransaction(method.Name))
+	return p.Precompile.RequiredGas(input, p.IsTransaction(method))
 }
 
 // Run executes the precompiled contract staking methods defined in the ABI.
@@ -169,8 +171,8 @@ func (p Precompile) Run(evm *vm.EVM, contract *vm.Contract, readOnly bool) (bz [
 //   - Revoke
 //   - IncreaseAllowance
 //   - DecreaseAllowance
-func (Precompile) IsTransaction(method string) bool {
-	switch method {
+func (Precompile) IsTransaction(method *abi.Method) bool {
+	switch method.Name {
 	case CreateValidatorMethod,
 		EditValidatorMethod,
 		DelegateMethod,

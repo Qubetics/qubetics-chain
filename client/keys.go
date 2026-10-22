@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package client
 
 import (
@@ -14,14 +21,17 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/crypto/hd"
 )
 
-// KeyCommands registers a sub-tree of commands to interact with
+// KeyCommands registers a subtree of commands to interact with
 // local private key storage.
-func KeyCommands(defaultNodeHome string) *cobra.Command {
+//
+// The defaultToEthKeys boolean indicates whether to use
+// Ethereum compatible keys by default or stick with the Cosmos SDK default.
+func KeyCommands(defaultNodeHome string, defaultToEthKeys bool) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "keys",
 		Short: "Manage your application's keys",
 		Long: `Keyring management commands. These keys may be in any format supported by the
-Tendermint crypto library and can be used by light-clients, full nodes, or any other application
+CometBFT crypto library and can be used by light-clients, full nodes, or any other application
 that needs to sign with a private key.
 
 The keyring supports the following backends:
@@ -47,12 +57,16 @@ The pass backend requires GnuPG: https://gnupg.org/
 	// support adding Ethereum supported keys
 	addCmd := keys.AddKeyCommand()
 
-	// update the default signing algorithm value to "eth_secp256k1"
-	algoFlag := addCmd.Flag(flags.FlagKeyType)
-	algoFlag.DefValue = string(hd.EthSecp256k1Type)
-	err := algoFlag.Value.Set(string(hd.EthSecp256k1Type))
-	if err != nil {
-		panic(err)
+	if defaultToEthKeys {
+		ethSecp256k1Str := string(hd.EthSecp256k1Type)
+
+		// update the default signing algorithm value to "eth_secp256k1"
+		algoFlag := addCmd.Flag(flags.FlagKeyType)
+		algoFlag.DefValue = ethSecp256k1Str
+		err := algoFlag.Value.Set(ethSecp256k1Str)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	addCmd.RunE = runAddCmd
@@ -63,6 +77,7 @@ The pass backend requires GnuPG: https://gnupg.org/
 		keys.ExportKeyCommand(),
 		keys.ImportKeyCommand(),
 		keys.ListKeysCmd(),
+		keys.ListKeyTypesCmd(),
 		keys.ShowKeysCmd(),
 		keys.DeleteKeyCommand(),
 		keys.RenameKeyCommand(),

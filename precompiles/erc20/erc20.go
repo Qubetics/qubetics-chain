@@ -1,21 +1,26 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package erc20
 
 import (
 	"embed"
 	"fmt"
 
-	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
-
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
-
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	auth "github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
+	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	erc20types "github.com/qubetics/qubetics-blockchain/v2/x/erc20/types"
 	transferkeeper "github.com/qubetics/qubetics-blockchain/v2/x/ibc/transfer/keeper"
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 const (
@@ -45,8 +50,9 @@ var _ vm.PrecompiledContract = &Precompile{}
 type Precompile struct {
 	cmn.Precompile
 	tokenPair      erc20types.TokenPair
-	bankKeeper     bankkeeper.Keeper
 	transferKeeper transferkeeper.Keeper
+	// BankKeeper is a public field so that the werc20 precompile can use it.
+	BankKeeper bankkeeper.Keeper
 }
 
 // NewPrecompile creates a new ERC-20 Precompile instance as a
@@ -71,7 +77,7 @@ func NewPrecompile(
 			TransientKVGasConfig: storetypes.GasConfig{},
 		},
 		tokenPair:      tokenPair,
-		bankKeeper:     bankKeeper,
+		BankKeeper:     bankKeeper,
 		transferKeeper: transferKeeper,
 	}
 	// Address defines the address of the ERC-20 precompile contract.
@@ -93,7 +99,7 @@ func (p Precompile) RequiredGas(input []byte) uint64 {
 	}
 
 	// TODO: these values were obtained from Remix using the ERC20.sol from OpenZeppelin.
-	// We should execute the transactions using the ERC20MinterBurnerDecimals.sol from Qubetics testnet
+	// We should execute the transactions using the ERC20MinterBurnerDecimals.sol from Cosmos EVM testnet
 	// to ensure parity in the values.
 	switch method.Name {
 	// ERC-20 transactions
@@ -127,6 +133,14 @@ func (p Precompile) RequiredGas(input []byte) uint64 {
 
 // Run executes the precompiled contract ERC-20 methods defined in the ABI.
 func (p Precompile) Run(evm *vm.EVM, contract *vm.Contract, readOnly bool) (bz []byte, err error) {
+	// ERC20 precompiles cannot receive funds because they are not managed by an
+	// EOA and will not be possible to recover funds sent to an instance of
+	// them.This check is a safety measure because currently funds cannot be
+	// received due to the lack of a fallback handler.
+	if value := contract.Value(); value.Sign() == 1 {
+		return nil, fmt.Errorf(ErrCannotReceiveFunds, contract.Value().String())
+	}
+
 	ctx, stateDB, snapshot, method, initialGas, args, err := p.RunSetup(evm, contract, readOnly, p.IsTransaction)
 	if err != nil {
 		return nil, err
@@ -153,8 +167,8 @@ func (p Precompile) Run(evm *vm.EVM, contract *vm.Contract, readOnly bool) (bz [
 }
 
 // IsTransaction checks if the given method name corresponds to a transaction or query.
-func (Precompile) IsTransaction(methodName string) bool {
-	switch methodName {
+func (Precompile) IsTransaction(method *abi.Method) bool {
+	switch method.Name {
 	case TransferMethod,
 		TransferFromMethod,
 		auth.ApproveMethod,

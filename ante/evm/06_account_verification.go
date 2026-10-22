@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package evm
 
 import (
@@ -5,10 +12,11 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ethereum/go-ethereum/common"
+	anteinterfaces "github.com/qubetics/qubetics-blockchain/v2/ante/interfaces"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/keeper"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/statedb"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // VerifyAccountBalance checks that the account balance is greater than the total transaction cost.
@@ -18,12 +26,12 @@ import (
 // - account balance is lower than the transaction cost
 func VerifyAccountBalance(
 	ctx sdk.Context,
-	accountKeeper evmtypes.AccountKeeper,
+	accountKeeper anteinterfaces.AccountKeeper,
 	account *statedb.Account,
 	from common.Address,
 	txData evmtypes.TxData,
 ) error {
-	// check whether the sender address is EOA
+	// Only EOA are allowed to send transactions.
 	if account != nil && account.IsContract() {
 		return errorsmod.Wrapf(
 			errortypes.ErrInvalidType,

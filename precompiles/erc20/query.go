@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package erc20
 
 import (
@@ -15,9 +22,9 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/ibc"
 	auth "github.com/qubetics/qubetics-blockchain/v2/precompiles/authorization"
 
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 const (
@@ -48,7 +55,7 @@ func (p Precompile) Name(
 	method *abi.Method,
 	_ []interface{},
 ) ([]byte, error) {
-	metadata, found := p.bankKeeper.GetDenomMetaData(ctx, p.tokenPair.Denom)
+	metadata, found := p.BankKeeper.GetDenomMetaData(ctx, p.tokenPair.Denom)
 	if found {
 		return method.Outputs.Pack(metadata.Name)
 	}
@@ -72,7 +79,7 @@ func (p Precompile) Symbol(
 	method *abi.Method,
 	_ []interface{},
 ) ([]byte, error) {
-	metadata, found := p.bankKeeper.GetDenomMetaData(ctx, p.tokenPair.Denom)
+	metadata, found := p.BankKeeper.GetDenomMetaData(ctx, p.tokenPair.Denom)
 	if found {
 		return method.Outputs.Pack(metadata.Symbol)
 	}
@@ -96,7 +103,7 @@ func (p Precompile) Decimals(
 	method *abi.Method,
 	_ []interface{},
 ) ([]byte, error) {
-	metadata, found := p.bankKeeper.GetDenomMetaData(ctx, p.tokenPair.Denom)
+	metadata, found := p.BankKeeper.GetDenomMetaData(ctx, p.tokenPair.Denom)
 	if !found {
 		denomTrace, err := ibc.GetDenomTrace(p.transferKeeper, ctx, p.tokenPair.Denom)
 		if err != nil {
@@ -137,7 +144,7 @@ func (p Precompile) Decimals(
 		))
 	}
 
-	return method.Outputs.Pack(uint8(decimals)) //#nosec G701 // we are checking for overflow above
+	return method.Outputs.Pack(uint8(decimals)) //#nosec G115 // we are checking for overflow above
 }
 
 // TotalSupply returns the amount of tokens in existence. It fetches the supply
@@ -149,7 +156,7 @@ func (p Precompile) TotalSupply(
 	method *abi.Method,
 	_ []interface{},
 ) ([]byte, error) {
-	supply := p.bankKeeper.GetSupply(ctx, p.tokenPair.Denom)
+	supply := p.BankKeeper.GetSupply(ctx, p.tokenPair.Denom)
 
 	return method.Outputs.Pack(supply.Amount.BigInt())
 }
@@ -168,7 +175,7 @@ func (p Precompile) BalanceOf(
 		return nil, err
 	}
 
-	balance := p.bankKeeper.GetBalance(ctx, account.Bytes(), p.tokenPair.Denom)
+	balance := p.BankKeeper.GetBalance(ctx, account.Bytes(), p.tokenPair.Denom)
 
 	return method.Outputs.Pack(balance.Amount.BigInt())
 }

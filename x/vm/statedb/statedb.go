@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package statedb
 
 import (
@@ -7,6 +14,7 @@ import (
 	"sort"
 
 	errorsmod "cosmossdk.io/errors"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -97,7 +105,7 @@ func (s *StateDB) GetCacheContext() (sdk.Context, error) {
 }
 
 // MultiStoreSnapshot returns a copy of the stateDB CacheMultiStore.
-func (s *StateDB) MultiStoreSnapshot() sdk.CacheMultiStore {
+func (s *StateDB) MultiStoreSnapshot() storetypes.CacheMultiStore {
 	if s.writeCache == nil {
 		err := s.cache()
 		if err != nil {
@@ -106,7 +114,7 @@ func (s *StateDB) MultiStoreSnapshot() sdk.CacheMultiStore {
 	}
 	// the cacheCtx multi store is already a CacheMultiStore
 	// so we need to pass a copy of the current state of it
-	cms := s.cacheCtx.MultiStore().(sdk.CacheMultiStore)
+	cms := s.cacheCtx.MultiStore().(storetypes.CacheMultiStore)
 	snapshot := cms.Copy()
 
 	return snapshot
@@ -341,7 +349,7 @@ func (s *StateDB) setStateObject(object *stateObject) {
 // AddPrecompileFn adds a precompileCall journal entry
 // with a snapshot of the multi-store and events previous
 // to the precompile call.
-func (s *StateDB) AddPrecompileFn(addr common.Address, cms sdk.CacheMultiStore, events sdk.Events) error {
+func (s *StateDB) AddPrecompileFn(addr common.Address, cms storetypes.CacheMultiStore, events sdk.Events) error {
 	stateObject := s.getOrNewStateObject(addr)
 	if stateObject == nil {
 		return fmt.Errorf("could not add precompile call to address %s. State object not found", addr)
@@ -525,18 +533,27 @@ func (s *StateDB) commitWithCtx(ctx sdk.Context) error {
 		obj := s.stateObjects[addr]
 		if obj.suicided {
 			if err := s.keeper.DeleteAccount(ctx, obj.Address()); err != nil {
-				return errorsmod.Wrap(err, "failed to delete account")
+				return errorsmod.Wrapf(err, "failed to delete account %s", obj.Address())
 			}
 		} else {
 			if obj.code != nil && obj.dirtyCode {
-				s.keeper.SetCode(ctx, obj.CodeHash(), obj.code)
+				if len(obj.code) == 0 {
+					s.keeper.DeleteCode(ctx, obj.CodeHash())
+				} else {
+					s.keeper.SetCode(ctx, obj.CodeHash(), obj.code)
+				}
 			}
 			if err := s.keeper.SetAccount(ctx, obj.Address(), obj.account); err != nil {
 				return errorsmod.Wrap(err, "failed to set account")
 			}
+
 			for _, key := range obj.dirtyStorage.SortedKeys() {
 				valueBytes := obj.dirtyStorage[key].Bytes()
-				s.keeper.SetState(ctx, obj.Address(), key, valueBytes)
+				if len(valueBytes) == 0 {
+					s.keeper.DeleteState(ctx, obj.Address(), key)
+				} else {
+					s.keeper.SetState(ctx, obj.Address(), key, valueBytes)
+				}
 			}
 		}
 	}

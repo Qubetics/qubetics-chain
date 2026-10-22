@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package filters
 
 import (
@@ -6,17 +13,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend"
-	"github.com/qubetics/qubetics-blockchain/v2/rpc/types"
-
 	"github.com/cometbft/cometbft/libs/log"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
-	"github.com/pkg/errors"
-
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/eth/filters"
+	"github.com/pkg/errors"
+	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend"
+	"github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 )
 
 // BloomIV represents the bit indexes and value inside the bloom filter that belong

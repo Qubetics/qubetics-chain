@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package usbwallet
 
 import (
@@ -169,7 +176,7 @@ func (w *ledgerDriver) ledgerVersion() ([3]byte, error) {
 	if len(reply) != 4 {
 		return [3]byte{}, errLedgerInvalidVersionReply
 	}
-	// Cache the version for qubetics reference
+	// Cache the version for future reference
 	var version [3]byte
 	copy(version[:], reply[1:])
 	return version, nil
@@ -221,12 +228,12 @@ func (w *ledgerDriver) ledgerDerive(derivationPath gethaccounts.DerivationPath) 
 	}
 
 	// Verify public key was returned
-	// #nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+	// #nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 	if len(reply) < 1 || len(reply) < 1+int(reply[0]) {
 		return common.Address{}, nil, errors.New("reply lacks public key entry")
 	}
 
-	// #nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+	// #nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 	replyFirstByteAsInt := int(reply[0])
 
 	pubkeyBz := reply[1 : 1+replyFirstByteAsInt]
@@ -240,13 +247,13 @@ func (w *ledgerDriver) ledgerDerive(derivationPath gethaccounts.DerivationPath) 
 	reply = reply[1+replyFirstByteAsInt:]
 
 	// Extract the Ethereum hex address string
-	// #nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+	// #nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 	if len(reply) < 1 || len(reply) < 1+int(reply[0]) {
 		return common.Address{}, nil, errors.New("reply lacks address entry")
 	}
 
 	// Reset first byte after discarding pubkey from response
-	// #nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+	// #nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 	replyFirstByteAsInt = int(reply[0])
 
 	hexStr := reply[1 : 1+replyFirstByteAsInt]
@@ -367,7 +374,7 @@ func (w *ledgerDriver) ledgerExchange(opcode ledgerOpcode, p1 ledgerParam1, p2 l
 	// Construct the message payload, possibly split into multiple chunks
 	apdu := make([]byte, 2, 7+len(data))
 
-	//#nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+	//#nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 	binary.BigEndian.PutUint16(apdu, uint16(5+len(data)))
 	apdu = append(apdu, []byte{0xe0, byte(opcode), byte(p1), byte(p2), byte(len(data))}...)
 	apdu = append(apdu, data...)
@@ -380,7 +387,7 @@ func (w *ledgerDriver) ledgerExchange(opcode ledgerOpcode, p1 ledgerParam1, p2 l
 	for i := 0; len(apdu) > 0; i++ {
 		// Construct the new message to stream
 		chunk = append(chunk[:0], header...)
-		//#nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+		//#nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 		binary.BigEndian.PutUint16(chunk[3:], uint16(i))
 
 		if len(apdu) > space {
@@ -412,7 +419,7 @@ func (w *ledgerDriver) ledgerExchange(opcode ledgerOpcode, p1 ledgerParam1, p2 l
 		var payload []byte
 
 		if chunk[3] == 0x00 && chunk[4] == 0x00 {
-			//#nosec G701 -- gosec will raise a warning on this integer conversion for potential overflow
+			//#nosec G115 -- gosec will raise a warning on this integer conversion for potential overflow
 			reply = make([]byte, 0, int(binary.BigEndian.Uint16(chunk[5:7])))
 			payload = chunk[7:]
 		} else {

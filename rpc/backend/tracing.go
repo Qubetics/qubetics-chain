@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package backend
 
 import (
@@ -8,10 +15,10 @@ import (
 	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 )
 
 // TraceTransaction returns the structured logs created during the execution of EVM
@@ -39,7 +46,7 @@ func (b *Backend) TraceTransaction(hash common.Hash, config *evmtypes.TraceConfi
 	if len(blk.Block.Txs) > math.MaxUint32 {
 		return nil, fmt.Errorf("tx count %d is overfloing", len(blk.Block.Txs))
 	}
-	txsLen := uint32(len(blk.Block.Txs)) // #nosec G701 -- checked for int overflow already
+	txsLen := uint32(len(blk.Block.Txs)) // #nosec G115 -- checked for int overflow already
 	if txsLen < transaction.TxIndex {
 		b.logger.Debug("tx index out of bounds", "index", transaction.TxIndex, "hash", hash.String(), "height", blk.Block.Height)
 		return nil, fmt.Errorf("transaction not included in block %v", blk.Block.Height)
@@ -69,7 +76,7 @@ func (b *Backend) TraceTransaction(hash common.Hash, config *evmtypes.TraceConfi
 	}
 
 	// add predecessor messages in current cosmos tx
-	index := int(transaction.MsgIndex) // #nosec G701
+	index := int(transaction.MsgIndex) // #nosec G115
 	for i := 0; i < index; i++ {
 		ethMsg, ok := tx.GetMsgs()[i].(*evmtypes.MsgEthereumTx)
 		if !ok {

@@ -1,26 +1,40 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package types
 
 import (
+	"bytes"
 	"fmt"
 	"math/big"
-
-	"github.com/cosmos/gogoproto/proto"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-// DefaultPriorityReduction is the default amount of price values required for 1 unit of priority.
-// Because priority is `int64` while price is `big.Int`, it's necessary to scale down the range to keep it more pratical.
-// The default value is the same as the `sdk.DefaultPowerReduction`.
-var DefaultPriorityReduction = sdk.DefaultPowerReduction
+var (
+	// DefaultPriorityReduction is the default amount of price values required for 1 unit of priority.
+	// Because priority is `int64` while price is `big.Int`, it's necessary to scale down the range to keep it more pratical.
+	// The default value is the same as the `sdk.DefaultPowerReduction`.
+	DefaultPriorityReduction = sdk.DefaultPowerReduction
 
-var EmptyCodeHash = crypto.Keccak256(nil)
+	// EmptyCodeHash is keccak256 hash of nil to represent empty code.
+	EmptyCodeHash = crypto.Keccak256(nil)
+)
+
+// IsEmptyCodeHash checks if the given byte slice represents an empty code hash.
+func IsEmptyCodeHash(bz []byte) bool {
+	return bytes.Equal(bz, EmptyCodeHash)
+}
 
 // DecodeTxResponse decodes an protobuf-encoded byte slice into TxResponse
 func DecodeTxResponse(in []byte) (*MsgEthereumTxResponse, error) {
@@ -81,22 +95,20 @@ func UnwrapEthereumMsg(tx *sdk.Tx, ethHash common.Hash) (*MsgEthereumTx, error) 
 func UnpackEthMsg(msg sdk.Msg) (
 	ethMsg *MsgEthereumTx,
 	txData TxData,
-	from sdk.AccAddress,
 	err error,
 ) {
 	msgEthTx, ok := msg.(*MsgEthereumTx)
 	if !ok {
-		return nil, nil, nil, errorsmod.Wrapf(errortypes.ErrUnknownRequest, "invalid message type %T, expected %T", msg, (*MsgEthereumTx)(nil))
+		return nil, nil, errorsmod.Wrapf(errortypes.ErrUnknownRequest, "invalid message type %T, expected %T", msg, (*MsgEthereumTx)(nil))
 	}
 
 	txData, err = UnpackTxData(msgEthTx.Data)
 	if err != nil {
-		return nil, nil, nil, errorsmod.Wrap(err, "failed to unpack tx data any for tx")
+		return nil, nil, errorsmod.Wrap(err, "failed to unpack tx data any for tx")
 	}
 
 	// sender address should be in the tx cache from the previous AnteHandle call
-	from = msgEthTx.GetFrom()
-	return msgEthTx, txData, from, nil
+	return msgEthTx, txData, nil
 }
 
 // BinSearch executes the binary search and hone in on an executable gas limit

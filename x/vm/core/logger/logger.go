@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package logger
 
 import (
@@ -10,13 +17,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/holiman/uint256"
-	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
 )
 
 // Storage represents a contract's storage.
@@ -39,7 +46,7 @@ type Config struct {
 	EnableReturnData bool // enable return data capture
 	Debug            bool // print output during capture end
 	Limit            int  // maximum length of output, but zero means unlimited
-	// Chain overrides, can be used to execute a trace using qubetics fork rules
+	// Chain overrides, can be used to execute a trace using future fork rules
 	Overrides *params.ChainConfig `json:"overrides,omitempty"`
 }
 
@@ -107,18 +114,13 @@ type StructLogger struct {
 
 // NewStructLogger returns a new logger
 func NewStructLogger(cfg *Config) *StructLogger {
-    // Create the StructLogger instance
-    logger := &StructLogger{
-        storage: make(map[common.Address]Storage),
-    }
-    
-    // Ensure cfg is not nil, providing a default if necessary
-    if cfg == nil {
-        cfg = &Config{} // Use default configuration
-    }
-    logger.cfg = *cfg
-    
-    return logger
+	logger := &StructLogger{
+		storage: make(map[common.Address]Storage),
+	}
+	if cfg != nil {
+		logger.cfg = *cfg
+	}
+	return logger
 }
 
 // Reset clears the data held by the logger.

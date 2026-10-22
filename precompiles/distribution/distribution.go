@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package distribution
 
 import (
@@ -7,16 +14,14 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	cmn "github.com/qubetics/qubetics-blockchain/v2/precompiles/common"
 	"github.com/qubetics/qubetics-blockchain/v2/x/vm/core/vm"
-
-	// stakingkeeper "github.com/qubetics/qubetics-blockchain/v2/x/staking/keeper"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	evmkeeper "github.com/qubetics/qubetics-blockchain/v2/x/vm/keeper"
+	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
-
-// PrecompileAddress of the distribution EVM extension in hex format.
-const PrecompileAddress = "0x0000000000000000000000000000000000000801"
 
 var _ vm.PrecompiledContract = &Precompile{}
 
@@ -30,6 +35,7 @@ type Precompile struct {
 	cmn.Precompile
 	distributionKeeper distributionkeeper.Keeper
 	stakingKeeper      stakingkeeper.Keeper
+	evmKeeper          *evmkeeper.Keeper
 }
 
 // NewPrecompile creates a new distribution Precompile instance as a
@@ -38,6 +44,7 @@ func NewPrecompile(
 	distributionKeeper distributionkeeper.Keeper,
 	stakingKeeper stakingkeeper.Keeper,
 	authzKeeper authzkeeper.Keeper,
+	evmKeeper *evmkeeper.Keeper,
 ) (*Precompile, error) {
 	newAbi, err := cmn.LoadABI(f, "abi.json")
 	if err != nil {
@@ -50,19 +57,23 @@ func NewPrecompile(
 			AuthzKeeper:          authzKeeper,
 			KvGasConfig:          storetypes.KVGasConfig(),
 			TransientKVGasConfig: storetypes.TransientGasConfig(),
-			ApprovalExpiration:   cmn.DefaultExpirationDuration, // should be configurable in the qubetics.
+			ApprovalExpiration:   cmn.DefaultExpirationDuration, // should be configurable in the future.
 		},
 		stakingKeeper:      stakingKeeper,
 		distributionKeeper: distributionKeeper,
+		evmKeeper:          evmKeeper,
 	}
+
 	// SetAddress defines the address of the distribution compile contract.
-	// address: 0x0000000000000000000000000000000000000801
-	p.SetAddress(common.HexToAddress(PrecompileAddress))
+	p.SetAddress(common.HexToAddress(evmtypes.DistributionPrecompileAddress))
+
 	return p, nil
 }
 
 // RequiredGas calculates the precompiled contract's base gas rate.
 func (p Precompile) RequiredGas(input []byte) uint64 {
+	// TODO: refactor this to be used in the common precompile method on a separate PR
+
 	// NOTE: This check avoid panicking when trying to decode the method ID
 	if len(input) < 4 {
 		return 0
@@ -76,7 +87,7 @@ func (p Precompile) RequiredGas(input []byte) uint64 {
 		return 0
 	}
 
-	return p.Precompile.RequiredGas(input, p.IsTransaction(method.Name))
+	return p.Precompile.RequiredGas(input, p.IsTransaction(method))
 }
 
 // Run executes the precompiled contract distribution methods defined in the ABI.
@@ -146,8 +157,8 @@ func (p Precompile) Run(evm *vm.EVM, contract *vm.Contract, readOnly bool) (bz [
 //   - SetWithdrawAddress
 //   - WithdrawDelegatorRewards
 //   - WithdrawValidatorCommission
-func (Precompile) IsTransaction(methodName string) bool {
-	switch methodName {
+func (Precompile) IsTransaction(method *abi.Method) bool {
+	switch method.Name {
 	case ClaimRewardsMethod,
 		SetWithdrawAddressMethod,
 		WithdrawDelegatorRewardsMethod,

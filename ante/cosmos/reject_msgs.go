@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package cosmos
 
 import (
@@ -7,8 +14,13 @@ import (
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
-// RejectMessagesDecorator prevents invalid msg types from being executed
+// RejectMessagesDecorator prevents invalid msg types from being executed.
 type RejectMessagesDecorator struct{}
+
+// NewRejectMessagesDecorator creates a new RejectMessagesDecorator.
+func NewRejectMessagesDecorator() sdk.AnteDecorator {
+	return RejectMessagesDecorator{}
+}
 
 // AnteHandle rejects messages that requires ethereum-specific authentication.
 // For example `MsgEthereumTx` requires fee to be deducted in the antehandler in

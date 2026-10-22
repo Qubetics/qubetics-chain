@@ -1,3 +1,10 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package eip712
 
 import (
@@ -11,7 +18,7 @@ import (
 	"github.com/qubetics/qubetics-blockchain/v2/types"
 )
 
-// PreprocessLedgerTx reformats Ledger-signed Cosmos transactions to match the fork expected by Ethermint
+// PreprocessLedgerTx reformats Ledger-signed Cosmos transactions to match the fork expected by Cosmos EVM
 // by including the signature in a Web3Tx extension and sending a blank signature in the body.
 func PreprocessLedgerTx(chainID string, keyType cosmoskr.KeyType, txBuilder client.TxBuilder) error {
 	// Only process Ledger transactions
@@ -49,10 +56,13 @@ func PreprocessLedgerTx(chainID string, keyType cosmoskr.KeyType, txBuilder clie
 		return fmt.Errorf("could not parse chain id: %w", err)
 	}
 
+	// In Cosmos SDK v0.47 FeePayer returns an sdk.AccAddress, which is
+	// encoded with the configured Bech32 account prefix.
+	feePayerAddr := txBuilder.GetTx().FeePayer().String()
 	// Add ExtensionOptionsWeb3Tx extension with signature
 	var option *codectypes.Any
 	option, err = codectypes.NewAnyWithValue(&types.ExtensionOptionsWeb3Tx{
-		FeePayer:         txBuilder.GetTx().FeePayer().String(),
+		FeePayer:         feePayerAddr,
 		TypedDataChainID: chainIDInt.Uint64(),
 		FeePayerSig:      sigBytes,
 	})
@@ -63,7 +73,7 @@ func PreprocessLedgerTx(chainID string, keyType cosmoskr.KeyType, txBuilder clie
 	extensionBuilder.SetExtensionOptions(option)
 
 	// Set blank signature with Amino Sign Type
-	// (Regardless of input signMode, Qubetics requires Amino signature type for Ledger)
+	// (Regardless of input signMode, Cosmos EVM requires Amino signature type for Ledger)
 	blankSig := signing.SingleSignatureData{
 		SignMode:  signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 		Signature: nil,

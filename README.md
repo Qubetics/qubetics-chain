@@ -89,19 +89,19 @@ qubeticsd start
 
 ## Repository Layout
 
-The layout follows [cosmos/evm](https://github.com/cosmos/evm): reusable EVM
-libraries live at the repository root, and the Qubetics chain application lives
-in `qubeticsd/` (the equivalent of `evmd/`).
+The EVM implementation is [Cosmos EVM](https://github.com/cosmos/evm) v0.1.0,
+backported from Cosmos SDK v0.50 to Cosmos SDK v0.47.12 so it can run alongside
+the Qubetics dVPN modules. Reusable EVM libraries live at the repository root,
+and the Qubetics chain application lives in `qubeticsd/` (the equivalent of
+Cosmos EVM's `example_chain/`).
 
 | Path | Contents |
 |------|----------|
-| `qubeticsd/` | Chain application (`app.go`, keepers wiring, genesis, export) |
+| `qubeticsd/` | Chain application (`app.go`, keepers wiring, genesis, export, precompiles) |
+| `qubeticsd/ante/` | Ante handler wiring for Cosmos and Ethereum transactions |
 | `qubeticsd/cmd/qubeticsd/` | `qubeticsd` binary entrypoint and CLI commands |
 | `qubeticsd/cmd/qubeticsd/config/` | Bech32 prefixes and denominations |
-| `qubeticsd/eips/` | Custom EIP activators |
-| `qubeticsd/post/` | Post handlers |
-| `qubeticsd/upgrades/` | Upgrade handlers |
-| `ante/` | Ante handlers (`ante/evm`, `ante/cosmos`, `ante/utils`) |
+| `ante/` | Cosmos EVM ante handlers (`ante/evm`, `ante/cosmos`) |
 | `x/vm/` | EVM module (module name `evm`) |
 | `x/erc20/`, `x/feemarket/`, `x/ibc/` | EVM-related modules |
 | `x/vpn/`, `x/node/`, `x/provider/`, `x/plan/`, `x/session/`, `x/subscription/`, `x/lease/`, `x/deposit/` | dVPN modules |
@@ -110,9 +110,9 @@ in `qubeticsd/` (the equivalent of `evmd/`).
 | `rpc/`, `server/`, `indexer/` | JSON-RPC server and transaction indexer |
 | `crypto/`, `encoding/`, `ethereum/eip712/`, `wallets/` | Keys, codecs, EIP-712 and hardware wallets |
 | `types/`, `utils/`, `version/` | Shared types and helpers |
-| `proto/` | Protobuf definitions (`ethermint/*`, `qubetics/*`) |
-| `client/docs/` | Swagger UI and embedded (statik) docs |
-| `testutil/`, `tests/` | Test helpers, integration, e2e and nix tests |
+| `proto/` | Protobuf definitions (`cosmos/evm/*`, `qubetics/*`) |
+| `client/docs/` | Swagger UI, generated `swagger.yaml` and embedded (statik) docs |
+| `testutil/` | Test helpers |
 
 ## Development
 
@@ -121,12 +121,29 @@ in `qubeticsd/` (the equivalent of `evmd/`).
 | `make build` | Build `qubeticsd` into `./build` |
 | `make install` | Install `qubeticsd` into `$GOPATH/bin` |
 | `make test-unit` | Run unit tests |
-| `make lint` | Run `golangci-lint` |
+| `make lint` | Run linters |
 | `make proto-gen` | Regenerate Go code from `proto/` (requires Docker) |
-| `make proto-swagger-gen` | Regenerate `client/docs/swagger-ui/swagger.json` (requires Docker) |
-| `make update-swagger-docs` | Re-embed the Swagger UI into `client/docs/statik` |
-| `make swagger` | `proto-swagger-gen` + `update-swagger-docs` |
-| `make proto-all` | Format, lint and regenerate protobuf code and Swagger |
+| `make proto-swagger-gen` | Regenerate `client/docs/swagger-ui/swagger.yaml` and re-embed it (requires Docker) |
+| `make update-swagger-docs` | Re-embed `client/docs/swagger-ui` into `client/docs/statik` |
+| `make swagger` | Alias for `make proto-swagger-gen` |
+| `make proto-all` | Format, lint and regenerate protobuf code and the Swagger spec |
+
+The REST API serves the Swagger UI at `/swagger/` when `swagger = true` is set in the
+`[api]` section of `app.toml` (enabled by `local_node.sh`).
+
+## License
+
+The EVM implementation in this repository is based on
+[Cosmos EVM](https://github.com/cosmos/evm) v0.1.0, licensed under the
+[Apache License 2.0](LICENSE). It was imported and then backported to Cosmos SDK
+v0.47.12; see [NOTICE](NOTICE) and the git history for details.
+
+Code derived from [go-ethereum](https://github.com/ethereum/go-ethereum) keeps its
+original GNU LGPL v3.0 license notices.
+
+Earlier versions of this repository were based on [Evmos](https://github.com/evmos/evmos)
+and are subject to the [Evmos Non-Commercial License](https://github.com/evmos/evmos/blob/main/LICENSE).
+That code has been removed from this version.
 
 ## Security
 

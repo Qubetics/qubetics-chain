@@ -1,27 +1,29 @@
+// Copyright Evmos Authors - Tharsis Labs Ltd - https://github.com/evmos/os/
+// Copyright 2025, Interchain Labs - https://github.com/cosmos/evm/
+// SPDX-License-Identifier: Apache-2.0
+//
+// Derived from cosmos/evm v0.1.0 (https://github.com/cosmos/evm), licensed under
+// the Apache License, Version 2.0. Modified by Qubetics: module path renamed; backported to Cosmos SDK 0.47 / ibc-go v7.
+
 package eth
 
 import (
 	"context"
 
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-
-	"github.com/ethereum/go-ethereum/rpc"
-
 	"github.com/cometbft/cometbft/libs/log"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-
+	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"github.com/qubetics/qubetics-blockchain/v2/rpc/backend"
-
 	rpctypes "github.com/qubetics/qubetics-blockchain/v2/rpc/types"
 	"github.com/qubetics/qubetics-blockchain/v2/types"
 	evmtypes "github.com/qubetics/qubetics-blockchain/v2/x/vm/types"
 )
 
-// The Ethereum API allows applications to connect to an Qubetics node that is
-// part of the Qubetics blockchain. Developers can interact with on-chain EVM data
+// The Ethereum API allows applications to connect to an node of any Cosmos EVM based blockchain.
+// Developers can interact with on-chain EVM data
 // and send different types of transactions to the network by utilizing the
 // endpoints provided by the API. The API follows a JSON-RPC standard. If not
 // otherwise specified, the interface is derived from the Alchemy Ethereum API:
@@ -296,7 +298,7 @@ func (e *PublicAPI) ProtocolVersion() hexutil.Uint {
 	return hexutil.Uint(types.ProtocolVersion)
 }
 
-// GasPrice returns the current gas price based on Ethermint's gas price oracle.
+// GasPrice returns the current gas price based on Cosmos EVM's gas price oracle.
 func (e *PublicAPI) GasPrice() (*hexutil.Big, error) {
 	e.logger.Debug("eth_gasPrice")
 	return e.backend.GasPrice()
@@ -414,27 +416,7 @@ func (e *PublicAPI) Sign(address common.Address, data hexutil.Bytes) (hexutil.By
 func (e *PublicAPI) GetTransactionLogs(txHash common.Hash) ([]*ethtypes.Log, error) {
 	e.logger.Debug("eth_getTransactionLogs", "hash", txHash)
 
-	hexTx := txHash.Hex()
-	res, err := e.backend.GetTxByEthHash(txHash)
-	if err != nil {
-		e.logger.Debug("tx not found", "hash", hexTx, "error", err.Error())
-		return nil, nil
-	}
-
-	if res.Failed {
-		// failed, return empty logs
-		return nil, nil
-	}
-
-	resBlockResult, err := e.backend.TendermintBlockResultByNumber(&res.Height)
-	if err != nil {
-		e.logger.Debug("block result not found", "number", res.Height, "error", err.Error())
-		return nil, nil
-	}
-
-	// parse tx logs from events
-	index := int(res.MsgIndex) // #nosec G701
-	return backend.TxLogsFromEvents(resBlockResult.TxsResults[res.TxIndex].Events, index)
+	return e.backend.GetTransactionLogs(txHash)
 }
 
 // SignTypedData signs EIP-712 conformant typed data
@@ -488,6 +470,13 @@ func (e *PublicAPI) GetPendingTransactions() ([]*rpctypes.RPCTransaction, error)
 		return nil, err
 	}
 
+	chainIDHex, err := e.backend.ChainID()
+	if err != nil {
+		return nil, err
+	}
+
+	chainID := chainIDHex.ToInt()
+
 	result := make([]*rpctypes.RPCTransaction, 0, len(txs))
 	for _, tx := range txs {
 		for _, msg := range (*tx).GetMsgs() {
@@ -503,7 +492,7 @@ func (e *PublicAPI) GetPendingTransactions() ([]*rpctypes.RPCTransaction, error)
 				uint64(0),
 				uint64(0),
 				nil,
-				e.backend.ChainConfig().ChainID,
+				chainID,
 			)
 			if err != nil {
 				return nil, err
